@@ -1,0 +1,174 @@
+'use client';
+
+import { useState } from 'react';
+import { Tag } from '@/components/primitives/Tag';
+import { Button } from '@/components/primitives/Button';
+import { MOCK_WORKSPACES } from '@/lib/mock/workspaces';
+import { GRADE_LABELS } from '@/lib/mock/biz-lookup';
+import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
+import { formatKRW, formatPct } from '@/lib/format';
+import type { Bid } from '@/lib/types/bid';
+import type { MerchantGrade } from '@/lib/types/biz-profile';
+import Link from 'next/link';
+
+type SortKey = 'name' | 'settle' | 'deposit' | 'setupFee' | 'monthlyMin' | 'bankPct' | 'easyPayPct';
+type SortDir = 'asc' | 'desc';
+
+const SETTLE_ORDER: Record<string, number> = { 'D+0': 0, 'D+1': 1, 'D+2': 2, weekly: 3, monthly: 4 };
+const SETTLE_LABEL: Record<string, string> = {
+  'D+0': 'D+0', 'D+1': 'D+1', 'D+2': 'D+2', weekly: '주1회', monthly: '월1회',
+};
+
+function pgName(wsId: string): string {
+  return MOCK_WORKSPACES.find((w) => w.id === wsId)?.name ?? wsId;
+}
+
+function min(bids: Bid[], key: (b: Bid) => number): number {
+  return Math.min(...bids.map(key));
+}
+
+function SortTh({
+  label, sortId, active, dir, onSort,
+}: {
+  label: string;
+  sortId: SortKey;
+  active: boolean;
+  dir: SortDir;
+  onSort: (k: SortKey) => void;
+}) {
+  return (
+    <th
+      className="px-3 py-3 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] font-normal cursor-pointer hover:text-[var(--color-ink)] transition-colors select-none"
+      onClick={() => onSort(sortId)}
+    >
+      {label}
+      {active && <span className="ml-1 text-[var(--color-ink)]">{dir === 'asc' ? '↑' : '↓'}</span>}
+    </th>
+  );
+}
+
+type Props = {
+  rfqId: string;
+  bids: Bid[];
+  grade: MerchantGrade | undefined;
+  rfqStatus: string;
+};
+
+export function BidComparisonTable({ rfqId, bids, grade, rfqStatus }: Props) {
+  const [sortKey, setSortKey] = useState<SortKey>('settle');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  if (bids.length === 0) {
+    return (
+      <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)] py-6">
+        — 아직 받은 견적이 없습니다 —
+      </p>
+    );
+  }
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else { setSortKey(key); setSortDir('asc'); }
+  };
+
+  const sorted = [...bids].sort((a, b) => {
+    const mul = sortDir === 'asc' ? 1 : -1;
+    switch (sortKey) {
+      case 'name': return mul * pgName(a.pgWsId).localeCompare(pgName(b.pgWsId), 'ko');
+      case 'settle': return mul * (SETTLE_ORDER[a.settleCycle] - SETTLE_ORDER[b.settleCycle]);
+      case 'deposit': return mul * (a.deposit - b.deposit);
+      case 'setupFee': return mul * (a.setupFee - b.setupFee);
+      case 'monthlyMin': return mul * (a.monthlyMin - b.monthlyMin);
+      case 'bankPct': return mul * (a.bankTransferFeePct - b.bankTransferFeePct);
+      case 'easyPayPct': return mul * (a.easyPayFeePct - b.easyPayFeePct);
+    }
+  });
+
+  const minDeposit = min(bids, (b) => b.deposit);
+  const minSetup = min(bids, (b) => b.setupFee);
+  const minMonthly = min(bids, (b) => b.monthlyMin);
+  const minBank = min(bids, (b) => b.bankTransferFeePct);
+  const minEasyPay = min(bids, (b) => b.easyPayFeePct);
+  const minSettle = min(bids, (b) => SETTLE_ORDER[b.settleCycle]);
+
+  const cardFee = grade && grade !== 'general' ? STATUTORY_CARD_FEE[grade] : null;
+  const canAward = rfqStatus === 'sent';
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="border-b border-[var(--color-hair)]">
+            <SortTh label="PG사" sortId="name" active={sortKey === 'name'} dir={sortDir} onSort={handleSort} />
+            <SortTh label="정산주기" sortId="settle" active={sortKey === 'settle'} dir={sortDir} onSort={handleSort} />
+            <SortTh label="보증금" sortId="deposit" active={sortKey === 'deposit'} dir={sortDir} onSort={handleSort} />
+            <SortTh label="셋업비" sortId="setupFee" active={sortKey === 'setupFee'} dir={sortDir} onSort={handleSort} />
+            <SortTh label="월최저" sortId="monthlyMin" active={sortKey === 'monthlyMin'} dir={sortDir} onSort={handleSort} />
+            {cardFee !== null && (
+              <th className="px-3 py-3 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] font-normal">
+                카드
+              </th>
+            )}
+            <SortTh label="계좌이체" sortId="bankPct" active={sortKey === 'bankPct'} dir={sortDir} onSort={handleSort} />
+            <SortTh label="간편결제" sortId="easyPayPct" active={sortKey === 'easyPayPct'} dir={sortDir} onSort={handleSort} />
+            <th className="px-3 py-3" />
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((bid) => {
+            const isMinSettle = SETTLE_ORDER[bid.settleCycle] === minSettle;
+            return (
+              <tr
+                key={bid.id}
+                className="group border-b border-[var(--color-hair)] hover:bg-[var(--color-paper-warm)] transition-colors"
+              >
+                <td className="relative px-3 py-4 text-[13px] font-medium text-[var(--color-ink)] group-hover:before:absolute group-hover:before:left-0 group-hover:before:top-0 group-hover:before:bottom-0 group-hover:before:w-0.5 group-hover:before:bg-[var(--color-amber)]">
+                  {pgName(bid.pgWsId)}
+                  {bid.proposalPdf.name !== '제안서 미첨부' && (
+                    <span className="ml-2 font-mono text-[10px] text-[var(--color-ink-faint)]">PDF</span>
+                  )}
+                </td>
+                <Num label={SETTLE_LABEL[bid.settleCycle]} best={isMinSettle} />
+                <Num label={formatKRW(bid.deposit)} best={bid.deposit === minDeposit} />
+                <Num label={formatKRW(bid.setupFee)} best={bid.setupFee === minSetup} />
+                <Num label={formatKRW(bid.monthlyMin)} best={bid.monthlyMin === minMonthly} />
+                {cardFee !== null && (
+                  <td className="px-3 py-4 font-mono text-[12px] tabular-nums text-[var(--color-ink-soft)]">
+                    {formatPct(cardFee)}
+                  </td>
+                )}
+                <Num label={formatPct(bid.bankTransferFeePct)} best={bid.bankTransferFeePct === minBank} />
+                <Num label={formatPct(bid.easyPayFeePct)} best={bid.easyPayFeePct === minEasyPay} />
+                <td className="px-3 py-4 text-right">
+                  {canAward && (
+                    <Link href={`/rfq/${rfqId}/award?bidId=${bid.id}`}>
+                      <Button variant="secondary" size="sm">선택</Button>
+                    </Link>
+                  )}
+                  {!canAward && (
+                    <Tag variant="moss">수주</Tag>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      {cardFee !== null && grade && (
+        <p className="mt-3 font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+          카드 {(cardFee * 100).toFixed(2)}% — {GRADE_LABELS[grade]} 법정 고정수수료 (PG 변경 불가)
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Num({ label, best }: { label: string; best: boolean }) {
+  return (
+    <td className={`px-3 py-4 font-mono text-[12px] tabular-nums ${best ? 'text-[var(--color-moss)] font-medium' : 'text-[var(--color-ink-muted)]'}`}>
+      {label}
+      {best && <span className="ml-1 text-[9px] opacity-60">▼</span>}
+    </td>
+  );
+}
