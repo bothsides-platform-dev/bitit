@@ -48,6 +48,15 @@ export const MOCK_WORKSPACES: Workspace[] = [
   },
 ];
 
+export const MOCK_SESSION_PG = {
+  userId: 'u-pg-001',
+  email: 'kim@toss.im',
+  workspaceId: 'ws-pg-toss',
+  workspaceType: 'pg' as const,
+  role: 'admin' as const,
+  name: '김영업',
+};
+
 export const MOCK_SESSION_BUYER = {
   userId: 'u-buyer-001',
   email: 'yeonseong.dev@gmail.com',
