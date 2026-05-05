@@ -1,0 +1,72 @@
+/* bidit design tokens — single source of truth. Sync from DESIGN.md §2~4,6 */
+
+@theme {
+  /* ── Ink ──────────────────────────────── */
+  --color-ink:        #0a0a0f;
+  --color-ink-muted:  #5a5560;
+  --color-ink-soft:   #8c8690;
+  --color-ink-faint:  #b8b0a4;
+
+  /* ── Paper ────────────────────────────── */
+  --color-paper:      #faf7f0;
+  --color-paper-pure: #fefdf9;
+  --color-paper-warm: #f3eddd;
+
+  /* ── Night (sidebar) ──────────────────── */
+  --color-night:   #0a0a0f;
+  --color-night-2: #14141b;
+
+  /* ── Hairline ─────────────────────────── */
+  --color-hair:        #ece5d2;
+  --color-hair-strong: #c8c0ac;
+
+  /* ── Accent ───────────────────────────── */
+  --color-accent:      #1a3a52;
+  --color-accent-deep: #0e2538;
+  --color-accent-tint: #e0e6ea;
+
+  /* ── Status ───────────────────────────── */
+  --color-amber:      #b97a25;
+  --color-terracotta: #a8443a;
+  --color-moss:       #4a6f3f;
+  --color-lavender:   #6b5d7a;
+
+  /* ── Typography ───────────────────────── */
+  --font-sans: 'Pretendard Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Text scale */
+  --text-2xs:      0.625rem;   /* 10px */
+  --text-xs:       0.6875rem;  /* 11px */
+  --text-sm:       0.75rem;    /* 12px */
+  --text-base:     0.8125rem;  /* 13px */
+  --text-md:       0.875rem;   /* 14px */
+  --text-lg:       1rem;       /* 16px */
+  --text-xl:       1.25rem;    /* 20px */
+  --text-2xl:      1.625rem;   /* 26px */
+  --text-3xl:      2.25rem;    /* 36px */
+  --text-4xl:      3.25rem;    /* 52px */
+  --text-display:  5.25rem;    /* 84px */
+
+  /* ── Shell / Layout ───────────────────── */
+  --shell-sidebar:  68px;
+  --shell-subnav:   244px;
+  --shell-topbar:   60px;
+  --content-max:    1440px;
+
+  /* Spacing */
+  --s-1:  4px;   --s-2:  8px;   --s-3:  12px;  --s-4:  16px;
+  --s-5:  20px;  --s-6:  24px;  --s-7:  32px;  --s-8:  40px;
+  --s-9:  56px;  --s-10: 80px;  --s-11: 120px;
+
+  /* Radius — max 12px */
+  --r-xs: 2px;  --r-sm: 3px;  --r: 5px;
+  --r-md: 8px;  --r-lg: 12px;
+
+  /* ── Motion ───────────────────────────── */
+  --ease:     cubic-bezier(0.22, 0.72, 0.18, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --d-fast:   140ms;
+  --d:        240ms;
+  --d-slow:   420ms;
+}

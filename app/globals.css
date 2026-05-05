@@ -1,0 +1,64 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "../styles/tokens.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Remap shadcn semantic vars → bidit tokens */
+  --color-background:         var(--color-paper);
+  --color-foreground:         var(--color-ink);
+
+  --color-card:               var(--color-paper-pure);
+  --color-card-foreground:    var(--color-ink);
+
+  --color-popover:            var(--color-paper-pure);
+  --color-popover-foreground: var(--color-ink);
+
+  --color-primary:            var(--color-ink);
+  --color-primary-foreground: var(--color-paper);
+
+  --color-secondary:          var(--color-paper-warm);
+  --color-secondary-foreground: var(--color-ink);
+
+  --color-muted:              var(--color-paper-warm);
+  --color-muted-foreground:   var(--color-ink-muted);
+
+  --color-accent:             var(--color-accent-tint);
+  --color-accent-foreground:  var(--color-accent);
+
+  --color-destructive:        var(--color-terracotta);
+
+  --color-border:             var(--color-hair);
+  --color-input:              var(--color-hair-strong);
+  --color-ring:               var(--color-ink);
+
+  /* Font aliases */
+  --font-sans:    var(--font-sans);
+  --font-mono:    var(--font-mono);
+  --font-heading: var(--font-sans);
+
+  /* Radius */
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-lg);
+}
+
+:root {
+  --radius: var(--r);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    letter-spacing: -0.006em;
+  }
+  html {
+    @apply font-sans;
+  }
+}
