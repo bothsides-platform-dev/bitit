@@ -3,11 +3,14 @@
 import { create } from 'zustand';
 import type { BizProfile } from '@/lib/types/biz-profile';
 
+export type RfqMockFile = { name: string; size: number };
+
 type RfqDraftStore = {
   step: number;
   bizProfile: BizProfile | null;
   title: string;
   memo: string;
+  rfpFiles: RfqMockFile[];
   allowedPgEmails: string[];
   deadline: string;
   setStep: (step: number) => void;
@@ -21,6 +24,7 @@ const defaultState = {
   bizProfile: null,
   title: '',
   memo: '',
+  rfpFiles: [] as RfqMockFile[],
   allowedPgEmails: [],
   deadline: '',
 };
