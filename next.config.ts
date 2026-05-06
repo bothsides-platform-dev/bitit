@@ -13,9 +13,7 @@ export default withSentryConfig(nextConfig, {
   sourcemaps: {
     deleteSourcemapsAfterUpload: true,
   },
-  webpack: {
-    treeshake: {
-      removeDebugLogging: true,
-    },
+  bundleSizeOptimizations: {
+    excludeDebugStatements: true,
   },
 });
