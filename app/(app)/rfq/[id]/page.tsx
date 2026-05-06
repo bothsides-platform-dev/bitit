@@ -1,36 +1,58 @@
-'use client';
-
-import { use } from 'react';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
 import { Tag } from '@/components/primitives/Tag';
 import { Button } from '@/components/primitives/Button';
 import { PageEnter } from '@/components/primitives/PageEnter';
 import { BidComparisonTable } from '@/components/rfq/BidComparisonTable';
-import { useRfqListStore } from '@/lib/stores/rfq-list';
-import { useBidListStore } from '@/lib/stores/bid-list';
-import { GRADE_LABELS } from '@/lib/mock/biz-lookup';
+import { auth } from '@/auth';
+import {
+  getBidRepo,
+  getRfqRepo,
+  getWorkspaceRepo,
+} from '@/lib/server/repositories/factory';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
 import { formatDate } from '@/lib/format';
-import Link from 'next/link';
+
+export const dynamic = 'force-dynamic';
+
+const GRADE_LABELS: Record<string, string> = {
+  small: '영세',
+  sme1: '중소 1',
+  sme2: '중소 2',
+  sme3: '중소 3',
+  general: '일반',
+};
+
+const statusLabel: Record<string, string> = {
+  draft: '임시저장',
+  sent: '발송됨',
+  closed: '마감',
+  awarded: '계약완료',
+  cancelled: '취소',
+};
+const statusVariant: Record<
+  string,
+  'default' | 'amber' | 'moss' | 'terracotta' | 'muted'
+> = {
+  draft: 'muted',
+  sent: 'amber',
+  closed: 'muted',
+  awarded: 'moss',
+  cancelled: 'terracotta',
+};
 
 type Props = { params: Promise<{ id: string }> };
 
-const statusLabel: Record<string, string> = {
-  draft: '임시저장', sent: '발송됨', closed: '마감', awarded: '계약완료', cancelled: '취소',
-};
-const statusVariant: Record<string, 'default' | 'amber' | 'moss' | 'terracotta' | 'muted'> = {
-  draft: 'muted', sent: 'amber', closed: 'muted', awarded: 'moss', cancelled: 'terracotta',
-};
+export default async function RfqDetailPage({ params }: Props) {
+  const { id } = await params;
+  const session = await auth();
+  if (!session?.user?.id || session.user.workspaceType !== 'buyer') {
+    redirect(`/login?next=/rfq/${id}`);
+  }
 
-export default function RfqDetailPage({ params }: Props) {
-  const { id } = use(params);
-  const rfqs = useRfqListStore((s) => s.rfqs);
-  const bids = useBidListStore((s) => s.bids);
-
-  const rfq = rfqs.find((r) => r.id === id);
-  const rfqBids = bids.filter((b) => b.rfqId === id && b.status === 'submitted');
-
-  if (!rfq) {
+  const rfq = await (await getRfqRepo()).findById(id);
+  if (!rfq || rfq.buyerWsId !== session.user.workspaceId) {
     return (
       <div className="px-8 py-8">
         <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
@@ -40,6 +62,12 @@ export default function RfqDetailPage({ params }: Props) {
     );
   }
 
+  const allBids = await (await getBidRepo()).findByRfq(id);
+  const rfqBids = allBids.filter((b) => b.status === 'submitted');
+
+  const ws = await (await getWorkspaceRepo()).findById(rfq.buyerWsId);
+  const companyName = ws?.name ?? '—';
+
   const { bizProfile } = rfq;
   const cardFee = bizProfile.grade ? STATUTORY_CARD_FEE[bizProfile.grade] : NaN;
 
@@ -47,7 +75,9 @@ export default function RfqDetailPage({ params }: Props) {
     <PageEnter className="px-8 py-8 max-w-[1100px] space-y-10">
       {/* Header */}
       <div>
-        <span className="font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)]">{rfq.id}</span>
+        <span className="font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)]">
+          {rfq.id}
+        </span>
         <div className="flex items-start justify-between mt-1 gap-4">
           <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
             {rfq.title}
@@ -97,18 +127,27 @@ export default function RfqDetailPage({ params }: Props) {
           </div>
           <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
             {[
-              ['상호명', '(주)샘플테크'],
+              ['상호명', companyName],
               ['사업자번호', bizProfile.bizNo],
-              ['대표자', '—'],
               ...(bizProfile.grade
                 ? [
                     ['등급', GRADE_LABELS[bizProfile.grade]],
-                    ['카드', isNaN(cardFee) ? '카드사별 협의' : `${(cardFee * 100).toFixed(2)}%`],
+                    [
+                      '카드',
+                      Number.isNaN(cardFee)
+                        ? '카드사별 협의'
+                        : `${(cardFee * 100).toFixed(2)}%`,
+                    ],
                   ]
                 : []),
             ].map(([label, value]) => (
-              <div key={label} className="py-2 flex items-baseline justify-between">
-                <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">{label}</span>
+              <div
+                key={label}
+                className="py-2 flex items-baseline justify-between"
+              >
+                <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
+                  {label}
+                </span>
                 <span className="text-[13px] text-[var(--color-ink)]">{value}</span>
               </div>
             ))}
@@ -128,7 +167,9 @@ export default function RfqDetailPage({ params }: Props) {
                   <span className="font-mono text-[10px] tabular-nums text-[var(--color-ink-faint)]">
                     {String(i + 1).padStart(2, '0')}
                   </span>
-                  <span className="text-[13px] text-[var(--color-ink)]">{email}</span>
+                  <span className="text-[13px] text-[var(--color-ink)]">
+                    {email}
+                  </span>
                 </div>
               ))}
             </div>

@@ -13,27 +13,29 @@ import {
 } from '@/components/rfq/BizLookupField';
 import { GradeConfirmPanel } from '@/components/rfq/GradeConfirmPanel';
 import { signupCompleteAction } from '@/lib/server/actions/auth';
+import { lookupBizNoAction } from '@/lib/server/actions/rfq';
 import {
   clearSignupDraft,
   readSignupDraft,
   writeSignupDraft,
   type SignupClientDraft,
 } from '@/lib/auth/signup-storage';
-// TODO Step 7: replace with `lookupBizNoAction` server action.
-import { lookupBizNo } from '@/lib/mock/biz-lookup';
 import type { MerchantGrade } from '@/lib/types/biz-profile';
 import { cn } from '@/lib/utils';
 
 type Tab = 'create' | 'join';
 
-// TODO Step 7: replace with `lookupBizNoAction` server action — one-line swap.
-const stubLookup = async (bizNo: string) => {
-  const found = await lookupBizNo(bizNo);
-  if (!found) return { valid: false as const };
+// Step 7 — `lookupBizNoAction` swap. BizLookupField는
+// `{ valid:true|false, taxType?, status? }` 만 기대하므로 액션 결과의
+// `{ ok, error?, ... }` 를 그 구조로 다듬어 전달한다. NTS 에러는 'valid:false'
+// 로 normalize — 폼은 "등록된 사업자번호가 없습니다" 단일 분기로 충분.
+const ntsLookup = async (bizNo: string) => {
+  const r = await lookupBizNoAction(bizNo);
+  if (!r.ok || !r.valid) return { valid: false as const };
   return {
     valid: true as const,
-    taxType: found.taxType,
-    status: found.status,
+    taxType: r.taxType!,
+    status: r.status!,
   };
 };
 
@@ -269,7 +271,7 @@ export default function SignupWorkspacePage() {
           {wsKind === 'buyer' && (
             <>
               <BizLookupField
-                onLookup={stubLookup}
+                onLookup={ntsLookup}
                 onResult={(profile) => {
                   setBizProfile(profile);
                   setGrade(null);

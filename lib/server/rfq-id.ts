@@ -16,8 +16,13 @@ export async function nextRfqId(tx: DB): Promise<string> {
     ON CONFLICT (year_month) DO UPDATE SET last_seq = rfq_counters.last_seq + 1
     RETURNING last_seq
   `);
-  // postgres-js returns rows as an array; cast through unknown for portability.
-  const rows = result as unknown as Array<{ last_seq: number }>;
+  // postgres-js returns an array of rows; pglite returns `{ rows: [...] }`.
+  // Tolerate both so prod and the pglite test path share this util.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const r = result as any;
+  const rows: Array<{ last_seq: number }> = Array.isArray(r)
+    ? (r as Array<{ last_seq: number }>)
+    : (r?.rows ?? []);
   const seq = rows[0].last_seq;
   return `Q-${yymm}-${String(seq).padStart(4, '0')}`;
 }
