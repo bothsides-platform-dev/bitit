@@ -45,13 +45,11 @@ export function baseUrl(): string {
   );
 }
 
-// Console-log fallback used in development when no Resend key is set so the
-// dev can paste the verify link in the browser. Removed in Step 10.
-export function devLogVerifyLink(label: string, url: string): void {
-  if (process.env.NODE_ENV === 'development' && !process.env.RESEND_API_KEY) {
-    console.log(`[DEV ${label}] ${url}`);
-  }
-}
+// (Step 10) The previous `devLogVerifyLink` console fallback is gone. The
+// equivalent dev affordance now lives in `lib/integrations/resend.ts` —
+// `ResendSender` logs `[email DEV] event=... to=... subject=... dedupeKey=...`
+// when `RESEND_API_KEY` is unset, so every action's verify URL surfaces
+// through the unified outbox path instead of action-specific helpers.
 
 // 15-minute bucket used for `signup-verify` dedupe keys so a flurry of resend
 // clicks within the same window don't spam the queue. Step 1 bucket = floor

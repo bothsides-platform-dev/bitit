@@ -16,6 +16,8 @@ import {
   dispatchNotification,
   emitAfterCommit,
 } from '@/lib/server/notifications/dispatch';
+import { renderBidSubmitted } from '@/lib/server/outbox/templates/bidSubmitted';
+import { flushAfterCommit } from '@/lib/server/outbox/post-commit';
 import type { Bid, CardIssuer } from '@/lib/types/bid';
 import type { Notification } from '@/lib/types/notification';
 import { actionDb, type BidActionResult } from './_shared';
@@ -181,6 +183,15 @@ export async function submitBidAction(
 
       const outbox = await getOutboxRepo();
 
+      // 같은 RFQ × pgWs 조합의 메일 본문은 모든 buyer 멤버에게 동일 — 한 번만
+      // 렌더해 재사용.
+      const submittedHtml = await renderBidSubmitted({
+        rfqId: data.rfqId,
+        rfqTitle: rfq.title,
+        pgName: pgWsLabel,
+        submittedAt: now.toISOString().replace('T', ' ').slice(0, 16),
+      });
+
       for (const m of buyerMembers) {
         const notif: Notification = {
           id: randomUUID(),
@@ -200,8 +211,8 @@ export async function submitBidAction(
           {
             event: 'bid.submitted',
             to: m.email,
-            subject: `[${data.rfqId}] ${pgWsLabel} 견적 도착`,
-            html: `<p>${pgWsLabel}가 ${data.rfqId} RFQ에 견적을 제출했습니다.</p>`,
+            subject: `[BIDIT · ${data.rfqId}] ${pgWsLabel} 견적 도착`,
+            html: submittedHtml,
             // 멤버별 dedupe — 같은 멤버 중복 enqueue를 collapse.
             dedupeKey: `bid:${data.rfqId}:${pgWsId}:${m.userId}`,
           },
@@ -213,6 +224,9 @@ export async function submitBidAction(
     },
   );
 
-  if (result.ok) emitAfterCommit(pendingEmits);
+  if (result.ok) {
+    emitAfterCommit(pendingEmits);
+    flushAfterCommit();
+  }
   return result;
 }

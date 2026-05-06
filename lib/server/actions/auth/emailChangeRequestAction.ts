@@ -9,10 +9,11 @@ import {
   getVerificationTokenRepo,
 } from '@/lib/server/repositories/factory';
 import { addMinutes, generateToken, hashToken } from '@/lib/server/token';
+import { renderAuthEmailChange } from '@/lib/server/outbox/templates/authEmailChange';
+import { flushAfterCommit } from '@/lib/server/outbox/post-commit';
 import {
   baseUrl,
   bucket15Min,
-  devLogVerifyLink,
   normalizeEmail,
   type AuthActionResult,
 } from './_shared';
@@ -56,16 +57,22 @@ export async function emailChangeRequestAction(
   });
 
   const confirmUrl = `${baseUrl()}/auth/email-change?token=${rawToken}`;
-  devLogVerifyLink('email-change', confirmUrl);
 
   const outbox = await getOutboxRepo();
+  const html = await renderAuthEmailChange({
+    confirmUrl,
+    newEmail,
+    expiresHours: 24,
+  });
   await outbox.enqueue({
     event: 'auth.email-change',
     to: newEmail,
-    subject: '이메일 변경 확인',
-    html: `<a href="${confirmUrl}">확인하기</a>`,
+    subject: '[BIDIT] 이메일 변경 확인',
+    html,
     dedupeKey: `email-change:${session.user.id}:${newEmail}:${bucket15Min()}`,
   });
+
+  flushAfterCommit();
 
   return { ok: true };
 }

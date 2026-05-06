@@ -1,12 +1,14 @@
 // Shared helpers for the 7 buyer-side RFQ actions.
 //
-// - `actionDb()`/`baseUrl()`는 auth/_shared.ts 의 것을 그대로 재사용 (재정의
-//   없음 — 한 군데에서만 관리). Auth 액션과 동일한 testdb 핸들 override가
-//   적용되도록 단일 globalThis 키 (`__bidit_action_db_override__`) 로 통일.
-// - `devLogRfqInviteLink`만 신규 — Step 5의 `devLogVerifyLink` 패턴을 invite
-//   링크용으로 재사용. NODE_ENV=='development' && !RESEND_API_KEY 조건에서만
-//   `[DEV rfq-invite] {URL} (to: {email})`을 console.log. Step 10 시점에 한 줄
-//   삭제.
+// `actionDb()`/`baseUrl()`는 auth/_shared.ts 의 것을 그대로 재사용. Auth 액션과
+// 동일한 testdb 핸들 override가 적용되도록 단일 globalThis 키
+// (`__bidit_action_db_override__`) 로 통일.
+//
+// (Step 10 정리) 기존 `devLogRfqInviteLink` 헬퍼는 삭제됐다 — 동일한 dev 콘솔
+// 폴백은 `lib/integrations/resend.ts:ResendSender`가 `RESEND_API_KEY` 부재 시
+// `[email DEV] event=... to=... subject=... dedupeKey=...` 한 줄을 출력하는
+// 것으로 통합됐다. Action 레이어에서는 더 이상 invite URL을 직접 로깅하지
+// 않는다.
 
 export { actionDb, baseUrl } from '../auth/_shared';
 
@@ -15,9 +17,3 @@ export { actionDb, baseUrl } from '../auth/_shared';
 export type RfqActionResult<T extends object = {}> =
   | ({ ok: true } & T)
   | { ok: false; error: string };
-
-export function devLogRfqInviteLink(url: string, email: string): void {
-  if (process.env.NODE_ENV === 'development' && !process.env.RESEND_API_KEY) {
-    console.log(`[DEV rfq-invite] ${url}  (to: ${email})`);
-  }
-}

@@ -26,6 +26,9 @@ dependencies:
   '@radix-ui/react-tooltip':
     specifier: ^1.2.8
     version: 1.2.8(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@19.2.4)(react@19.2.4)
+  '@react-email/render':
+    specifier: ^2.0.8
+    version: 2.0.8(react-dom@19.2.4)(react@19.2.4)
   '@tanstack/react-table':
     specifier: ^8.21.3
     version: 8.21.3(react-dom@19.2.4)(react@19.2.4)
@@ -76,7 +79,7 @@ dependencies:
     version: 7.75.0(react@19.2.4)
   resend:
     specifier: ^6.4.0
-    version: 6.4.0
+    version: 6.4.0(@react-email/render@2.0.8)
   shadcn:
     specifier: ^4.6.0
     version: 4.6.0(@types/node@20.0.0)(typescript@6.0.3)
@@ -7679,7 +7682,7 @@ packages:
     resolution: {integrity: sha512-K/BG6eIky/SBpzfHZv/dd+9JBFiS4SWV7FIujVyJRux6e45+73RaUHXLmIR1f7WOMaQ0U1km6qwklRQxpJJY0w==}
     dev: false
 
-  /resend@6.4.0:
+  /resend@6.4.0(@react-email/render@2.0.8):
     resolution: {integrity: sha512-CTr4ix4RI5M/ucL58Wqr+LE8eI4JHtJEFaBAx6yUVNOI3eaPVtJjpNL0G/BdRSWMbwv6CtpprVOY8Xvpp6UJlA==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -7688,6 +7691,7 @@ packages:
       '@react-email/render':
         optional: true
     dependencies:
+      '@react-email/render': 2.0.8(react-dom@19.2.4)(react@19.2.4)
       svix: 1.76.1
     dev: false
 

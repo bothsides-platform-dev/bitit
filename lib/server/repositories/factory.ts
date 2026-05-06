@@ -49,13 +49,15 @@ async function buildBundle(): Promise<RepoBundle> {
     const { InMemoryRfqRepository } = await import('./in-memory/rfq');
     const { InMemoryInvitationRepository } = await import('./in-memory/invitation');
     const { InMemoryWorkspaceRepository } = await import('./in-memory/workspace');
+    const { InMemoryOutboxRepository } = await import('./in-memory/outbox');
     const rfq = new InMemoryRfqRepository();
     const invitation = new InMemoryInvitationRepository();
     invitation.setRfqRepoRef(() => rfq);
     const workspace = new InMemoryWorkspaceRepository();
-    // The 8 forward-declared repos return a Proxy that throws on any method
-    // call. Construction stays cheap; the gap surfaces loudly only if Step 5+
-    // code reaches for a not-yet-implemented in-memory repo.
+    const outbox = new InMemoryOutboxRepository();
+    // The 7 still-forward-declared repos return a Proxy that throws on any
+    // method call. Construction stays cheap; the gap surfaces loudly only
+    // if Step 5+ code reaches for a not-yet-implemented in-memory repo.
     const notImplemented = (name: string) =>
       new Proxy(
         {},
@@ -80,7 +82,7 @@ async function buildBundle(): Promise<RepoBundle> {
         'verificationToken',
       ) as VerificationTokenRepo,
       attachment: notImplemented('attachment') as AttachmentRepo,
-      outbox: notImplemented('outbox') as OutboxRepo,
+      outbox,
       __backend: 'memory',
     };
   }

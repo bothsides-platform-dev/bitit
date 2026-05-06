@@ -9,10 +9,11 @@ import {
   getVerificationTokenRepo,
 } from '@/lib/server/repositories/factory';
 import { addMinutes, generateToken, hashToken } from '@/lib/server/token';
+import { renderAuthReset } from '@/lib/server/outbox/templates/authReset';
+import { flushAfterCommit } from '@/lib/server/outbox/post-commit';
 import {
   baseUrl,
   bucket15Min,
-  devLogVerifyLink,
   normalizeEmail,
   type AuthActionResult,
 } from './_shared';
@@ -55,16 +56,18 @@ export async function passwordForgotAction(
   });
 
   const resetUrl = `${baseUrl()}/password/reset?token=${rawToken}`;
-  devLogVerifyLink('password-reset', resetUrl);
 
   const outbox = await getOutboxRepo();
+  const html = await renderAuthReset({ resetUrl, expiresMinutes: 30 });
   await outbox.enqueue({
     event: 'auth.reset',
     to: email,
-    subject: '비밀번호 재설정',
-    html: `<a href="${resetUrl}">재설정하기</a>`,
+    subject: '[BIDIT] 비밀번호 재설정 안내',
+    html,
     dedupeKey: `password-reset:${email}:${bucket15Min()}`,
   });
+
+  flushAfterCommit();
 
   return { ok: true };
 }
