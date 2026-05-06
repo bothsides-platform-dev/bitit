@@ -17,10 +17,12 @@ import {
 } from '@/lib/server/repositories/factory';
 import { nextRfqId } from '@/lib/server/rfq-id';
 import { addMinutes, generateToken } from '@/lib/server/token';
+import { renderRfqInvited } from '@/lib/server/outbox/templates/rfqInvited';
+import { renderRfqSent } from '@/lib/server/outbox/templates/rfqSent';
+import { flushAfterCommit } from '@/lib/server/outbox/post-commit';
 import {
   actionDb,
   baseUrl,
-  devLogRfqInviteLink,
   type RfqActionResult,
 } from './_shared';
 
@@ -81,16 +83,20 @@ export async function createRfqAction(
   const send = parsed.data.send;
   const db = actionDb();
 
-  return await db.transaction(
+  const result = await db.transaction(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async (tx: any): Promise<CreateRfqResult> => {
       // 1. RFQ id 발급 (atomic counter)
       const rfqId = await nextRfqId(tx);
 
       // 2. workspace의 현재 biz_profile_id 조회 (advisor pin 2: hydrated
-      //    Workspace 타입이 아니라 raw 컬럼 직접 read)
+      //    Workspace 타입이 아니라 raw 컬럼 직접 read). name도 함께 픽업해
+      //    rfq.invited 메일 본문의 buyerName으로 쓴다.
       const [wsRow] = await tx
-        .select({ bizProfileId: workspaces.bizProfileId })
+        .select({
+          bizProfileId: workspaces.bizProfileId,
+          name: workspaces.name,
+        })
         .from(workspaces)
         .where(eq(workspaces.id, wsId))
         .limit(1);
@@ -151,6 +157,12 @@ export async function createRfqAction(
         const outbox = await getOutboxRepo();
         const expiresAt = addMinutes(now, INVITE_TTL_DAYS * 24 * 60);
 
+        const buyerName = wsRow.name ?? '구매사';
+        const deadlineDisplay = new Date(parsed.data.deadline)
+          .toISOString()
+          .replace('T', ' ')
+          .slice(0, 16);
+
         for (const email of parsed.data.allowedPgEmails) {
           const rawToken = generateToken();
           const invId = randomUUID();
@@ -168,16 +180,19 @@ export async function createRfqAction(
             tx,
           );
           const inviteUrl = `${baseUrl()}/invite/rfq/${rawToken}`;
-          // Step 10 cleanup: remove this devLogRfqInviteLink line once Resend
-          // sender lands so dev no longer needs the console fallback.
-          devLogRfqInviteLink(inviteUrl, email);
+          const html = await renderRfqInvited({
+            rfqId,
+            rfqTitle: parsed.data.title.trim(),
+            buyerName,
+            deadline: deadlineDisplay,
+            inviteUrl,
+          });
           await outbox.enqueue(
             {
               event: 'rfq.invited',
               to: email,
-              // Step 10에서 react-email 템플릿으로 교체.
-              subject: `[RFQ ${rfqId}] 견적 요청 도착`,
-              html: `<a href="${inviteUrl}">초대 수락하기</a>`,
+              subject: `[BIDIT · ${rfqId}] 견적 요청 도착`,
+              html,
               dedupeKey: `rfq:${rfqId}:invite:${email}`,
             },
             tx,
@@ -185,12 +200,17 @@ export async function createRfqAction(
         }
 
         // buyer 본인 발송 알림 (in-app은 Step 9 SSE 시점에 추가, 지금은 outbox만).
+        const sentHtml = await renderRfqSent({
+          rfqId,
+          rfqTitle: parsed.data.title.trim(),
+          inviteCount: parsed.data.allowedPgEmails.length,
+        });
         await outbox.enqueue(
           {
             event: 'rfq.sent',
             to: session.user.email ?? '',
-            subject: `[RFQ ${rfqId}] 발송 완료`,
-            html: `<p>${parsed.data.title.trim()} 견적이 ${parsed.data.allowedPgEmails.length}개 PG사에 발송되었습니다.</p>`,
+            subject: `[BIDIT · ${rfqId}] 발송 완료`,
+            html: sentHtml,
             dedupeKey: `rfq:${rfqId}:sent`,
           },
           tx,
@@ -204,4 +224,10 @@ export async function createRfqAction(
       return { ok: true, rfqId };
     },
   );
+
+  // Post-commit fire-and-forget flush — drains the rfq.invited / rfq.sent
+  // entries we just enqueued. cron is the safety net if this drops on the
+  // floor (process killed mid-flight). Never blocks the action response.
+  if (result.ok && send) flushAfterCommit();
+  return result;
 }

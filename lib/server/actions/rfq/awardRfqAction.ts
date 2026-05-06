@@ -20,6 +20,8 @@ import {
   dispatchNotification,
   emitAfterCommit,
 } from '@/lib/server/notifications/dispatch';
+import { renderRfqAwarded } from '@/lib/server/outbox/templates/rfqAwarded';
+import { flushAfterCommit } from '@/lib/server/outbox/post-commit';
 import type { Notification } from '@/lib/types/notification';
 import { actionDb, type RfqActionResult } from './_shared';
 
@@ -75,9 +77,13 @@ export async function awardRfqAction(
   const result: AwardRfqResult = await db.transaction(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async (tx: any): Promise<AwardRfqResult> => {
-      // 1. ownership 검증
+      // 1. ownership 검증 — title도 함께 픽업해 rfq.awarded 메일에 사용.
       const [rfqRow] = await tx
-        .select({ buyerWsId: rfqs.buyerWsId, status: rfqs.status })
+        .select({
+          buyerWsId: rfqs.buyerWsId,
+          status: rfqs.status,
+          title: rfqs.title,
+        })
         .from(rfqs)
         .where(eq(rfqs.id, rfqId))
         .limit(1);
@@ -110,19 +116,24 @@ export async function awardRfqAction(
         tx,
       );
 
-      // 4. winner / loser 분리.
+      // 4. winner / loser 분리. settleCycle은 winner row에서 픽업해 메일에 사용.
       const allBids = await tx
-        .select({ id: bids.id, pgWsId: bids.pgWsId })
+        .select({
+          id: bids.id,
+          pgWsId: bids.pgWsId,
+          settleCycle: bids.settleCycle,
+        })
         .from(bids)
         .where(and(eq(bids.rfqId, rfqId), eq(bids.status, 'submitted')));
 
-      const winner = allBids.find(
-        (b: { id: string; pgWsId: string }) => b.id === awardedBidId,
+      type BidRow = { id: string; pgWsId: string; settleCycle: string };
+      const winner = (allBids as BidRow[]).find(
+        (b) => b.id === awardedBidId,
       );
       if (!winner) return { ok: false, error: 'WINNING_BID_NOT_FOUND' };
 
-      const losers = allBids.filter(
-        (b: { id: string; pgWsId: string }) => b.id !== awardedBidId,
+      const losers = (allBids as BidRow[]).filter(
+        (b) => b.id !== awardedBidId,
       );
 
       const outbox = await getOutboxRepo();
@@ -157,13 +168,19 @@ export async function awardRfqAction(
         .from(workspaceMembers)
         .innerJoin(users, eq(workspaceMembers.userId, users.id))
         .where(eq(workspaceMembers.workspaceId, winner.pgWsId));
+      const awardedHtml = await renderRfqAwarded({
+        rfqId,
+        rfqTitle: rfqRow.title,
+        bidId: awardedBidId,
+        settlementCycle: winner.settleCycle,
+      });
       for (const row of winnerEmails as { email: string }[]) {
         await outbox.enqueue(
           {
             event: 'rfq.awarded',
             to: row.email,
-            subject: `[${rfqId}] 낙찰 결과`,
-            html: `<p>제출하신 ${rfqId} 견적이 낙찰되었습니다.</p>`,
+            subject: `[BIDIT · ${rfqId}] 낙찰 결과`,
+            html: awardedHtml,
             dedupeKey: `rfq:${rfqId}:awarded:${row.email}`,
           },
           tx,
@@ -171,7 +188,7 @@ export async function awardRfqAction(
       }
 
       // — loser: in-app 알림만 (이메일 없음 — advisor pin 6).
-      for (const loser of losers as { id: string; pgWsId: string }[]) {
+      for (const loser of losers) {
         const memberRows = await tx
           .select({ userId: workspaceMembers.userId })
           .from(workspaceMembers)
@@ -199,6 +216,10 @@ export async function awardRfqAction(
   );
 
   // commit 후에만 SSE emit — Step 9 dispatch 패턴(advisor pin 3).
-  if (result.ok) emitAfterCommit(pendingEmits);
+  if (result.ok) {
+    emitAfterCommit(pendingEmits);
+    // Outbox drain — winner 메일 즉시 전송 시도, 실패 시 cron 안전망.
+    flushAfterCommit();
+  }
   return result;
 }

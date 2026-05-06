@@ -8,10 +8,11 @@ import {
   getVerificationTokenRepo,
 } from '@/lib/server/repositories/factory';
 import { addMinutes, generateToken, hashToken } from '@/lib/server/token';
+import { renderAuthVerify } from '@/lib/server/outbox/templates/authVerify';
+import { flushAfterCommit } from '@/lib/server/outbox/post-commit';
 import {
   baseUrl,
   bucket15Min,
-  devLogVerifyLink,
   normalizeEmail,
   type AuthActionResult,
 } from './_shared';
@@ -59,17 +60,21 @@ export async function signupEmailAction(
   });
 
   const verifyUrl = `${baseUrl()}/auth/verify?token=${rawToken}`;
-  devLogVerifyLink('signup-verify', verifyUrl);
 
   const outbox = await getOutboxRepo();
+  const html = await renderAuthVerify({ verifyUrl, expiresMinutes: 15 });
   await outbox.enqueue({
     event: 'auth.verify',
     to: email,
-    // Step 10 replaces subject/html with a real template.
-    subject: '인증 메일',
-    html: `<a href="${verifyUrl}">인증하기</a>`,
+    subject: '[BIDIT] 이메일 인증을 완료해 주세요',
+    html,
     dedupeKey: `signup-verify:${email}:${bucket15Min()}`,
   });
+
+  // Post-commit flush — fire-and-forget. The action runs without an
+  // explicit `db.transaction()` wrapper, so "post-commit" here means
+  // "after the enqueue UPDATE is durable" which is the same instant.
+  flushAfterCommit();
 
   return { ok: true, email };
 }

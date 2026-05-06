@@ -15,7 +15,7 @@ import type { Contract } from '@/lib/types/contract';
 import type { Notification } from '@/lib/types/notification';
 import type { Attachment } from '@/lib/types/common';
 import type { VerificationToken } from '@/lib/types/auth';
-import type { OutboxEntry, OutboxEvent } from '../outbox/types';
+import type { OutboxEntry, OutboxEvent, Sender } from '../outbox/types';
 
 // Tx union — postgres-js DB, pglite DB, or a transactional handle from either.
 // `any` generics are localised here so individual method signatures stay clean.
@@ -172,7 +172,7 @@ export interface AttachmentRepo {
   >;
 }
 
-// ── Outbox (forward declaration; 구현은 Step 10) ──────────────────────
+// ── Outbox ────────────────────────────────────────────────────────────
 export interface OutboxRepo {
   /** 메일 전송 큐 enqueue — dedupeKey UNIQUE 위배 시 null. */
   enqueue(
@@ -194,4 +194,18 @@ export interface OutboxRepo {
     result: { ok: true } | { ok: false; error: string },
     tx?: Tx,
   ): Promise<void>;
+  /**
+   * Drain pending entries through `sender`.
+   *
+   * Postgres impl uses `SELECT ... FOR UPDATE SKIP LOCKED LIMIT $limit` so
+   * concurrent flush callers (cron + post-commit fire-and-forget) don't
+   * double-deliver. Returns counts: `ok` = sender returned ok, `failed` =
+   * sender returned !ok (regardless of whether maxAttempts was hit on this
+   * pass — `markResult` decides the persistent state).
+   */
+  flush(
+    sender: Sender,
+    limit?: number,
+    tx?: Tx,
+  ): Promise<{ ok: number; failed: number }>;
 }
