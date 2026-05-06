@@ -198,7 +198,7 @@ export async function signupCompleteAction(
 
         return {
           ok: true,
-          redirectTo: '/home',
+          redirectTo: '/rfq',
           email,
           password: parsed.data.password,
         };
@@ -224,7 +224,7 @@ export async function signupCompleteAction(
         if (joined) {
           return {
             ok: true,
-            redirectTo: '/home',
+            redirectTo: '/inbox',
             email,
             password: parsed.data.password,
           };
@@ -244,7 +244,7 @@ export async function signupCompleteAction(
         });
         return {
           ok: true,
-          redirectTo: '/home',
+          redirectTo: '/inbox',
           email,
           password: parsed.data.password,
         };

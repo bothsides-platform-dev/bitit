@@ -90,6 +90,42 @@ describe('signupEmailAction + verifyEmailAction', () => {
     const second = await verifyEmailAction(token);
     expect(second.ok).toBe(false);
   });
+
+  it('stores workspaceType=buyer in meta and verify returns it', async () => {
+    const r = await signupEmailAction({ email: 'buyer@example.com', workspaceType: 'buyer' });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+
+    const rows = await db
+      .select({ html: outboxEntries.html })
+      .from(outboxEntries)
+      .where(eq(outboxEntries.toAddr, 'buyer@example.com'))
+      .limit(1);
+    const token = tokenFromHtml(rows[0].html);
+
+    const v = await verifyEmailAction(token);
+    expect(v.ok).toBe(true);
+    if (!v.ok) return;
+    expect(v.workspaceType).toBe('buyer');
+  });
+
+  it('stores workspaceType=pg in meta and verify returns it', async () => {
+    const r = await signupEmailAction({ email: 'pg@toss.im', workspaceType: 'pg' });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+
+    const rows = await db
+      .select({ html: outboxEntries.html })
+      .from(outboxEntries)
+      .where(eq(outboxEntries.toAddr, 'pg@toss.im'))
+      .limit(1);
+    const token = tokenFromHtml(rows[0].html);
+
+    const v = await verifyEmailAction(token);
+    expect(v.ok).toBe(true);
+    if (!v.ok) return;
+    expect(v.workspaceType).toBe('pg');
+  });
 });
 
 function tokenFromHtml(html: string): string {
@@ -102,7 +138,7 @@ describe('signupCompleteAction — buyer branch', () => {
   });
   afterEach(teardownActionEnv);
 
-  it('creates user + biz_profile + workspace + admin member, returns /home', async () => {
+  it('creates user + biz_profile + workspace + admin member, returns /rfq', async () => {
     const r = await signupCompleteAction({
       email: 'kim@example.com',
       name: '김구매',
@@ -119,7 +155,7 @@ describe('signupCompleteAction — buyer branch', () => {
     });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.redirectTo).toBe('/home');
+    expect(r.redirectTo).toBe('/rfq');
     expect(r.password).toBe('Password123!');
 
     const [u] = await db
@@ -196,7 +232,7 @@ describe('signupCompleteAction — pg branch', () => {
     });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.redirectTo).toBe('/home');
+    expect(r.redirectTo).toBe('/inbox');
 
     const [ws] = await db
       .select()

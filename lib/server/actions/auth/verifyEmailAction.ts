@@ -7,6 +7,7 @@ import type { AuthActionResult } from './_shared';
 export type VerifyEmailResult = AuthActionResult<{
   email: string;
   inviteToken?: string;
+  workspaceType?: 'buyer' | 'pg';
 }>;
 
 /**
@@ -35,14 +36,20 @@ export async function verifyEmailAction(
     return { ok: false, error: 'WRONG_PURPOSE' };
   }
 
-  const inviteToken =
-    consumed.meta && typeof consumed.meta === 'object'
-      ? (consumed.meta as Record<string, unknown>).inviteToken
-      : undefined;
+  const meta = consumed.meta && typeof consumed.meta === 'object'
+    ? (consumed.meta as Record<string, unknown>)
+    : {};
+
+  const inviteToken = meta.inviteToken;
+  const rawWorkspaceType = meta.workspaceType;
 
   return {
     ok: true,
     email: consumed.email,
     inviteToken: typeof inviteToken === 'string' ? inviteToken : undefined,
+    workspaceType:
+      rawWorkspaceType === 'buyer' || rawWorkspaceType === 'pg'
+        ? rawWorkspaceType
+        : undefined,
   };
 }

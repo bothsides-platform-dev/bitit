@@ -19,6 +19,7 @@ import {
 
 const Input = z.object({
   email: z.string().email(),
+  workspaceType: z.enum(['buyer', 'pg']).optional(),
   inviteToken: z.string().min(1).max(256).optional(),
 });
 
@@ -47,6 +48,10 @@ export async function signupEmailAction(
   const expiresAt = addMinutes(new Date(), 15);
 
   const verifications = await getVerificationTokenRepo();
+  const metaFields = {
+    ...(parsed.data.inviteToken ? { inviteToken: parsed.data.inviteToken } : {}),
+    ...(parsed.data.workspaceType ? { workspaceType: parsed.data.workspaceType } : {}),
+  };
   await verifications.save({
     id: randomUUID(),
     purpose: 'signup_email',
@@ -54,9 +59,7 @@ export async function signupEmailAction(
     tokenHash,
     issuedAt: new Date().toISOString(),
     expiresAt,
-    meta: parsed.data.inviteToken
-      ? { inviteToken: parsed.data.inviteToken }
-      : undefined,
+    meta: Object.keys(metaFields).length ? metaFields : undefined,
   });
 
   const verifyUrl = `${baseUrl()}/auth/verify?token=${rawToken}`;
