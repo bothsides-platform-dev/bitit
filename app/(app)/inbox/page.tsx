@@ -103,7 +103,7 @@ export default function InboxPage() {
                       {rfq.id}
                     </td>
                     <td className="px-3 py-4 text-[13px] text-[var(--color-ink)] font-medium">{rfq.title}</td>
-                    <td className="px-3 py-4 text-[13px] text-[var(--color-ink-muted)]">{rfq.bizProfile.name}</td>
+                    <td className="px-3 py-4 text-[13px] text-[var(--color-ink-muted)]">(주)샘플테크</td>
                     <td className="px-3 py-4 font-mono text-[12px] text-[var(--color-ink-muted)]">
                       {rfq.bizProfile.grade ? GRADE_LABELS[rfq.bizProfile.grade] : '—'}
                     </td>

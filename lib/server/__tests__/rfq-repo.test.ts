@@ -8,12 +8,9 @@ function makeRfq(id: string, status: RFQ['status'] = 'draft'): RFQ {
     buyerWsId: 'ws-buyer',
     bizProfile: {
       bizNo: '1234567890',
-      name: 'Test Co',
-      ceoName: 'Hong',
-      ksic: '52',
       taxType: 'general',
       status: 'active',
-      gradeSource: 'auto_nice',
+      gradeSource: 'user_confirmed',
     },
     title: 'Test RFQ',
     memo: '',

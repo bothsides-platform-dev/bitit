@@ -39,9 +39,9 @@ export function RfqBriefPanel({ rfq }: Props) {
         </div>
         <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
           {[
-            ['상호명', bizProfile.name],
+            ['상호명', '(주)샘플테크'],
             ['사업자번호', bizProfile.bizNo],
-            ['대표자', bizProfile.ceoName],
+            ['대표자', '—'],
           ].map(([label, value]) => (
             <div key={label} className="py-2.5 flex items-baseline justify-between">
               <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">{label}</span>

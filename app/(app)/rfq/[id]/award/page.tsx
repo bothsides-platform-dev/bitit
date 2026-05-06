@@ -200,7 +200,7 @@ export default function AwardPage({ params }: Props) {
         </div>
         <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
           {[
-            ['구매사', rfq.bizProfile.name],
+            ['구매사', '(주)샘플테크'],
             ['사업자번호', rfq.bizProfile.bizNo],
             ['등급', grade ? GRADE_LABELS[grade] : '—'],
             ['마감', formatDate(rfq.deadline)],

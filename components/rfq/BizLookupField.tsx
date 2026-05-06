@@ -4,10 +4,19 @@ import { useState } from 'react';
 import { Button } from '@/components/primitives/Button';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
 import { lookupBizNo, KSIC_LABELS } from '@/lib/mock/biz-lookup';
-import type { BizProfile } from '@/lib/types/biz-profile';
 import { cn } from '@/lib/utils';
 
-type BaseProfile = Omit<BizProfile, 'grade' | 'gradeSource' | 'gradeConfirmedBy' | 'gradeConfirmedAt' | 'estimatedRevenue' | 'revenueYear' | 'niceLookedUpAt'>;
+// Local mock NTS record shape (kept separate from the slim BizProfile DB type).
+// Step 13 deletes this component along with the rest of the mock surface.
+type BaseProfile = {
+  bizNo: string;
+  name: string;
+  ceoName: string;
+  ksic: string;
+  taxType: 'general' | 'simple' | 'exempt';
+  status: 'active' | 'suspended' | 'closed';
+  mailOrderNo?: string;
+};
 
 type Status = 'idle' | 'loading' | 'found' | 'notfound';
 

@@ -97,9 +97,9 @@ export default function RfqDetailPage({ params }: Props) {
           </div>
           <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
             {[
-              ['상호명', bizProfile.name],
+              ['상호명', '(주)샘플테크'],
               ['사업자번호', bizProfile.bizNo],
-              ['대표자', bizProfile.ceoName],
+              ['대표자', '—'],
               ...(bizProfile.grade
                 ? [
                     ['등급', GRADE_LABELS[bizProfile.grade]],
