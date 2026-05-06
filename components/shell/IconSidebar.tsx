@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { HomeIcon, FileTextIcon, InboxIcon, SettingsIcon } from '@/components/icons';
+import { Logo } from '@/components/primitives/Logo';
 
 type NavItem = {
   href: string;
@@ -27,9 +28,7 @@ export function IconSidebar() {
       className="flex flex-col items-center py-4 bg-[var(--color-night)] border-r border-[var(--color-night-2)] row-span-2"
     >
       {/* Wordmark */}
-      <div className="mb-8 font-mono text-[10px] tracking-[0.2em] uppercase text-[var(--color-paper)] opacity-80 writing-mode-vertical px-1 text-center leading-tight">
-        B
-      </div>
+      <Logo variant="compact" className="mb-8" />
 
       {/* Nav */}
       <nav className="flex flex-col items-center gap-1 flex-1">
