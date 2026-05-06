@@ -9,11 +9,15 @@ import { workspaceMembers, users, workspaces } from '@/lib/db/schema';
 import {
   getBidRepo,
   getInvitationRepo,
-  getNotificationRepo,
   getOutboxRepo,
   getRfqRepo,
 } from '@/lib/server/repositories/factory';
+import {
+  dispatchNotification,
+  emitAfterCommit,
+} from '@/lib/server/notifications/dispatch';
 import type { Bid, CardIssuer } from '@/lib/types/bid';
+import type { Notification } from '@/lib/types/notification';
 import { actionDb, type BidActionResult } from './_shared';
 
 const CardIssuerEnum = z.enum([
@@ -117,7 +121,9 @@ export async function submitBidAction(
     return { ok: false, error: 'BID_ALREADY_SUBMITTED' };
   }
 
-  return await db.transaction(
+  const pendingEmits: Notification[] = [];
+
+  const result: SubmitBidResult = await db.transaction(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async (tx: any): Promise<SubmitBidResult> => {
       const bid: Bid = {
@@ -173,25 +179,23 @@ export async function submitBidAction(
         .limit(1)) as { name: string; domain: string | null }[];
       const pgWsLabel = pgWsRow?.name ?? pgWsRow?.domain ?? 'PG';
 
-      const notifRepo = await getNotificationRepo();
       const outbox = await getOutboxRepo();
 
       for (const m of buyerMembers) {
-        await notifRepo.save(
-          {
-            id: randomUUID(),
-            userId: m.userId,
-            workspaceId: rfq.buyerWsId,
-            type: 'bid.submitted',
-            title: `[${data.rfqId}] ${pgWsLabel} 견적 도착`,
-            body: `${pgWsLabel}가 견적을 제출했습니다.`,
-            channel: 'inapp',
-            status: 'pending',
-            linkUrl: `/rfq/${data.rfqId}`,
-            createdAt: now.toISOString(),
-          },
-          tx,
-        );
+        const notif: Notification = {
+          id: randomUUID(),
+          userId: m.userId,
+          workspaceId: rfq.buyerWsId,
+          type: 'bid.submitted',
+          title: `[${data.rfqId}] ${pgWsLabel} 견적 도착`,
+          body: `${pgWsLabel}가 견적을 제출했습니다.`,
+          channel: 'inapp',
+          status: 'pending',
+          linkUrl: `/rfq/${data.rfqId}`,
+          createdAt: now.toISOString(),
+        };
+        await dispatchNotification(tx, notif);
+        pendingEmits.push(notif);
         await outbox.enqueue(
           {
             event: 'bid.submitted',
@@ -208,4 +212,7 @@ export async function submitBidAction(
       return { ok: true, bidId };
     },
   );
+
+  if (result.ok) emitAfterCommit(pendingEmits);
+  return result;
 }

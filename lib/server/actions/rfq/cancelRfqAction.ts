@@ -6,10 +6,12 @@ import { and, eq } from 'drizzle-orm';
 
 import { requireBuyerSession } from '@/lib/auth/session';
 import { bids, rfqs, workspaceMembers } from '@/lib/db/schema';
+import { getRfqRepo } from '@/lib/server/repositories/factory';
 import {
-  getNotificationRepo,
-  getRfqRepo,
-} from '@/lib/server/repositories/factory';
+  dispatchNotification,
+  emitAfterCommit,
+} from '@/lib/server/notifications/dispatch';
+import type { Notification } from '@/lib/types/notification';
 import { actionDb, type RfqActionResult } from './_shared';
 
 const Input = z.object({ rfqId: z.string().min(1) }).strict();
@@ -37,7 +39,9 @@ export async function cancelRfqAction(
   const wsId = session.user.workspaceId;
   const db = actionDb();
 
-  return await db.transaction(
+  const pendingEmits: Notification[] = [];
+
+  const result: CancelRfqResult = await db.transaction(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async (tx: any): Promise<CancelRfqResult> => {
       const [row] = await tx
@@ -68,32 +72,33 @@ export async function cancelRfqAction(
       const wsSet = new Set<string>(
         (submittedBids as { pgWsId: string }[]).map((b) => b.pgWsId),
       );
-      const notifRepo = await getNotificationRepo();
       for (const pgWsId of wsSet) {
         const members = await tx
           .select({ userId: workspaceMembers.userId })
           .from(workspaceMembers)
           .where(eq(workspaceMembers.workspaceId, pgWsId));
         for (const m of members as { userId: string }[]) {
-          await notifRepo.save(
-            {
-              id: randomUUID(),
-              userId: m.userId,
-              workspaceId: pgWsId,
-              type: 'rfq.cancelled',
-              title: `[${rfqId}] 취소됨`,
-              body: '구매사가 견적 요청을 취소했습니다.',
-              channel: 'inapp',
-              status: 'pending',
-              linkUrl: `/inbox/${rfqId}`,
-              createdAt: new Date().toISOString(),
-            },
-            tx,
-          );
+          const notif: Notification = {
+            id: randomUUID(),
+            userId: m.userId,
+            workspaceId: pgWsId,
+            type: 'rfq.cancelled',
+            title: `[${rfqId}] 취소됨`,
+            body: '구매사가 견적 요청을 취소했습니다.',
+            channel: 'inapp',
+            status: 'pending',
+            linkUrl: `/inbox/${rfqId}`,
+            createdAt: new Date().toISOString(),
+          };
+          await dispatchNotification(tx, notif);
+          pendingEmits.push(notif);
         }
       }
 
       return { ok: true };
     },
   );
+
+  if (result.ok) emitAfterCommit(pendingEmits);
+  return result;
 }

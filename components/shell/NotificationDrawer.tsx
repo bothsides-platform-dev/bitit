@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useUIStore } from '@/lib/stores/ui';
-import { useNotificationsStore } from '@/lib/stores/notifications';
+import { useNotifications } from '@/lib/hooks/useNotifications';
 import { XIcon, EnvelopeIcon } from '@/components/icons';
 import { IconButton } from '@/components/primitives/IconButton';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
@@ -34,16 +34,11 @@ function timeAgo(iso: string): string {
 export function NotificationDrawer() {
   const router = useRouter();
   const { notificationDrawerOpen, closeNotificationDrawer } = useUIStore();
-  const notifications = useNotificationsStore((s) => s.notifications);
-  const markRead = useNotificationsStore((s) => s.markRead);
-  const markAllRead = useNotificationsStore((s) => s.markAllRead);
-
-  const unreadCount = notifications.filter(
-    (n) => n.status === 'pending' || n.status === 'sent',
-  ).length;
+  const { notifications, unreadCount, markRead, markAllRead } =
+    useNotifications();
 
   const handleClick = (notif: Notification) => {
-    markRead(notif.id);
+    void markRead(notif.id);
     closeNotificationDrawer();
     if (notif.linkUrl) router.push(notif.linkUrl);
   };
@@ -80,7 +75,7 @@ export function NotificationDrawer() {
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
               <button
-                onClick={markAllRead}
+                onClick={() => void markAllRead()}
                 className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] hover:text-[var(--color-ink)] transition-colors"
               >
                 모두 읽음

@@ -13,10 +13,14 @@ import {
 } from '@/lib/db/schema';
 import {
   getContractRepo,
-  getNotificationRepo,
   getOutboxRepo,
   getRfqRepo,
 } from '@/lib/server/repositories/factory';
+import {
+  dispatchNotification,
+  emitAfterCommit,
+} from '@/lib/server/notifications/dispatch';
+import type { Notification } from '@/lib/types/notification';
 import { actionDb, type RfqActionResult } from './_shared';
 
 const Input = z
@@ -64,7 +68,11 @@ export async function awardRfqAction(
   const userId = session.user.id;
   const db = actionDb();
 
-  return await db.transaction(
+  // SSE emit는 commit 이후 1회. tx 내에서 만든 notification을 모았다가
+  // tx 정상 종료 시 bus.emit. tx throw 시 자연 누락 → rollback과 SSE 정합.
+  const pendingEmits: Notification[] = [];
+
+  const result: AwardRfqResult = await db.transaction(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async (tx: any): Promise<AwardRfqResult> => {
       // 1. ownership 검증
@@ -117,7 +125,6 @@ export async function awardRfqAction(
         (b: { id: string; pgWsId: string }) => b.id !== awardedBidId,
       );
 
-      const notifRepo = await getNotificationRepo();
       const outbox = await getOutboxRepo();
 
       // — winner: in-app 알림 N + 이메일 outbox N (멤버 수만큼)
@@ -126,22 +133,20 @@ export async function awardRfqAction(
         .from(workspaceMembers)
         .where(eq(workspaceMembers.workspaceId, winner.pgWsId));
       for (const m of winnerMembers as { userId: string }[]) {
-        const notifId = randomUUID();
-        await notifRepo.save(
-          {
-            id: notifId,
-            userId: m.userId,
-            workspaceId: winner.pgWsId,
-            type: 'rfq.awarded',
-            title: `[${rfqId}] 낙찰`,
-            body: '제출하신 견적이 낙찰되었습니다.',
-            channel: 'inapp',
-            status: 'pending',
-            linkUrl: `/inbox/${rfqId}`,
-            createdAt: new Date().toISOString(),
-          },
-          tx,
-        );
+        const notif: Notification = {
+          id: randomUUID(),
+          userId: m.userId,
+          workspaceId: winner.pgWsId,
+          type: 'rfq.awarded',
+          title: `[${rfqId}] 낙찰`,
+          body: '제출하신 견적이 낙찰되었습니다.',
+          channel: 'inapp',
+          status: 'pending',
+          linkUrl: `/inbox/${rfqId}`,
+          createdAt: new Date().toISOString(),
+        };
+        await dispatchNotification(tx, notif);
+        pendingEmits.push(notif);
       }
 
       // 이메일은 사람 단위가 아니라 RFQ × ws 단위 1통 — 정책상 멤버별로 보낼
@@ -172,26 +177,28 @@ export async function awardRfqAction(
           .from(workspaceMembers)
           .where(eq(workspaceMembers.workspaceId, loser.pgWsId));
         for (const m of memberRows as { userId: string }[]) {
-          const notifId = randomUUID();
-          await notifRepo.save(
-            {
-              id: notifId,
-              userId: m.userId,
-              workspaceId: loser.pgWsId,
-              type: 'rfq.rejected',
-              title: `[${rfqId}] 미낙찰`,
-              body: '다른 PG가 선정되었습니다.',
-              channel: 'inapp',
-              status: 'pending',
-              linkUrl: `/inbox/${rfqId}`,
-              createdAt: new Date().toISOString(),
-            },
-            tx,
-          );
+          const notif: Notification = {
+            id: randomUUID(),
+            userId: m.userId,
+            workspaceId: loser.pgWsId,
+            type: 'rfq.rejected',
+            title: `[${rfqId}] 미낙찰`,
+            body: '다른 PG가 선정되었습니다.',
+            channel: 'inapp',
+            status: 'pending',
+            linkUrl: `/inbox/${rfqId}`,
+            createdAt: new Date().toISOString(),
+          };
+          await dispatchNotification(tx, notif);
+          pendingEmits.push(notif);
         }
       }
 
       return { ok: true };
     },
   );
+
+  // commit 후에만 SSE emit — Step 9 dispatch 패턴(advisor pin 3).
+  if (result.ok) emitAfterCommit(pendingEmits);
+  return result;
 }
