@@ -5,6 +5,13 @@ import { useNotifications } from '@/lib/hooks/useNotifications';
 import { IconButton } from '@/components/primitives/IconButton';
 import { BellIcon, SearchIcon } from '@/components/icons';
 import { Avatar } from '@/components/primitives/Avatar';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 export type TopbarProps = {
   user: { id: string; email: string; name: string };
@@ -16,6 +23,11 @@ export function Topbar({ user }: TopbarProps) {
   const { openNotificationDrawer, openCommandPalette } = useUIStore();
   // Step 9: unread 배지 = SSE 라이브 카운트.
   const { unreadCount } = useNotifications();
+
+  async function handleLogout() {
+    await fetch('/logout', { method: 'POST' });
+    window.location.href = '/login';
+  }
 
   return (
     <header
@@ -45,13 +57,34 @@ export function Topbar({ user }: TopbarProps) {
           )}
         </div>
 
-        {/* User avatar */}
-        <Avatar
-          name={user.name}
-          color="ink"
-          size="sm"
-          className="cursor-pointer"
-        />
+        {/* User avatar + profile dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger className="outline-none rounded-[var(--r-sm)]">
+            <Avatar name={user.name} color="ink" size="sm" className="cursor-pointer" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            side="bottom"
+            align="end"
+            sideOffset={8}
+            className="min-w-[180px] rounded-[var(--r)] border border-[var(--color-hair)] bg-[var(--color-paper)] p-1 shadow-sm"
+          >
+            <div className="px-2 py-1.5">
+              <p className="font-mono text-[11px] font-medium tracking-[0.04em] text-[var(--color-ink)]">
+                {user.name}
+              </p>
+              <p className="font-mono text-[10px] text-[var(--color-ink-soft)] mt-0.5">
+                {user.email}
+              </p>
+            </div>
+            <DropdownMenuSeparator className="bg-[var(--color-hair)]" />
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="font-mono text-[11px] tracking-[0.04em] text-[var(--color-ink)] cursor-pointer px-2 py-1.5 rounded-[var(--r-sm)] hover:bg-[var(--color-field)]"
+            >
+              로그아웃
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

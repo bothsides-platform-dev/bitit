@@ -23,7 +23,7 @@ export default function BuyerSignupEmailPage() {
   const router = useRouter();
   const { setEmail, setAgreedAt, setWorkspaceType } = useSignupDraftStore();
 
-  const [email, setEmailInput] = useState('');
+  const [emailInput, setEmailInput] = useState('');
   const [agreements, setAgreements] = useState<AgreementState>({
     terms: false,
     privacy: false,
@@ -33,7 +33,7 @@ export default function BuyerSignupEmailPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const canSubmit =
-    email.trim() !== '' &&
+    emailInput.trim() !== '' &&
     agreements.terms &&
     agreements.privacy &&
     !submitting;
@@ -44,7 +44,7 @@ export default function BuyerSignupEmailPage() {
     setError('');
     setSubmitting(true);
 
-    const normalised = email.trim().toLowerCase();
+    const normalised = emailInput.trim().toLowerCase();
     const r = await signupEmailAction({
       email: normalised,
       workspaceType: 'buyer',
@@ -96,7 +96,7 @@ export default function BuyerSignupEmailPage() {
             id="email"
             type="email"
             name="email"
-            value={email}
+            value={emailInput}
             onChange={(e) => setEmailInput(e.target.value)}
             autoComplete="email"
             placeholder="your@company.com"
