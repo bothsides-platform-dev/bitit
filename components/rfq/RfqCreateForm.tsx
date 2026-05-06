@@ -4,8 +4,9 @@ import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/primitives/Button';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
-import { BizLookupField } from './BizLookupField';
+import { BizLookupField, type BizLookupResult } from './BizLookupField';
 import { GradeConfirmPanel } from './GradeConfirmPanel';
+import { lookupBizNo } from '@/lib/mock/biz-lookup';
 import { PgEmailAllowlist } from './PgEmailAllowlist';
 import { RfpAttachmentDropzone } from './RfpAttachmentDropzone';
 import { useRfqDraftStore } from '@/lib/stores/rfq-draft';
@@ -42,17 +43,8 @@ export function RfqCreateForm() {
   const rfqs = useRfqListStore((s) => s.rfqs);
   const addNotification = useNotificationsStore((s) => s.add);
 
-  // Local mock NTS shape (matches BizLookupField's BaseProfile). Slim BizProfile in
-  // the draft store is constructed from a subset of these fields below.
-  const [baseProfile, setBaseProfile] = useState<{
-    bizNo: string;
-    name: string;
-    ceoName: string;
-    ksic: string;
-    taxType: 'general' | 'simple' | 'exempt';
-    status: 'active' | 'suspended' | 'closed';
-    mailOrderNo?: string;
-  } | null>(null);
+  // Slim NTS-confirmed profile (only DB-shaped fields after Step 6 trim).
+  const [baseProfile, setBaseProfile] = useState<BizLookupResult | null>(null);
   const [gradeConfirmed, setGradeConfirmed] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [minDate] = useState(() => new Date(Date.now() + 86_400_000).toISOString().slice(0, 10));
@@ -73,23 +65,30 @@ export function RfqCreateForm() {
     draft.allowedPgEmails.length > 0 &&
     draft.deadline !== '';
 
-  const handleGradeConfirm = (result: {
-    grade: BizProfile['grade'];
-    gradeSource: BizProfile['gradeSource'];
-    estimatedRevenue?: number;
-    revenueYear?: string;
-  }) => {
+  const handleGradeConfirm = (
+    grade: NonNullable<BizProfile['grade']>,
+    gradeSource: BizProfile['gradeSource'],
+  ) => {
     if (!baseProfile) return;
-    // Slim BizProfile only stores DB-shaped fields. Mock NTS extras (name/ceoName/etc.)
-    // remain in local component state and are dropped here.
     draft.setBizProfile({
       bizNo: baseProfile.bizNo,
       taxType: baseProfile.taxType,
       status: baseProfile.status,
-      grade: result.grade,
-      gradeSource: result.gradeSource,
+      grade,
+      gradeSource,
     });
     setGradeConfirmed(true);
+  };
+
+  // TODO Step 7: replace with `lookupBizNoAction` server action.
+  const stubLookup = async (bizNo: string) => {
+    const found = await lookupBizNo(bizNo);
+    if (!found) return { valid: false as const };
+    return {
+      valid: true as const,
+      taxType: found.taxType,
+      status: found.status,
+    };
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -136,7 +135,8 @@ export function RfqCreateForm() {
         <SectionHeader num="01" label="사업자 정보" />
         <div className="space-y-6">
           <BizLookupField
-            onFound={(profile) => {
+            onLookup={stubLookup}
+            onResult={(profile) => {
               setBaseProfile(profile);
               setGradeConfirmed(false);
               draft.setBizProfile(null);
@@ -151,10 +151,7 @@ export function RfqCreateForm() {
           {baseProfile && (
             <div className="space-y-2">
               <Eyebrow>가맹점 등급 (카드 우대수수료)</Eyebrow>
-              <GradeConfirmPanel
-                bizNo={baseProfile.bizNo}
-                onConfirm={handleGradeConfirm}
-              />
+              <GradeConfirmPanel onConfirm={handleGradeConfirm} />
             </div>
           )}
         </div>

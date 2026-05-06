@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { InMemoryInvitationRepository } from '../repositories/invitation';
+import { InMemoryInvitationRepository } from '../repositories/in-memory/invitation';
 import { generateToken, addMinutes } from '../token';
 import type { RfqInvitation } from '@/lib/types/invitation';
 
@@ -23,11 +23,11 @@ describe('InMemoryInvitationRepository', () => {
     repo = new InMemoryInvitationRepository();
   });
 
-  it('claims a valid token and sets acceptedByUserId', () => {
+  it('claims a valid token and sets acceptedByUserId', async () => {
     const raw = generateToken();
-    repo.save(makeInvitation(raw), raw);
+    await repo.save(makeInvitation(raw), raw);
 
-    const result = repo.claimToken(raw, 'user-pg');
+    const result = await repo.claimToken(raw, 'user-pg');
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.invitation.acceptedByUserId).toBe('user-pg');
@@ -35,39 +35,39 @@ describe('InMemoryInvitationRepository', () => {
     }
   });
 
-  it('returns invalid for unknown token', () => {
-    const result = repo.claimToken('unknown', 'user-pg');
+  it('returns invalid for unknown token', async () => {
+    const result = await repo.claimToken('unknown', 'user-pg');
     expect(result).toEqual({ ok: false, reason: 'invalid' });
   });
 
-  it('returns expired for past expiresAt', () => {
+  it('returns expired for past expiresAt', async () => {
     const raw = generateToken();
-    repo.save(
+    await repo.save(
       makeInvitation(raw, { expiresAt: new Date(Date.now() - 1000).toISOString() }),
       raw,
     );
-    expect(repo.claimToken(raw, 'user-pg')).toEqual({ ok: false, reason: 'expired' });
+    expect(await repo.claimToken(raw, 'user-pg')).toEqual({ ok: false, reason: 'expired' });
   });
 
-  it('returns used when acceptedByUserId already set', () => {
+  it('returns used when acceptedByUserId already set', async () => {
     const raw = generateToken();
-    repo.save(makeInvitation(raw, { acceptedByUserId: 'prev-user' }), raw);
-    expect(repo.claimToken(raw, 'user-pg')).toEqual({ ok: false, reason: 'used' });
+    await repo.save(makeInvitation(raw, { acceptedByUserId: 'prev-user' }), raw);
+    expect(await repo.claimToken(raw, 'user-pg')).toEqual({ ok: false, reason: 'used' });
   });
 
-  it('second claim returns used', () => {
+  it('second claim returns used', async () => {
     const raw = generateToken();
-    repo.save(makeInvitation(raw), raw);
-    repo.claimToken(raw, 'user-1');
-    expect(repo.claimToken(raw, 'user-2')).toEqual({ ok: false, reason: 'used' });
+    await repo.save(makeInvitation(raw), raw);
+    await repo.claimToken(raw, 'user-1');
+    expect(await repo.claimToken(raw, 'user-2')).toEqual({ ok: false, reason: 'used' });
   });
 
-  it('canAccess is true only for the accepting user (same-domain peers blocked)', () => {
+  it('canAccess is true only for the accepting user (same-domain peers blocked)', async () => {
     const raw = generateToken();
-    repo.save(makeInvitation(raw), raw);
-    repo.claimToken(raw, 'user-pg');
+    await repo.save(makeInvitation(raw), raw);
+    await repo.claimToken(raw, 'user-pg');
 
-    expect(repo.canAccess('rfq-1', 'user-pg')).toBe(true);
-    expect(repo.canAccess('rfq-1', 'other-pg-user')).toBe(false);
+    expect(await repo.canAccess('rfq-1', 'user-pg')).toBe(true);
+    expect(await repo.canAccess('rfq-1', 'other-pg-user')).toBe(false);
   });
 });

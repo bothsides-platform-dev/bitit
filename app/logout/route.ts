@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
+import { signOut } from '@/auth';
 
-export async function POST() {
-  const res = NextResponse.redirect(new URL('/login', process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'));
-  res.cookies.delete('session');
-  return res;
+export async function POST(req: Request) {
+  await signOut({ redirect: false });
+  return NextResponse.redirect(new URL('/login', req.url), 302);
 }

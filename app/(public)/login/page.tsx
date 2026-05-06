@@ -1,16 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Serial } from '@/components/primitives/Serial';
 import { Button } from '@/components/primitives/Button';
 import { PasswordField } from '@/components/auth/PasswordField';
+import { loginAction } from '@/lib/server/actions/auth';
 
-export default function LoginPage() {
+function LoginContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next') ?? '/home';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [failCount] = useState(0);
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    setSubmitting(true);
+    const r = await loginAction({ email, password });
+    setSubmitting(false);
+    if (!r.ok) {
+      setError('이메일 또는 비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    // Auth.js v5 sets the cookie inside the server action's signIn() call;
+    // a router.push is enough to land on the protected route.
+    router.push(next);
+    router.refresh();
+  }
 
   return (
     <div className="space-y-8">
@@ -21,7 +43,7 @@ export default function LoginPage() {
         </h2>
       </div>
 
-      <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+      <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="space-y-1">
           <label htmlFor="email" className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
             이메일
@@ -59,14 +81,14 @@ export default function LoginPage() {
           </label>
         </div>
 
-        {failCount >= 5 && (
-          <div className="p-3 border border-[var(--color-hair)] text-[12px] text-[var(--color-ink-muted)] font-mono uppercase tracking-[0.08em]">
-            CAPTCHA — (mock)
-          </div>
+        {error && (
+          <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]">
+            {error}
+          </p>
         )}
 
-        <Button type="submit" fullWidth size="lg">
-          로그인
+        <Button type="submit" fullWidth size="lg" disabled={submitting || !email || !password}>
+          {submitting ? 'LOADING…' : '로그인'}
         </Button>
       </form>
 
@@ -89,5 +111,13 @@ export default function LoginPage() {
         — FIN —
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<p className="font-mono text-[12px] tracking-[0.16em] uppercase text-center">LOADING…</p>}>
+      <LoginContent />
+    </Suspense>
   );
 }

@@ -7,6 +7,11 @@ import { Serial } from '@/components/primitives/Serial';
 import { Button } from '@/components/primitives/Button';
 import { AgreementCheckboxes } from '@/components/auth/AgreementCheckboxes';
 import { useSignupDraftStore } from '@/lib/stores/signup-draft';
+import { signupEmailAction } from '@/lib/server/actions/auth';
+import {
+  readSignupDraft,
+  writeSignupDraft,
+} from '@/lib/auth/signup-storage';
 
 type AgreementState = { terms: boolean; privacy: boolean; marketing: boolean };
 
@@ -20,19 +25,37 @@ export default function SignupPage() {
     marketing: false,
   });
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const canSubmit = email.trim() !== '' && agreements.terms && agreements.privacy;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.includes('@')) {
       setError('올바른 이메일 형식이 아닙니다.');
       return;
     }
     setError('');
-    setEmail(email.trim().toLowerCase());
+    setSubmitting(true);
+
+    const normalised = email.trim().toLowerCase();
+    // sessionStorage carries inviteToken across reloads; the server action
+    // reads it from the form input, the verify hop reads it from the verify
+    // row's meta. See lib/server/actions/auth/signupEmailAction.ts.
+    const draft = readSignupDraft();
+    const inviteToken = draft.inviteToken;
+
+    const r = await signupEmailAction({ email: normalised, inviteToken });
+    setSubmitting(false);
+    if (!r.ok) {
+      setError('인증 메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    writeSignupDraft({ ...draft, email: r.email });
+    setEmail(r.email);
     setAgreedAt(new Date().toISOString());
-    router.push('/signup/verify');
+    router.push(`/auth/verify?email=${encodeURIComponent(r.email)}`);
   };
 
   return (
@@ -67,8 +90,8 @@ export default function SignupPage() {
 
         <AgreementCheckboxes value={agreements} onChange={setAgreements} />
 
-        <Button type="submit" fullWidth size="lg" disabled={!canSubmit}>
-          인증 메일 받기
+        <Button type="submit" fullWidth size="lg" disabled={!canSubmit || submitting}>
+          {submitting ? 'LOADING…' : '인증 메일 받기'}
         </Button>
       </form>
 
