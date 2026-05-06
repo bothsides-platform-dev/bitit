@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { passwordStrength } from '@/lib/auth/strength';
 import { cn } from '@/lib/utils';
 
@@ -59,10 +60,10 @@ export function PasswordField({
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute right-0 top-2 font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] hover:text-[var(--color-ink)] transition-colors"
+          className="absolute right-0 top-2 text-[var(--color-ink-soft)] hover:text-[var(--color-ink)] transition-colors"
           aria-label={visible ? '비밀번호 숨기기' : '비밀번호 보기'}
         >
-          {visible ? 'HIDE' : 'SHOW'}
+          {visible ? <EyeOff size={16} strokeWidth={1.4} /> : <Eye size={16} strokeWidth={1.4} />}
         </button>
       </div>
 
