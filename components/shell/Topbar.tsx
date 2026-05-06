@@ -1,7 +1,7 @@
 'use client';
 
 import { useUIStore } from '@/lib/stores/ui';
-import { useNotificationsStore } from '@/lib/stores/notifications';
+import { useNotifications } from '@/lib/hooks/useNotifications';
 import { IconButton } from '@/components/primitives/IconButton';
 import { BellIcon, SearchIcon } from '@/components/icons';
 import { Avatar } from '@/components/primitives/Avatar';
@@ -10,9 +10,8 @@ import { useMockSession } from '@/lib/mock/session';
 export function Topbar() {
   const { openNotificationDrawer, openCommandPalette } = useUIStore();
   const { session, user } = useMockSession();
-  const unreadCount = useNotificationsStore((s) =>
-    s.notifications.filter((n) => n.status === 'pending' || n.status === 'sent').length,
-  );
+  // Step 9: unread 배지 = SSE 라이브 카운트. session de-mock은 Step 12 영역.
+  const { unreadCount } = useNotifications();
 
   return (
     <header

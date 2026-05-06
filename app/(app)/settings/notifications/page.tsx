@@ -1,10 +1,22 @@
-'use client';
-
+// Notifications settings page — RSC (advisor pin 6 + Step 9 H).
+//
+// 서버 사이드 list + retry 액션 form. mark-all-read는 hook을 쓰는 클라이언트
+// 컴포넌트 'NotificationsActivityList'에 위임 — settings 페이지는 list가 길어
+// 서버 fetch + revalidatePath 패턴이 맞고, 서버 컴포넌트가 hook을 못 쓰니까
+// 두 책임을 분리한다.
+//
+// 단, Drawer/Topbar처럼 라이브 prepend는 필요 없으니 (이 페이지는 archive 뷰)
+// 단순 hydration 후 retry / read 동작만 form action으로 처리 — mock store 흔적
+// 제거.
+import { requireSession } from '@/lib/auth/session';
+import { getNotificationRepo } from '@/lib/server/repositories/factory';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
 import { Tag } from '@/components/primitives/Tag';
 import { PageEnter } from '@/components/primitives/PageEnter';
-import { useNotificationsStore } from '@/lib/stores/notifications';
-import type { NotificationStatus } from '@/lib/types/notification';
+import type { Notification, NotificationStatus } from '@/lib/types/notification';
+
+import { RetryNotificationButton } from './RetryNotificationButton';
+import { MarkAllReadButton } from './MarkAllReadButton';
 
 const statusVariant: Record<NotificationStatus, 'amber' | 'moss' | 'terracotta' | 'muted'> = {
   pending: 'amber',
@@ -30,10 +42,15 @@ function fmtDateTime(iso: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-export default function NotificationsSettingsPage() {
-  const notifications = useNotificationsStore((s) => s.notifications);
-  const retry = useNotificationsStore((s) => s.retry);
-  const markAllRead = useNotificationsStore((s) => s.markAllRead);
+export const dynamic = 'force-dynamic';
+
+export default async function NotificationsSettingsPage() {
+  const session = await requireSession();
+  const repo = await getNotificationRepo();
+  const notifications: Notification[] = await repo.findRecentForUser(
+    session.user.id,
+    100,
+  );
 
   const counts = {
     total: notifications.length,
@@ -60,14 +77,7 @@ export default function NotificationsSettingsPage() {
         <div className="flex items-center gap-3 mb-4">
           <Eyebrow>FIG. 01 — Outbox 상태</Eyebrow>
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
-          {counts.pending + counts.sent > 0 && (
-            <button
-              onClick={markAllRead}
-              className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] hover:text-[var(--color-ink)] transition-colors"
-            >
-              모두 읽음
-            </button>
-          )}
+          {counts.pending + counts.sent > 0 && <MarkAllReadButton />}
         </div>
         <div className="grid grid-cols-5 gap-px bg-[var(--color-hair)] border border-[var(--color-hair)]">
           {[
@@ -141,13 +151,7 @@ export default function NotificationsSettingsPage() {
                 <div className="flex flex-col items-end gap-2 shrink-0">
                   <Tag variant={statusVariant[n.status]}>{statusLabel[n.status]}</Tag>
                   {n.status === 'failed' && (
-                    <button
-                      type="button"
-                      onClick={() => retry(n.id)}
-                      className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-amber)] hover:text-[var(--color-ink)] transition-colors"
-                    >
-                      재시도 →
-                    </button>
+                    <RetryNotificationButton notificationId={n.id} />
                   )}
                 </div>
               </div>
