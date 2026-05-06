@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
 import type { RfqMockFile } from '@/lib/stores/rfq-draft';
 import { DRAFT_OWNER_ID } from '@/lib/server/storage/constants';
@@ -44,10 +44,26 @@ export function RfpAttachmentDropzone({ value, onChange }: Props) {
     value.map((v) => ({ ...v, status: 'ready' as const })),
   );
 
-  const sync = (next: RowState[]): void => {
-    setRows(next);
-    onChange(next.filter((r) => r.status === 'ready'));
-  };
+  // Keep latest onChange in a ref so the sync effect doesn't depend on its
+  // identity (parent passes an inline arrow that changes every render).
+  const onChangeRef = useRef(onChange);
+  useLayoutEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  // Sync committed rows to the parent draft AFTER commit. Doing this inside
+  // a setRows updater would make the updater impure: the Zustand setField
+  // notifies subscribed components synchronously, triggering "Cannot update
+  // a component (RfqCreateForm) while rendering a different component
+  // (RfpAttachmentDropzone)" because React invokes the updater during render.
+  const isFirstSyncRef = useRef(true);
+  useEffect(() => {
+    if (isFirstSyncRef.current) {
+      isFirstSyncRef.current = false;
+      return;
+    }
+    onChangeRef.current(rows.filter((r) => r.status === 'ready'));
+  }, [rows]);
 
   const uploadOne = async (file: File, tempId: string): Promise<void> => {
     const form = new FormData();
@@ -68,18 +84,16 @@ export function RfpAttachmentDropzone({ value, onChange }: Props) {
             : r.status === 415
               ? '지원되지 않는 파일 형식입니다 (PDF/PNG/JPEG만 허용)'
               : `업로드 실패 (${r.status})`;
-        setRows((prev) => {
-          const next = prev.map((row) =>
+        setRows((prev) =>
+          prev.map((row) =>
             row.id === tempId ? { ...row, status: 'error' as const, error: msg } : row,
-          );
-          onChange(next.filter((rr) => rr.status === 'ready'));
-          return next;
-        });
+          ),
+        );
         return;
       }
       const body = (await r.json()) as { id: string; name: string; size: number };
-      setRows((prev) => {
-        const next = prev.map((row) =>
+      setRows((prev) =>
+        prev.map((row) =>
           row.id === tempId
             ? {
                 id: body.id,
@@ -88,19 +102,15 @@ export function RfpAttachmentDropzone({ value, onChange }: Props) {
                 status: 'ready' as const,
               }
             : row,
-        );
-        onChange(next.filter((rr) => rr.status === 'ready'));
-        return next;
-      });
+        ),
+      );
     } catch (err) {
       const msg = err instanceof Error ? err.message : '네트워크 오류';
-      setRows((prev) => {
-        const next = prev.map((row) =>
+      setRows((prev) =>
+        prev.map((row) =>
           row.id === tempId ? { ...row, status: 'error' as const, error: msg } : row,
-        );
-        onChange(next.filter((rr) => rr.status === 'ready'));
-        return next;
-      });
+        ),
+      );
     }
   };
 
@@ -124,7 +134,7 @@ export function RfpAttachmentDropzone({ value, onChange }: Props) {
       });
       void uploadOne(f, tempId);
     }
-    if (additions.length > 0) sync([...rows, ...additions]);
+    if (additions.length > 0) setRows((prev) => [...prev, ...additions]);
   };
 
   const handleDrop = (e: React.DragEvent): void => {
@@ -134,7 +144,7 @@ export function RfpAttachmentDropzone({ value, onChange }: Props) {
   };
 
   const removeRow = (rowId: string): void => {
-    sync(rows.filter((r) => r.id !== rowId));
+    setRows((prev) => prev.filter((r) => r.id !== rowId));
   };
 
   return (

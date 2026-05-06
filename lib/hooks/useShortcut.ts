@@ -33,6 +33,10 @@ export function useShortcut(
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Synthetic keyboard events (Sentry instrumentation, IME composition,
+      // some browser-extension dispatches) can arrive without a `key` field
+      // even though the type says string — guard before .toLowerCase().
+      if (typeof e.key !== 'string') return;
       const isEscape = e.key === 'Escape';
       if (preventInInput !== false && isEditable(e.target) && !isEscape) return;
       if (!isEscape) {
