@@ -11,15 +11,11 @@ import { useRfqDraftStore } from '@/lib/stores/rfq-draft';
 import { useShortcut } from '@/lib/hooks/useShortcut';
 import { createRfqAction } from '@/lib/server/actions/rfq';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
-import type { BizProfile, MerchantGrade } from '@/lib/types/biz-profile';
-
-const GRADE_LABELS: Record<MerchantGrade, string> = {
-  small: '영세',
-  sme1: '중소 1',
-  sme2: '중소 2',
-  sme3: '중소 3',
-  general: '일반',
-};
+import {
+  GRADE_LABELS,
+  type BizProfile,
+  type MerchantGrade,
+} from '@/lib/types/biz-profile';
 
 function SectionHeader({ num, label }: { num: string; label: string }) {
   return (

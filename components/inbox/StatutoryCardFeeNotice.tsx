@@ -1,6 +1,5 @@
-import { GRADE_LABELS } from '@/lib/mock/biz-lookup';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
-import type { MerchantGrade } from '@/lib/types/biz-profile';
+import { GRADE_LABELS, type MerchantGrade } from '@/lib/types/biz-profile';
 
 type Props = { grade: MerchantGrade };
 

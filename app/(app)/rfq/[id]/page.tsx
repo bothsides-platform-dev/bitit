@@ -12,17 +12,10 @@ import {
   getWorkspaceRepo,
 } from '@/lib/server/repositories/factory';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
+import { GRADE_LABELS } from '@/lib/types/biz-profile';
 import { formatDate } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
-
-const GRADE_LABELS: Record<string, string> = {
-  small: '영세',
-  sme1: '중소 1',
-  sme2: '중소 2',
-  sme3: '중소 3',
-  general: '일반',
-};
 
 const statusLabel: Record<string, string> = {
   draft: '임시저장',

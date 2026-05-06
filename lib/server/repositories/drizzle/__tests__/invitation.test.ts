@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { createPgliteDb } from '@/lib/db/client-pglite';
 import { rfqs } from '@/lib/db/schema';
 import { DrizzleInvitationRepository } from '../invitation';
-import { generateToken, addMinutes } from '../../../token';
+import { generateToken, addMinutes, hashToken } from '../../../token';
 import type { RfqInvitation } from '@/lib/types/invitation';
 import {
   seedBizProfile,
@@ -137,5 +137,42 @@ describe('DrizzleInvitationRepository', () => {
     await repo.save(makeInvitation(ctx.rfqId, { pgEmail: 'b@x.com' }), r2);
     const list = await repo.findByRfq(ctx.rfqId);
     expect(list).toHaveLength(2);
+  });
+
+  it('findByTokenHash hits the row before claim — pgEmail readable', async () => {
+    const raw = generateToken();
+    const inv = makeInvitation(ctx.rfqId, { pgEmail: 'sales@toss.im' });
+    await repo.save(inv, raw);
+
+    const found = await repo.findByTokenHash(hashToken(raw));
+    expect(found).toBeDefined();
+    expect(found!.id).toBe(inv.id);
+    expect(found!.pgEmail).toBe('sales@toss.im');
+    expect(found!.acceptedByUserId).toBeUndefined();
+
+    // Unknown hash → undefined.
+    const missing = await repo.findByTokenHash(hashToken('nope-' + Date.now()));
+    expect(missing).toBeUndefined();
+  });
+
+  it('findByPgUser returns claimed invitation+RFQ pairs only for that user', async () => {
+    const r1 = generateToken();
+    const r2 = generateToken();
+    await repo.save(makeInvitation(ctx.rfqId, { pgEmail: 'a@toss.im' }), r1);
+    await repo.save(makeInvitation(ctx.rfqId, { pgEmail: 'b@toss.im' }), r2);
+
+    const userA = await seedUser(ctx.db, { email: 'a@toss.im' });
+    const userB = await seedUser(ctx.db, { email: 'b@toss.im' });
+
+    // userA claims their token; userB never claims.
+    await repo.claimToken(r1, userA.id);
+
+    const aPairs = await repo.findByPgUser(userA.id);
+    expect(aPairs).toHaveLength(1);
+    expect(aPairs[0].rfq.id).toBe(ctx.rfqId);
+    expect(aPairs[0].invitation.acceptedByUserId).toBe(userA.id);
+
+    const bPairs = await repo.findByPgUser(userB.id);
+    expect(bPairs).toHaveLength(0);
   });
 });

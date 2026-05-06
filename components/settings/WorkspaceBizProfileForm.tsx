@@ -6,15 +6,7 @@ import { Button } from '@/components/primitives/Button';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
 import { updateWorkspaceBizProfileAction } from '@/lib/server/actions/rfq';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
-import type { MerchantGrade } from '@/lib/types/biz-profile';
-
-const GRADE_LABELS: Record<MerchantGrade, string> = {
-  small: '영세',
-  sme1: '중소 1',
-  sme2: '중소 2',
-  sme3: '중소 3',
-  general: '일반',
-};
+import { GRADE_LABELS, type MerchantGrade } from '@/lib/types/biz-profile';
 
 const ALL_GRADES: MerchantGrade[] = [
   'small',

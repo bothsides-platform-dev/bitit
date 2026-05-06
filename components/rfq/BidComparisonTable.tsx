@@ -5,11 +5,10 @@ import { Tag } from '@/components/primitives/Tag';
 import { Button } from '@/components/primitives/Button';
 import { EmptyState } from '@/components/primitives/EmptyState';
 import { MOCK_WORKSPACES } from '@/lib/mock/workspaces';
-import { GRADE_LABELS } from '@/lib/mock/biz-lookup';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
 import { formatKRW, formatPct } from '@/lib/format';
 import type { Bid } from '@/lib/types/bid';
-import type { MerchantGrade } from '@/lib/types/biz-profile';
+import { GRADE_LABELS, type MerchantGrade } from '@/lib/types/biz-profile';
 import { EnvelopeIcon } from '@/components/icons';
 import Link from 'next/link';
 

@@ -51,6 +51,7 @@ async function buildBundle(): Promise<RepoBundle> {
     const { InMemoryWorkspaceRepository } = await import('./in-memory/workspace');
     const rfq = new InMemoryRfqRepository();
     const invitation = new InMemoryInvitationRepository();
+    invitation.setRfqRepoRef(() => rfq);
     const workspace = new InMemoryWorkspaceRepository();
     // The 8 forward-declared repos return a Proxy that throws on any method
     // call. Construction stays cheap; the gap surfaces loudly only if Step 5+
