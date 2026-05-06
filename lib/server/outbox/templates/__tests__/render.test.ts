@@ -2,7 +2,7 @@
 // props and asserts:
 //   1. Core dynamic fields land in the rendered HTML (rfqId / urls / counts).
 //   2. The Korean Editorial visual rules survive: font-mono span on numerics,
-//      the `— FIN —` close mark, hairline divider, button radius ≤ 12px.
+//      hairline divider, button radius ≤ 12px.
 //
 // `render()` is async (react-email v2). Each helper is awaited.
 import { describe, expect, it } from 'vitest';

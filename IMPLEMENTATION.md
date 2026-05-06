@@ -209,7 +209,6 @@ export default nextConfig;
 
 ### 4.6 빈 상태
 - [ ] 모든 목록 페이지에 SCREEN_DESIGN 명세된 카피로 노출
-- [ ] DESIGN.md 의 `— FIN —` 종결 마킹 포함
 - [ ] CTA 버튼 1개 이상
 
 ### 4.7 비교/PDF 프리뷰 (M4)
@@ -349,7 +348,6 @@ export default nextConfig;
 #### 시각 (DESIGN.md §5.11)
 - [ ] AuthShell 좌상단 워드마크 + 우상단 serial `EDITION 01 · v0`
 - [ ] 입력 필드 border-bottom only (카드 박스 X)
-- [ ] 종결 마킹 `— FIN —` (P3, P7 안내 화면)
 - [ ] 봉투/체크 라인 SVG (1.4 stroke), 컬러 일러스트 X
 - [ ] 1차 CTA 버튼 full-width, 검정 채움
 

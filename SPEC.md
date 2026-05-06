@@ -204,9 +204,9 @@ DESIGN.md 가 변경되면 `tokens.css` 만 동기화하면 되도록 단방향 
 | KpiCell | `components/primitives/KpiCell.tsx` | 숫자 84px/300, 라벨 mono uppercase, 델타(↑/↓/—) 모노 표기 |
 | Form Section | `components/rfq/RfqCreateForm.tsx`, `components/inbox/BidForm.tsx` | 카드 박스 금지, 하단선 입력 패턴, 포커스 시 하단선 강조 |
 | PDF Preview A4 | `components/rfq/RfqDetail/ProposalPdfPreview.tsx` | A4 비율, 허용 그림자 1종만 사용, 선택 Bid 변경 시 즉시 전환 |
-| Notification Drawer | `components/shell/NotificationDrawer.tsx` | 우측 슬라이드(폭 420), 진입 `translateX(100%)→0`, empty 상태 `— FIN —` → [NOTIFICATION.md](./NOTIFICATION.md) |
+| Notification Drawer | `components/shell/NotificationDrawer.tsx` | 우측 슬라이드(폭 420), 진입 `translateX(100%)→0` → [NOTIFICATION.md](./NOTIFICATION.md) |
 | Command Palette | `components/shell/CommandPalette.tsx` | 폭 620, 12vh top, 그룹 헤더 mono uppercase, 우측 메타 모노 |
-| EmptyState | `components/primitives/EmptyState.tsx` | 컬러 일러스트 금지, 라인 SVG + 본문 + CTA 1개 + `— FIN —` |
+| EmptyState | `components/primitives/EmptyState.tsx` | 컬러 일러스트 금지, 라인 SVG + 본문 + CTA 1개 |
 
 ### 4.2 PG 비교 도메인 컴포넌트 계약
 

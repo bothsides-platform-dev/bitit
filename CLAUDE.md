@@ -93,7 +93,7 @@ These are non-negotiable visual decisions enforced across all screens. Violating
 - **No** Inter/Roboto/Arial. Pretendard Variable (KR + Latin) + JetBrains Mono only.
 - **No** purple-to-blue gradients (canonical SaaS cliché). Solid `--color-ink` for primary actions.
 - **No** rounded corners > 12px. Default radius is 5px.
-- **No** illustrated empty states. Line SVGs (1.4 stroke) only, end with `— FIN —` mono mark.
+- **No** illustrated empty states. Line SVGs (1.4 stroke) only.
 - **No** pulse/spinner loading. Use mono `LOADING…` text.
 - **No** glassmorphism, neon accents, fill-color status badges.
 - **All** numerics (₩, qty, dates, RFQ numbers like `Q-2605-0042`) use `font-mono` + `tabular-nums`.

@@ -204,7 +204,6 @@ export async function sendEmail(notification: Notification): Promise<void> {
 - 배경: 흰색 (`#FFFFFF`), 텍스트: 먹 (`#0D0D0D`)
 - 버튼: 채워진 색 없이 테두리 스타일, `[ 확인하기 ]` 형태
 - RFQ 번호/금액 등 수치: 모노스페이스 폰트 + `font-variant-numeric: tabular-nums`
-- 이메일 푸터: `— FIN —` 모노 마크
 
 ---
 
@@ -293,7 +292,7 @@ SSE route constraints:
 │ ─────────────────────────────────────── │
 │                                          │
 │         새로운 알림이 없습니다.             │
-│              — FIN —                     │
+│                                          │
 └───────────────────────────────────────────┘
 ```
 
@@ -302,7 +301,7 @@ SSE route constraints:
 - 클릭: 해당 RFQ 페이지로 이동 + `PATCH /api/notifications/:id` 읽음 처리
 - 탭 v0 구현: `모든 알림` + `발송·조회`
 - 탭 v0 제외: `결재 요청` (결재선 기능 도입 시 추가)
-- 빈 상태: 텍스트 + 라인 SVG (stroke 1.4) + `— FIN —`
+- 빈 상태: 텍스트 + 라인 SVG (stroke 1.4)
 
 ---
 

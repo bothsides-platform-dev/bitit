@@ -9,7 +9,6 @@
  *   - 1px hairlines via `<hr style="border:0;border-top:1px solid #ddd" />`.
  *     No filled status badges, no purple/blue gradients, no glassmorphism,
  *     no rounded corners > 12px.
- *   - Body closes with the editorial mark `— FIN —` set in the mono stack.
  *
  * The layout is deliberately plain inline-styled HTML — react-email's
  * components are not imported because mail clients render this anyway and
