@@ -12,8 +12,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 2. **SCREEN_DESIGN.md** — Screens, IA, UX flows. Includes §11.5 email auth (P1~P11). Some sections (결재선·캘린더·템플릿) are now v0-out-of-scope per the PG pivot but kept as architectural reference.
 3. **DESIGN.md** — Design system (*Korean Editorial Modernism*). Tokens, typography, color, component visual rules, motion, anti-clichés. **Single source of truth for visual decisions** — `styles/tokens.css` syncs from here unidirectionally.
 4. **SPEC.md** — Tech spec. Stack, directory layout, domain TypeScript types, App Router strategy, public-vs-app route groups, middleware guard.
-5. **IMPLEMENTATION.md** — Milestones M0~M7 + M1.5 (auth), bootstrap commands, verification checklists, work order.
+5. **IMPLEMENTATION.md** — Milestones M0~M8 + M1.5 (auth), bootstrap commands, verification checklists, work order.
 6. **[NOTIFICATION.md](./NOTIFICATION.md)** — 알림 시스템 설계. 이메일(Resend) + 인앱(SSE + Drawer) 채널, NotificationService 모듈 구조, 이벤트→알림 매핑 테이블.
+7. **[BACKEND_MIGRATION.md](./BACKEND_MIGRATION.md)** — M8 백엔드 마이그레이션 계획. mock/Zustand 캐시 → Postgres + Drizzle + Auth.js v5 + 서버 액션 14-step 컷오버. 슬림 BizProfile, NTS 단독 enrichment, P6 buyer/PG 라디오, RFQ별 bizProfile 스냅샷, drizzle-adapter outbox.
 
 If these conflict, **PG_RFQ_SPEC.md wins** (newest, post-pivot). Distribute its §8 changes back into the other four files when implementing — do not let them drift.
 
