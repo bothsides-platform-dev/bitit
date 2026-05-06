@@ -5,12 +5,16 @@ import { useNotifications } from '@/lib/hooks/useNotifications';
 import { IconButton } from '@/components/primitives/IconButton';
 import { BellIcon, SearchIcon } from '@/components/icons';
 import { Avatar } from '@/components/primitives/Avatar';
-import { useMockSession } from '@/lib/mock/session';
 
-export function Topbar() {
+export type TopbarProps = {
+  user: { id: string; email: string; name: string };
+  workspaceType: 'buyer' | 'pg';
+  workspaceName: string;
+};
+
+export function Topbar({ user }: TopbarProps) {
   const { openNotificationDrawer, openCommandPalette } = useUIStore();
-  const { session, user } = useMockSession();
-  // Step 9: unread 배지 = SSE 라이브 카운트. session de-mock은 Step 12 영역.
+  // Step 9: unread 배지 = SSE 라이브 카운트.
   const { unreadCount } = useNotifications();
 
   return (
@@ -43,8 +47,8 @@ export function Topbar() {
 
         {/* User avatar */}
         <Avatar
-          name={user?.name ?? session.name}
-          color={user?.avatarColor ?? 'ink'}
+          name={user.name}
+          color="ink"
           size="sm"
           className="cursor-pointer"
         />
