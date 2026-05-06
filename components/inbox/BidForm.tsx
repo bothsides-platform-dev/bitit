@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/primitives/Button';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
@@ -128,11 +128,66 @@ export function BidForm({ rfqId, grade }: Props) {
   const [overseasPct, setOverseasPct] = useState('');
   const [memo, setMemo] = useState('');
 
+  // Proposal PDF state — uploaded eagerly to /api/files/upload (Step 11)
+  // so the bid action only sees the resulting attachment id. The preview
+  // iframe targets /api/files/{id} which carries the user's session cookie.
+  const proposalInputRef = useRef<HTMLInputElement>(null);
+  const [proposal, setProposal] = useState<
+    | { id: string; name: string; size: number }
+    | { name: string; status: 'uploading' }
+    | { name: string; status: 'error'; error: string }
+    | null
+  >(null);
+
+  const uploadProposal = async (file: File): Promise<void> => {
+    if (file.type !== 'application/pdf') {
+      setProposal({ name: file.name, status: 'error', error: 'PDF만 업로드 가능합니다.' });
+      return;
+    }
+    setProposal({ name: file.name, status: 'uploading' });
+    const form = new FormData();
+    form.append('file', file);
+    form.append('ownerKind', 'bid_proposal');
+    form.append('ownerId', rfqId);
+    try {
+      const r = await fetch('/api/files/upload', {
+        method: 'POST',
+        body: form,
+        credentials: 'same-origin',
+      });
+      if (!r.ok) {
+        setProposal({
+          name: file.name,
+          status: 'error',
+          error:
+            r.status === 413
+              ? '파일이 너무 큽니다 (최대 20MB)'
+              : r.status === 415
+                ? '지원되지 않는 파일 형식입니다'
+                : `업로드 실패 (${r.status})`,
+        });
+        return;
+      }
+      const body = (await r.json()) as { id: string; name: string; size: number };
+      setProposal(body);
+    } catch (err) {
+      setProposal({
+        name: file.name,
+        status: 'error',
+        error: err instanceof Error ? err.message : '네트워크 오류',
+      });
+    }
+  };
+
+  const proposalReady = proposal && 'id' in proposal;
+  const proposalUploading = proposal && 'status' in proposal && proposal.status === 'uploading';
+
   const isGeneral = grade === 'general';
   const cardFeeStatutory = grade && !isGeneral ? STATUTORY_CARD_FEE[grade] : null;
 
   const canSubmit =
     !pending &&
+    !proposalUploading &&
     bankPct !== '' && parseFloat(bankPct) >= 0 &&
     easyPayPct !== '' && parseFloat(easyPayPct) >= 0 &&
     (!isGeneral || CARD_ISSUERS.every((c) => cardFees[c.key] !== ''));
@@ -163,6 +218,7 @@ export function BidForm({ rfqId, grade }: Props) {
         easyPayFeePct: pct(easyPayPct),
         cardFeesByIssuer,
         overseasCardFeePct: isGeneral && overseasPct ? pct(overseasPct) : undefined,
+        proposalAttachmentId: proposalReady ? proposal.id : undefined,
         memo: memo.trim() || undefined,
       });
       if (r.ok) {
@@ -245,10 +301,72 @@ export function BidForm({ rfqId, grade }: Props) {
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
         <div className="space-y-4">
-          {/* 첨부 업로드는 Step 11에서 — 일단 미첨부로 제출. */}
-          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-faint)]">
-            제안서 PDF 업로드는 추후 추가됩니다.
-          </p>
+          <div className="space-y-2">
+            <Eyebrow>제안서 PDF (선택)</Eyebrow>
+            <input
+              ref={proposalInputRef}
+              type="file"
+              accept=".pdf"
+              className="sr-only"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void uploadProposal(f);
+                e.target.value = '';
+              }}
+            />
+            {!proposal && (
+              <button
+                type="button"
+                onClick={() => proposalInputRef.current?.click()}
+                className="block w-full border border-dashed border-[var(--color-hair-strong)] py-5 text-center hover:border-[var(--color-ink)] transition-colors"
+              >
+                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-[var(--color-ink-soft)]">
+                  PDF 업로드 (클릭)
+                </p>
+                <p className="font-mono text-[10px] tracking-[0.08em] uppercase text-[var(--color-ink-faint)] mt-1">
+                  20MB 이내
+                </p>
+              </button>
+            )}
+            {proposal && 'status' in proposal && proposal.status === 'uploading' && (
+              <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-ink-faint)]">
+                {proposal.name} — UPLOADING…
+              </p>
+            )}
+            {proposal && 'status' in proposal && proposal.status === 'error' && (
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]">
+                  {proposal.name} — {proposal.error}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setProposal(null)}
+                  className="font-mono text-[11px] text-[var(--color-ink-faint)] hover:text-[var(--color-terracotta)] px-1"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+            {proposalReady && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] text-[var(--color-ink)] truncate">{proposal.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setProposal(null)}
+                    className="font-mono text-[11px] text-[var(--color-ink-faint)] hover:text-[var(--color-terracotta)] px-1 shrink-0"
+                  >
+                    ×
+                  </button>
+                </div>
+                <iframe
+                  src={`/api/files/${proposal.id}`}
+                  title={proposal.name}
+                  className="w-full h-[320px] border border-[var(--color-hair)] bg-[var(--color-paper-warm)]"
+                />
+              </div>
+            )}
+          </div>
           <div className="space-y-1">
             <Eyebrow>메모</Eyebrow>
             <textarea

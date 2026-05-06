@@ -92,6 +92,9 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
       deadline: draft.deadline,
       allowedPgEmails: draft.allowedPgEmails,
       gradeOverride: overrideGrade ?? undefined,
+      // Attachments uploaded to /api/files/upload land with ownerId='__draft__';
+      // the action patches them to the new rfqId after RFQ insert (Step 11 wiring).
+      rfpAttachmentIds: draft.rfpFiles.map((f) => f.id),
       send: true,
     });
     setSubmitting(false);

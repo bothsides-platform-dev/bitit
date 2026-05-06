@@ -7,6 +7,7 @@ import { eq } from 'drizzle-orm';
 import { requirePgSession } from '@/lib/auth/session';
 import { workspaceMembers, users, workspaces } from '@/lib/db/schema';
 import {
+  getAttachmentRepo,
   getBidRepo,
   getInvitationRepo,
   getOutboxRepo,
@@ -108,6 +109,23 @@ export async function submitBidAction(
   const allInvs = await invRepo.findByRfq(data.rfqId);
   const myInv = allInvs.find((i) => i.acceptedByUserId === userId);
   if (!myInv) return { ok: false, error: 'INVITATION_NOT_FOUND' };
+
+  // proposalAttachmentId가 있다면 본인 업로드인지 강제(advisor pin: 다른
+  // PG의 attachment id로 자기 견적을 만드는 spoofing 방지). canAccess는
+  // 같은 RFQ에 초대된 다른 PG도 통과시키므로 별도 ownership 체크 필요.
+  if (data.proposalAttachmentId) {
+    const att = await (await getAttachmentRepo()).findById(
+      data.proposalAttachmentId,
+    );
+    if (
+      !att ||
+      att.uploadedBy !== userId ||
+      att.ownerKind !== 'bid_proposal' ||
+      att.ownerId !== data.rfqId
+    ) {
+      return { ok: false, error: 'INVALID_ATTACHMENT' };
+    }
+  }
 
   const db = actionDb();
   const bidId = randomUUID();

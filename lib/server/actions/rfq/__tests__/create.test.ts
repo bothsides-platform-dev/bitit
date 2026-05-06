@@ -1,13 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { eq, and } from 'drizzle-orm';
 
+import { randomUUID } from 'node:crypto';
 import {
+  attachments,
   bizProfiles,
   outboxEntries,
   rfqInvitations,
   rfqs,
   workspaces,
 } from '@/lib/db/schema';
+import { DRAFT_OWNER_ID } from '@/lib/server/storage/path';
 import {
   seedBizProfile,
   seedBuyerWorkspace,
@@ -274,6 +277,62 @@ describe('createRfqAction', () => {
       allowedPgEmails: [],
     });
     expect(r.ok).toBe(false);
+  });
+
+  it('Step 11 — patches __draft__ attachments to the new RFQ id', async () => {
+    // Pre-existing RFP attachment row uploaded against the draft sentinel
+    // (mirrors what the dropzone does at file-select time).
+    const draftAttId = randomUUID();
+    await db.insert(attachments).values({
+      id: draftAttId,
+      ownerKind: 'rfq_rfp',
+      ownerId: DRAFT_OWNER_ID,
+      name: 'rfp.pdf',
+      size: 100,
+      mimeType: 'application/pdf',
+      storagePath: '2026/05/dummy.pdf',
+      uploadedBy: buyerUserId,
+    });
+    // Plus a foreign attachment that must NOT be touched (uploaded by
+    // another user; same ownerId sentinel by chance).
+    const otherUser = await seedUser(db, { email: 'other@x.com' });
+    const foreignAttId = randomUUID();
+    await db.insert(attachments).values({
+      id: foreignAttId,
+      ownerKind: 'rfq_rfp',
+      ownerId: DRAFT_OWNER_ID,
+      name: 'rfp-other.pdf',
+      size: 100,
+      mimeType: 'application/pdf',
+      storagePath: '2026/05/dummy-other.pdf',
+      uploadedBy: otherUser.id,
+    });
+
+    const r = await createRfqAction({
+      title: '첨부 link-up 테스트',
+      deadline: new Date(Date.now() + 86_400_000).toISOString(),
+      allowedPgEmails: ['sales@toss.im'],
+      rfpAttachmentIds: [draftAttId, foreignAttId],
+      send: false,
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+
+    const [own] = await db
+      .select()
+      .from(attachments)
+      .where(eq(attachments.id, draftAttId))
+      .limit(1);
+    expect(own?.ownerId).toBe(r.rfqId);
+
+    const [foreign] = await db
+      .select()
+      .from(attachments)
+      .where(eq(attachments.id, foreignAttId))
+      .limit(1);
+    // Cross-user guard: action's WHERE includes uploaded_by — foreign row
+    // stays on the draft sentinel.
+    expect(foreign?.ownerId).toBe(DRAFT_OWNER_ID);
   });
 
   // _suppress unused import warnings

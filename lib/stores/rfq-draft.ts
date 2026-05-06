@@ -3,7 +3,13 @@
 import { create } from 'zustand';
 import type { BizProfile } from '@/lib/types/biz-profile';
 
-export type RfqMockFile = { name: string; size: number };
+// `id` is the attachment row id returned by POST /api/files/upload
+// (Step 11). Pre-Step 11 the dropzone carried only name/size in
+// memory; the file now lives on disk + in `attachments` at upload
+// time (`ownerId='__draft__'`), and `createRfqAction` patches the row's
+// ownerId to the freshly minted RFQ id at form submit.
+// Name kept for blast-radius reasons (Step 13 will sweep `Mock` naming).
+export type RfqMockFile = { id: string; name: string; size: number };
 
 type RfqDraftStore = {
   step: number;
