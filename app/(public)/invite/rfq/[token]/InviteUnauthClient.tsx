@@ -2,21 +2,45 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  readSignupDraft,
-  writeSignupDraft,
-} from '@/lib/auth/signup-storage';
+import { signupEmailAction } from '@/lib/server/actions/auth';
+import { readSignupDraft, writeSignupDraft } from '@/lib/auth/signup-storage';
 
-// Step 5 보존 — 비인증 사용자는 signupDraft 에 토큰 stash 후 /login?next= 로 보냄.
-export function InviteUnauthClient({ token }: { token: string }) {
+type Props = {
+  token: string;
+  inviteEmail?: string;
+};
+
+export function InviteUnauthClient({ token, inviteEmail }: Props) {
   const router = useRouter();
 
   useEffect(() => {
-    const draft = readSignupDraft();
-    writeSignupDraft({ ...draft, inviteToken: token });
-    const next = `/invite/rfq/${token}`;
-    router.replace(`/login?next=${encodeURIComponent(next)}`);
-  }, [token, router]);
+    void (async () => {
+      const draft = readSignupDraft();
+      // Always write workspaceType + inviteToken before routing
+      writeSignupDraft({ ...draft, workspaceType: 'pg', inviteToken: token });
+
+      if (!inviteEmail) {
+        // Token invalid/expired — go to Gs1 so user can enter email manually
+        router.replace('/signup/pg');
+        return;
+      }
+
+      // Send verification email and skip Gs1
+      const r = await signupEmailAction({
+        email: inviteEmail,
+        workspaceType: 'pg',
+        inviteToken: token,
+      });
+      const updatedDraft = readSignupDraft();
+      if (r.ok) {
+        writeSignupDraft({ ...updatedDraft, email: r.email });
+        router.replace('/signup/pg/verify');
+      } else {
+        // Fallback to Gs1 on error
+        router.replace('/signup/pg');
+      }
+    })();
+  }, [token, inviteEmail, router]);
 
   return (
     <div className="py-8 text-center">
