@@ -47,17 +47,19 @@ function VerifyContent() {
         return;
       }
       const draft = readSignupDraft();
+      const kind = r.workspaceType ?? draft.workspaceType ?? 'buyer';
       writeSignupDraft({
         ...draft,
         email: r.email,
         emailVerified: true,
+        workspaceType: kind,
         // inviteToken is the only payload that flows from the verify-row's
         // meta back into the client-side draft; sessionStorage keeps it
         // alive until /signup/workspace consumes it.
         inviteToken: r.inviteToken ?? draft.inviteToken,
       });
       setState('success');
-      setTimeout(() => router.push('/signup/profile'), 600);
+      setTimeout(() => router.push(`/signup/${kind}/profile`), 600);
     })();
 
     return () => {
