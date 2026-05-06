@@ -3,6 +3,7 @@ import { IconSidebar } from '@/components/shell/IconSidebar';
 import { Topbar } from '@/components/shell/Topbar';
 import { NotificationDrawer } from '@/components/shell/NotificationDrawer';
 import { CommandPalette } from '@/components/shell/CommandPalette';
+import { GlobalShortcuts } from '@/components/shell/GlobalShortcuts';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,6 +15,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </main>
       <NotificationDrawer />
       <CommandPalette />
+      <GlobalShortcuts />
     </AppShell>
   );
 }

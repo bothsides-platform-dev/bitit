@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { Tag } from '@/components/primitives/Tag';
 import { Button } from '@/components/primitives/Button';
+import { EmptyState } from '@/components/primitives/EmptyState';
 import { MOCK_WORKSPACES } from '@/lib/mock/workspaces';
 import { GRADE_LABELS } from '@/lib/mock/biz-lookup';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
 import { formatKRW, formatPct } from '@/lib/format';
 import type { Bid } from '@/lib/types/bid';
 import type { MerchantGrade } from '@/lib/types/biz-profile';
+import { EnvelopeIcon } from '@/components/icons';
 import Link from 'next/link';
 
 type SortKey = 'name' | 'settle' | 'deposit' | 'setupFee' | 'monthlyMin' | 'bankPct' | 'easyPayPct';
@@ -60,9 +62,16 @@ export function BidComparisonTable({ rfqId, bids, grade, rfqStatus }: Props) {
 
   if (bids.length === 0) {
     return (
-      <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)] py-6">
-        — 아직 받은 견적이 없습니다 —
-      </p>
+      <EmptyState
+        icon={<EnvelopeIcon size={32} />}
+        title="아직 받은 견적이 없습니다."
+        description={
+          rfqStatus === 'sent'
+            ? '초대된 PG가 견적을 제출하면 비교표가 표시됩니다.'
+            : 'RFQ가 아직 발송되지 않았습니다.'
+        }
+        className="py-12"
+      />
     );
   }
 

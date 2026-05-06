@@ -5,6 +5,7 @@ import { Eyebrow } from '@/components/primitives/Eyebrow';
 import { Tag } from '@/components/primitives/Tag';
 import { Button } from '@/components/primitives/Button';
 import { Avatar } from '@/components/primitives/Avatar';
+import { PageEnter } from '@/components/primitives/PageEnter';
 import { MOCK_SESSION_BUYER, MOCK_WORKSPACES } from '@/lib/mock/workspaces';
 import { GRADE_LABELS } from '@/lib/mock/biz-lookup';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
@@ -32,7 +33,7 @@ export default function ProfilePage() {
   const cardFee = grade && grade !== 'general' ? STATUTORY_CARD_FEE[grade] : null;
 
   return (
-    <div className="px-8 py-8 max-w-[720px] space-y-12">
+    <PageEnter className="px-8 py-8 max-w-[720px] space-y-12">
       <div>
         <Eyebrow className="block mb-2">SETTINGS · PROFILE</Eyebrow>
         <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
@@ -134,6 +135,6 @@ export default function ProfilePage() {
           워크스페이스 정보는 사업자등록 자동 갱신을 따릅니다.
         </p>
       </section>
-    </div>
+    </PageEnter>
   );
 }

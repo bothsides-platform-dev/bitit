@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/primitives/Button';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
@@ -10,6 +10,7 @@ import { PgEmailAllowlist } from './PgEmailAllowlist';
 import { RfpAttachmentDropzone } from './RfpAttachmentDropzone';
 import { useRfqDraftStore } from '@/lib/stores/rfq-draft';
 import { useRfqListStore } from '@/lib/stores/rfq-list';
+import { useShortcut } from '@/lib/hooks/useShortcut';
 import type { BizProfile } from '@/lib/types/biz-profile';
 import type { RFQ } from '@/lib/types/rfq';
 
@@ -40,8 +41,18 @@ export function RfqCreateForm() {
 
   const [baseProfile, setBaseProfile] = useState<Omit<BizProfile, 'grade' | 'gradeSource' | 'gradeConfirmedBy' | 'gradeConfirmedAt' | 'estimatedRevenue' | 'revenueYear' | 'niceLookedUpAt'> | null>(null);
   const [gradeConfirmed, setGradeConfirmed] = useState(false);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
   // eslint-disable-next-line react-hooks/purity
   const minDate = useMemo(() => new Date(Date.now() + 86_400_000).toISOString().slice(0, 10), []);
+
+  const handleDraftSave = useCallback(() => {
+    setSavedAt(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+  }, []);
+
+  useShortcut('s', (e) => {
+    e.preventDefault();
+    handleDraftSave();
+  }, { meta: true, preventInInput: false });
 
   const canSend =
     draft.bizProfile !== null &&
@@ -194,6 +205,15 @@ export function RfqCreateForm() {
               ? `${draft.allowedPgEmails.length}개 PG사에 발송`
               : '발송'}
           </Button>
+
+          <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-faint)]">
+            <span>
+              <kbd className="text-[var(--color-ink-soft)]">⌘S</kbd> 임시 저장
+            </span>
+            {savedAt && (
+              <span className="text-[var(--color-moss)]">✓ 저장됨 {savedAt}</span>
+            )}
+          </div>
         </div>
       </section>
     </form>

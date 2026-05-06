@@ -6,6 +6,7 @@ import { Button } from '@/components/primitives/Button';
 import { Avatar } from '@/components/primitives/Avatar';
 import { RoleBadge } from '@/components/primitives/RoleBadge';
 import { Tag } from '@/components/primitives/Tag';
+import { PageEnter } from '@/components/primitives/PageEnter';
 import { MOCK_SESSION_BUYER, MOCK_WORKSPACES } from '@/lib/mock/workspaces';
 import { formatDate } from '@/lib/format';
 import type { User, Role } from '@/lib/types/user';
@@ -53,7 +54,7 @@ export default function MembersPage() {
   };
 
   return (
-    <div className="px-8 py-8 max-w-[840px] space-y-12">
+    <PageEnter className="px-8 py-8 max-w-[840px] space-y-12">
       <div>
         <Eyebrow className="block mb-2">SETTINGS · MEMBERS</Eyebrow>
         <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
@@ -193,6 +194,6 @@ export default function MembersPage() {
           ))}
         </div>
       </section>
-    </div>
+    </PageEnter>
   );
 }

@@ -4,6 +4,7 @@ import { use } from 'react';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
 import { Tag } from '@/components/primitives/Tag';
 import { Button } from '@/components/primitives/Button';
+import { PageEnter } from '@/components/primitives/PageEnter';
 import { BidComparisonTable } from '@/components/rfq/BidComparisonTable';
 import { useRfqListStore } from '@/lib/stores/rfq-list';
 import { useBidListStore } from '@/lib/stores/bid-list';
@@ -43,7 +44,7 @@ export default function RfqDetailPage({ params }: Props) {
   const cardFee = bizProfile.grade ? STATUTORY_CARD_FEE[bizProfile.grade] : NaN;
 
   return (
-    <div className="px-8 py-8 max-w-[1100px] space-y-10">
+    <PageEnter className="px-8 py-8 max-w-[1100px] space-y-10">
       {/* Header */}
       <div>
         <span className="font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)]">{rfq.id}</span>
@@ -144,6 +145,6 @@ export default function RfqDetailPage({ params }: Props) {
           )}
         </section>
       </div>
-    </div>
+    </PageEnter>
   );
 }

@@ -2,6 +2,7 @@
 
 import { Eyebrow } from '@/components/primitives/Eyebrow';
 import { Tag } from '@/components/primitives/Tag';
+import { PageEnter } from '@/components/primitives/PageEnter';
 import { useNotificationsStore } from '@/lib/stores/notifications';
 import type { NotificationStatus } from '@/lib/types/notification';
 
@@ -43,7 +44,7 @@ export default function NotificationsSettingsPage() {
   };
 
   return (
-    <div className="px-8 py-8 max-w-[860px] space-y-12">
+    <PageEnter className="px-8 py-8 max-w-[860px] space-y-12">
       <div>
         <Eyebrow className="block mb-2">SETTINGS · NOTIFICATIONS</Eyebrow>
         <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
@@ -154,6 +155,6 @@ export default function NotificationsSettingsPage() {
           </div>
         )}
       </section>
-    </div>
+    </PageEnter>
   );
 }

@@ -1,5 +1,10 @@
+import Link from 'next/link';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
 import { Tag } from '@/components/primitives/Tag';
+import { Button } from '@/components/primitives/Button';
+import { EmptyState } from '@/components/primitives/EmptyState';
+import { PageEnter } from '@/components/primitives/PageEnter';
+import { FileTextIcon } from '@/components/icons';
 import { MOCK_RFQS } from '@/lib/mock/rfqs';
 import { formatDate } from '@/lib/format';
 
@@ -7,7 +12,7 @@ export default function HomePage() {
   const sentRfqs = MOCK_RFQS.filter((r) => r.status === 'sent');
 
   return (
-    <div className="px-8 py-10 max-w-[var(--content-max)]">
+    <PageEnter className="px-8 py-10 max-w-[var(--content-max)]">
       {/* Greeting */}
       <div className="mb-12">
         <div className="flex items-center gap-3 mb-6">
@@ -32,20 +37,37 @@ export default function HomePage() {
             {sentRfqs.length}건
           </span>
         </div>
-        <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
-          {sentRfqs.map((rfq) => (
-            <div key={rfq.id} className="py-4 flex items-center justify-between group hover:bg-[var(--color-paper-warm)] -mx-4 px-4 cursor-pointer transition-colors">
-              <div>
-                <p className="text-[13px] font-medium text-[var(--color-ink)]">{rfq.title}</p>
-                <span className="font-mono text-[11px] text-[var(--color-ink-soft)] tabular-nums">
-                  {rfq.id} · {formatDate(rfq.sentAt ?? rfq.createdAt)}
-                </span>
-              </div>
-              <Tag variant="amber">발송됨</Tag>
-            </div>
-          ))}
-        </div>
+        {sentRfqs.length === 0 ? (
+          <EmptyState
+            icon={<FileTextIcon size={32} />}
+            title="진행 중인 견적이 없습니다."
+            description="새로운 견적을 작성해 PG사에 발송하세요."
+            action={
+              <Link href="/rfq/new">
+                <Button size="sm">+ 신규 견적</Button>
+              </Link>
+            }
+          />
+        ) : (
+          <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
+            {sentRfqs.map((rfq) => (
+              <Link
+                key={rfq.id}
+                href={`/rfq/${rfq.id}`}
+                className="py-4 flex items-center justify-between group hover:bg-[var(--color-paper-warm)] -mx-4 px-4 cursor-pointer transition-colors"
+              >
+                <div>
+                  <p className="text-[13px] font-medium text-[var(--color-ink)]">{rfq.title}</p>
+                  <span className="font-mono text-[11px] text-[var(--color-ink-soft)] tabular-nums">
+                    {rfq.id} · {formatDate(rfq.sentAt ?? rfq.createdAt)}
+                  </span>
+                </div>
+                <Tag variant="amber">발송됨</Tag>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
-    </div>
+    </PageEnter>
   );
 }
