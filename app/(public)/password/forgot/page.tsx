@@ -34,7 +34,6 @@ export default function ForgotPasswordPage() {
           <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">30분 내 만료됩니다.</p>
         </div>
         <ResendCountdown onResend={() => {}} />
-        <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-faint)]">— FIN —</p>
       </div>
     );
   }

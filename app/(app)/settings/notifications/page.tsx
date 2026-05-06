@@ -114,9 +114,6 @@ export default async function NotificationsSettingsPage() {
             <p className="text-[13px] text-[var(--color-ink-muted)]">
               아직 발송된 알림이 없습니다.
             </p>
-            <p className="mt-2 font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-faint)]">
-              — FIN —
-            </p>
           </div>
         ) : (
           <div className="divide-y divide-[var(--color-hair)] border-y border-[var(--color-hair)]">

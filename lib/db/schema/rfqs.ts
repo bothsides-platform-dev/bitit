@@ -22,7 +22,6 @@ export const rfqs = pgTable(
       .notNull()
       .references(() => workspaces.id),
     bizProfileId: uuid('biz_profile_id')
-      .notNull()
       .references(() => bizProfiles.id),
     title: text('title').notNull(),
     memo: text('memo').notNull().default(''),

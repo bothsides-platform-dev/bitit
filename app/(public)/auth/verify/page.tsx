@@ -101,7 +101,6 @@ function VerifyContent() {
           <p>스팸함을 확인해보세요.</p>
           <p>회사 메일의 경우 도메인 차단 여부를 확인해주세요.</p>
         </div>
-        <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-faint)]">— FIN —</p>
       </div>
     );
   }

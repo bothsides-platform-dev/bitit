@@ -174,17 +174,6 @@ export function Layout({
 
                 {HAIRLINE}
 
-                <div
-                  style={{
-                    fontFamily: MONO_STACK,
-                    fontSize: '12px',
-                    color: '#999',
-                    textAlign: 'center',
-                    letterSpacing: '0.12em',
-                  }}
-                >
-                  — FIN —
-                </div>
               </td>
             </tr>
             <tr>

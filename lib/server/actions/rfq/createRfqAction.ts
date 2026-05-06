@@ -102,39 +102,39 @@ export async function createRfqAction(
         .from(workspaces)
         .where(eq(workspaces.id, wsId))
         .limit(1);
-      if (!wsRow || !wsRow.bizProfileId) {
-        return { ok: false, error: 'WORKSPACE_BIZ_PROFILE_MISSING' };
-      }
-      const [currentBiz] = await tx
-        .select()
-        .from(bizProfiles)
-        .where(eq(bizProfiles.id, wsRow.bizProfileId))
-        .limit(1);
-      if (!currentBiz) {
-        return { ok: false, error: 'WORKSPACE_BIZ_PROFILE_MISSING' };
-      }
+      if (!wsRow) return { ok: false, error: 'FORBIDDEN_BUYER' };
 
-      // 3. RFQ별 immutable 스냅샷 row insert. gradeOverride가 있으면 grade를
-      //    덮어쓰고 source/confirm 메타를 사용자 식별로 업데이트.
-      const snapshotId = randomUUID();
+      // 3. RFQ별 immutable 스냅샷 row insert. workspace에 bizProfile이 없으면
+      //    snapshotId는 null로 두고 스냅샷 생성을 건너뜀.
+      let snapshotId: string | null = null;
       const now = new Date();
       const overrideGrade = parsed.data.gradeOverride;
-      await tx.insert(bizProfiles).values({
-        id: snapshotId,
-        bizNo: currentBiz.bizNo,
-        taxType: currentBiz.taxType,
-        status: currentBiz.status,
-        grade: overrideGrade ?? currentBiz.grade ?? null,
-        gradeSource: overrideGrade
-          ? 'user_overridden'
-          : currentBiz.gradeSource,
-        gradeConfirmedBy: overrideGrade
-          ? userId
-          : (currentBiz.gradeConfirmedBy ?? null),
-        gradeConfirmedAt: overrideGrade
-          ? now
-          : (currentBiz.gradeConfirmedAt ?? null),
-      });
+      if (wsRow.bizProfileId) {
+        const [currentBiz] = await tx
+          .select()
+          .from(bizProfiles)
+          .where(eq(bizProfiles.id, wsRow.bizProfileId))
+          .limit(1);
+        if (currentBiz) {
+          snapshotId = randomUUID();
+          await tx.insert(bizProfiles).values({
+            id: snapshotId,
+            bizNo: currentBiz.bizNo,
+            taxType: currentBiz.taxType,
+            status: currentBiz.status,
+            grade: overrideGrade ?? currentBiz.grade ?? null,
+            gradeSource: overrideGrade
+              ? 'user_overridden'
+              : currentBiz.gradeSource,
+            gradeConfirmedBy: overrideGrade
+              ? userId
+              : (currentBiz.gradeConfirmedBy ?? null),
+            gradeConfirmedAt: overrideGrade
+              ? now
+              : (currentBiz.gradeConfirmedAt ?? null),
+          });
+        }
+      }
 
       // 4. NOTE: workspace.biz_profile_id 는 건드리지 않음.
       //    (RFQ 시점 스냅샷일 뿐, workspace 시점 갱신은 updateWorkspaceBizProfileAction 전용)

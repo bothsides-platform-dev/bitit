@@ -133,9 +133,6 @@ export default async function InboxSubmittedPage({ params }: Props) {
         >
           ← 수신함으로
         </Link>
-        <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-faint)] text-center pt-4">
-          — FIN —
-        </p>
       </div>
     </div>
   );

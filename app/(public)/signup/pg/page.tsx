@@ -136,9 +136,6 @@ export default function PgSignupEmailPage() {
         </Link>
       </div>
 
-      <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-faint)] text-center">
-        — FIN —
-      </p>
     </div>
   );
 }

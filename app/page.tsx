@@ -1,5 +1,9 @@
 import { redirect } from 'next/navigation';
+import { auth } from '@/auth';
+import { LandingHero } from '@/components/landing/LandingHero';
 
-export default function RootPage() {
-  redirect('/home');
+export default async function RootPage() {
+  const session = await auth();
+  if (session?.user) redirect('/home');
+  return <LandingHero />;
 }

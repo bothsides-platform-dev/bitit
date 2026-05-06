@@ -77,7 +77,6 @@ export function DataTable<T extends RowData>({
                 colSpan={columns.length}
                 className="py-12 text-center font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-ink-faint)]"
               >
-                — FIN —
               </td>
             </tr>
           )}

@@ -26,9 +26,6 @@ export function EmptyState({ icon, title, description, action, className }: Empt
         )}
       </div>
       {action && <div>{action}</div>}
-      <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-faint)]">
-        — FIN —
-      </span>
     </div>
   );
 }

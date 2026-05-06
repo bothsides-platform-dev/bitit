@@ -17,8 +17,6 @@ import { renderRfqSent } from '../rfqSent';
 
 // Korean Editorial assertions every template must satisfy.
 function expectEditorialRules(html: string): void {
-  // — FIN — close mark.
-  expect(html).toContain('— FIN —');
   // Hairline divider — 1px solid #ddd.
   expect(html).toMatch(/border-top:\s*1px solid #ddd/i);
   // Mono stack used for numerics (Mono component injects this stack).

@@ -49,4 +49,12 @@ describe('decideRoute — Step 3 four cases', () => {
   it('auth + /home (an app route) passes through', () => {
     expect(decideRoute('/home', '', true)).toEqual({ kind: 'next' });
   });
+
+  it('unauth + / passes through (landing page is public)', () => {
+    expect(decideRoute('/', '', false)).toEqual({ kind: 'next' });
+  });
+
+  it('auth + / redirects to /home (skip marketing landing)', () => {
+    expect(decideRoute('/', '', true)).toEqual({ kind: 'redirect', to: '/home' });
+  });
 });

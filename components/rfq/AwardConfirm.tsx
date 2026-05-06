@@ -127,9 +127,6 @@ export function AwardConfirm(props: Props) {
           <Button onClick={() => router.push('/rfq')} fullWidth>
             RFQ 목록으로 →
           </Button>
-          <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-faint)] text-center pt-2">
-            — FIN —
-          </p>
         </div>
       </div>
     );

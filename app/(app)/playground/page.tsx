@@ -196,11 +196,6 @@ export default function PlaygroundPage() {
         </p>
       </Section>
 
-      <div className="pt-8 border-t border-[var(--color-hair)]">
-        <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-faint)] text-center">
-          — FIN — M1 PRIMITIVES
-        </p>
-      </div>
     </div>
   );
 }

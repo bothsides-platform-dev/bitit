@@ -94,9 +94,6 @@ export function NotificationDrawer() {
               <p className="text-[13px] text-[var(--color-ink-muted)]">
                 새로운 알림이 없습니다.
               </p>
-              <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-faint)]">
-                — FIN —
-              </span>
             </div>
           ) : (
             notifications.map((notif) => {

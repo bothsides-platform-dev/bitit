@@ -32,6 +32,10 @@ export function decideRoute(
   search: string,
   isAuthenticated: boolean,
 ): RouteDecision {
+  if (pathname === '/') {
+    return isAuthenticated ? { kind: 'redirect', to: '/home' } : { kind: 'next' };
+  }
+
   const isPublic = PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
   const isClaimableInvite = CLAIMABLE_PUBLIC_PREFIXES.some((p) =>
     pathname.startsWith(p),

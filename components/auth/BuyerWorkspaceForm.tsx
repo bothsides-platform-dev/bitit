@@ -46,20 +46,23 @@ export function BuyerWorkspaceForm({ onSubmit, submitting, error }: Props) {
   const [grade, setGrade] = useState<MerchantGrade | null>(null);
 
   const canSubmit =
-    wsName.trim() !== '' && bizProfile !== null && grade !== null && !submitting;
+    wsName.trim() !== '' &&
+    !submitting &&
+    (bizProfile === null || grade !== null);
 
   const handleSubmit = async () => {
-    if (!canSubmit || !bizProfile || !grade) return;
-    await onSubmit({
-      wsName: wsName.trim(),
-      bizProfile: {
+    if (!canSubmit) return;
+    const payload: Parameters<typeof onSubmit>[0] = { wsName: wsName.trim() };
+    if (bizProfile && grade) {
+      payload.bizProfile = {
         bizNo: bizProfile.bizNo,
         taxType: bizProfile.taxType,
         status: bizProfile.status,
         grade,
         gradeSource: 'user_confirmed',
-      },
-    });
+      };
+    }
+    await onSubmit(payload);
   };
 
   return (

@@ -17,14 +17,8 @@ export default async function RfqNewPage() {
   }
 
   const ws = await (await getWorkspaceRepo()).findById(session.user.workspaceId);
-  if (!ws || !ws.bizProfile) {
-    return (
-      <div className="px-8 py-12 max-w-[640px]">
-        <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]">
-          워크스페이스 사업자 정보가 등록되지 않았습니다. 설정에서 먼저 등록해주세요.
-        </p>
-      </div>
-    );
+  if (!ws) {
+    redirect('/login?next=/rfq/new');
   }
 
   return (
@@ -36,12 +30,7 @@ export default async function RfqNewPage() {
         </h1>
       </div>
       <RfqCreateForm
-        bizProfile={{
-          bizNo: ws.bizProfile.bizNo,
-          taxType: ws.bizProfile.taxType,
-          status: ws.bizProfile.status,
-          grade: ws.bizProfile.grade,
-        }}
+        bizProfile={ws.bizProfile ?? undefined}
         workspaceName={ws.name}
       />
     </div>

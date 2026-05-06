@@ -43,9 +43,6 @@ export function InviteAuthedClient({ token }: { token: string }) {
         <p className="text-[13px] text-[var(--color-ink-muted)]">
           {ERROR_LABELS[error] ?? error}
         </p>
-        <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-faint)] pt-2">
-          — FIN —
-        </p>
       </div>
     );
   }
