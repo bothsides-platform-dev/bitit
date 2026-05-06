@@ -8,7 +8,8 @@ import { Tag } from '@/components/primitives/Tag';
 import { Button } from '@/components/primitives/Button';
 import { useRfqListStore } from '@/lib/stores/rfq-list';
 import { useBidListStore } from '@/lib/stores/bid-list';
-import { MOCK_WORKSPACES } from '@/lib/mock/workspaces';
+import { useNotificationsStore } from '@/lib/stores/notifications';
+import { MOCK_WORKSPACES, MOCK_SESSION_BUYER } from '@/lib/mock/workspaces';
 import { GRADE_LABELS } from '@/lib/mock/biz-lookup';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
 import { formatKRW, formatPct, formatDate } from '@/lib/format';
@@ -36,6 +37,7 @@ export default function AwardPage({ params }: Props) {
   const rfqs = useRfqListStore((s) => s.rfqs);
   const awardRfq = useRfqListStore((s) => s.awardRfq);
   const bids = useBidListStore((s) => s.bids);
+  const addNotification = useNotificationsStore((s) => s.add);
 
   const rfq = rfqs.find((r) => r.id === id);
   const allBids = bids.filter((b) => b.rfqId === id && b.status === 'submitted');
@@ -69,6 +71,16 @@ export default function AwardPage({ params }: Props) {
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 400));
     awardRfq(id, selected.id);
+
+    addNotification({
+      userId: MOCK_SESSION_BUYER.userId,
+      workspaceId: MOCK_SESSION_BUYER.workspaceId,
+      type: 'award_confirmed',
+      title: `${pgName(selected.pgWsId)} 수주 확정`,
+      body: `${id} RFQ가 ${pgName(selected.pgWsId)}와 계약 완료 처리되었습니다.`,
+      linkUrl: `/rfq/${id}`,
+    });
+
     setSubmitting(false);
     setConfirmed(true);
   };

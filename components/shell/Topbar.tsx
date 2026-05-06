@@ -1,15 +1,17 @@
 'use client';
 
 import { useUIStore } from '@/lib/stores/ui';
+import { useNotificationsStore } from '@/lib/stores/notifications';
 import { IconButton } from '@/components/primitives/IconButton';
 import { BellIcon, SearchIcon } from '@/components/icons';
 import { Avatar } from '@/components/primitives/Avatar';
 import { MOCK_SESSION_BUYER } from '@/lib/mock/workspaces';
-import { MOCK_NOTIFICATIONS } from '@/lib/mock/notifications';
 
 export function Topbar() {
   const { openNotificationDrawer, openCommandPalette } = useUIStore();
-  const unreadCount = MOCK_NOTIFICATIONS.filter((n) => n.status === 'pending').length;
+  const unreadCount = useNotificationsStore((s) =>
+    s.notifications.filter((n) => n.status === 'pending' || n.status === 'sent').length,
+  );
 
   return (
     <header

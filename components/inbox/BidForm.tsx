@@ -6,7 +6,8 @@ import { Button } from '@/components/primitives/Button';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
 import { StatutoryCardFeeNotice } from './StatutoryCardFeeNotice';
 import { useBidListStore } from '@/lib/stores/bid-list';
-import { MOCK_SESSION_PG } from '@/lib/mock/workspaces';
+import { useNotificationsStore } from '@/lib/stores/notifications';
+import { MOCK_SESSION_PG, MOCK_WORKSPACES, MOCK_SESSION_BUYER } from '@/lib/mock/workspaces';
 import { STATUTORY_CARD_FEE, type CardIssuer } from '@/lib/types/bid';
 import type { MerchantGrade } from '@/lib/types/biz-profile';
 import type { Bid, SettlementCycle } from '@/lib/types/bid';
@@ -105,6 +106,7 @@ type Props = {
 export function BidForm({ rfqId, invitationId, grade }: Props) {
   const router = useRouter();
   const addBid = useBidListStore((s) => s.addBid);
+  const addNotification = useNotificationsStore((s) => s.add);
 
   const [settleCycle, setSettleCycle] = useState<SettlementCycle>('D+1');
   const [deposit, setDeposit] = useState('0');
@@ -164,6 +166,17 @@ export function BidForm({ rfqId, invitationId, grade }: Props) {
     };
 
     addBid(bid);
+
+    const pgWsName = MOCK_WORKSPACES.find((w) => w.id === MOCK_SESSION_PG.workspaceId)?.name ?? 'PG';
+    addNotification({
+      userId: MOCK_SESSION_BUYER.userId,
+      workspaceId: MOCK_SESSION_BUYER.workspaceId,
+      type: 'bid_submitted',
+      title: `${pgWsName} 견적 도착`,
+      body: `${rfqId} RFQ에 ${pgWsName}가 견적을 제출했습니다.`,
+      linkUrl: `/rfq/${rfqId}`,
+    });
+
     router.push(`/inbox/${rfqId}/submitted`);
   };
 

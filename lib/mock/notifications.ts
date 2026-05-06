@@ -25,4 +25,16 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
     linkUrl: '/rfq/Q-2604-0001',
     createdAt: '2026-05-02T11:01:00Z',
   },
+  {
+    id: 'notif-003',
+    userId: 'u-buyer-001',
+    workspaceId: 'ws-buyer-001',
+    type: 'rfq_invited',
+    title: 'PG 초대 메일 — 발송 실패',
+    body: 'choi@kakaopay.com 으로의 초대 메일 발송이 실패했습니다. (Resend 502)',
+    channel: 'email',
+    status: 'failed',
+    linkUrl: '/settings/notifications',
+    createdAt: '2026-05-04T10:12:00Z',
+  },
 ];
