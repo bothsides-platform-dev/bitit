@@ -1,0 +1,329 @@
+// canAccessAttachment matrix:
+//   rfq_rfp:
+//     - buyer ws member of the owning RFQ → ALLOW
+//     - PG user with accepted invitation → ALLOW
+//     - PG user without accepted invitation (peer same domain) → DENY
+//     - random user → DENY
+//     - uploader (own row, e.g. draft window) → ALLOW
+//   bid_proposal:
+//     - buyer ws member of underlying RFQ → ALLOW
+//     - PG ws peer (same workspace as bid submitter) → ALLOW
+//     - PG ws other (different workspace, even if invited) → DENY
+//     - random user → DENY
+//     - uploader → ALLOW
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { randomUUID } from 'node:crypto';
+
+import { attachments, bids, rfqInvitations, rfqs } from '@/lib/db/schema';
+import { createPgliteDb, type PgliteDB } from '@/lib/db/client-pglite';
+import { __useDrizzleWithDbForTest, __resetForTest, getInvitationRepo } from '@/lib/server/repositories/factory';
+import {
+  seedBizProfile,
+  seedBuyerWorkspace,
+  seedMembership,
+  seedPgWorkspace,
+  seedUser,
+} from '@/lib/server/repositories/drizzle/__tests__/_seed';
+import { generateToken, hashToken, addMinutes } from '@/lib/server/token';
+import { canAccessAttachment, type AttachmentRow } from '../permissions';
+
+let db: PgliteDB;
+
+beforeEach(async () => {
+  __resetForTest();
+  db = await createPgliteDb();
+  await __useDrizzleWithDbForTest(db);
+});
+
+afterEach(() => {
+  __resetForTest();
+});
+
+type Scenario = {
+  rfqId: string;
+  buyerWsId: string;
+  buyerUserId: string;
+  pgWsId: string;
+  pgUserId: string; // claimed the invitation
+  pgPeerUserId: string; // same pg ws, different user
+  otherPgWsId: string;
+  otherPgUserId: string; // different pg ws — also invited but not relevant
+  randomUserId: string; // unrelated
+  uploaderId: string; // happens to be buyerUserId for rfp; pgUserId for bid_proposal
+  rfpAttachment: AttachmentRow;
+  bidAttachment: AttachmentRow;
+};
+
+async function seedScenario(): Promise<Scenario> {
+  const buyer = await seedUser(db, { email: 'buyer@buy.com' });
+  const biz = await seedBizProfile(db);
+  const buyerWs = await seedBuyerWorkspace(db, { bizProfileId: biz.id });
+  await seedMembership(db, buyerWs.id, buyer.id, 'admin');
+
+  const pgWs = await seedPgWorkspace(db, 'toss.im');
+  const pgUser = await seedUser(db, { email: 'pg@toss.im' });
+  await seedMembership(db, pgWs.id, pgUser.id, 'admin');
+  const pgPeer = await seedUser(db, { email: 'peer@toss.im' });
+  await seedMembership(db, pgWs.id, pgPeer.id, 'member');
+
+  const otherPgWs = await seedPgWorkspace(db, 'kakaopay.com');
+  const otherPg = await seedUser(db, { email: 'pg@kakaopay.com' });
+  await seedMembership(db, otherPgWs.id, otherPg.id, 'admin');
+
+  const random = await seedUser(db, { email: 'rando@x.com' });
+
+  const rfqId = 'Q-2605-0010';
+  await db.insert(rfqs).values({
+    id: rfqId,
+    buyerWsId: buyerWs.id,
+    bizProfileId: biz.id,
+    title: 'perm test',
+    memo: '',
+    allowedPgEmails: ['pg@toss.im', 'pg@kakaopay.com'],
+    deadline: new Date(Date.now() + 86_400_000),
+    status: 'sent',
+    createdBy: buyer.id,
+    sentAt: new Date(),
+  });
+
+  const invForToss = randomUUID();
+  await db.insert(rfqInvitations).values({
+    id: invForToss,
+    rfqId,
+    pgEmail: 'pg@toss.im',
+    pgWsId: pgWs.id,
+    acceptedByUserId: pgUser.id,
+    tokenHash: hashToken(generateToken()),
+    sentAt: new Date(),
+    expiresAt: new Date(addMinutes(new Date(), 7 * 24 * 60)),
+    status: 'accepted',
+  });
+  // Other PG invited but not part of acceptance for the bid we'll create.
+  await db.insert(rfqInvitations).values({
+    id: randomUUID(),
+    rfqId,
+    pgEmail: 'pg@kakaopay.com',
+    pgWsId: otherPgWs.id,
+    acceptedByUserId: otherPg.id,
+    tokenHash: hashToken(generateToken()),
+    sentAt: new Date(),
+    expiresAt: new Date(addMinutes(new Date(), 7 * 24 * 60)),
+    status: 'accepted',
+  });
+
+  // RFP attachment — uploaded by buyer.
+  const rfpId = randomUUID();
+  await db.insert(attachments).values({
+    id: rfpId,
+    ownerKind: 'rfq_rfp',
+    ownerId: rfqId,
+    name: 'rfp.pdf',
+    size: 100,
+    mimeType: 'application/pdf',
+    storagePath: '2026/05/dummy-rfp.pdf',
+    uploadedBy: buyer.id,
+  });
+
+  // Bid + bid_proposal attachment — bid was submitted by toss PG user.
+  const proposalId = randomUUID();
+  await db.insert(attachments).values({
+    id: proposalId,
+    ownerKind: 'bid_proposal',
+    ownerId: rfqId,
+    name: 'proposal.pdf',
+    size: 200,
+    mimeType: 'application/pdf',
+    storagePath: '2026/05/dummy-prop.pdf',
+    uploadedBy: pgUser.id,
+  });
+  const bidId = randomUUID();
+  await db.insert(bids).values({
+    id: bidId,
+    rfqId,
+    pgWsId: pgWs.id,
+    invitationId: invForToss,
+    settleCycle: 'D+1',
+    deposit: '0',
+    setupFee: '0',
+    monthlyMin: '0',
+    bankTransferFeePct: '0.015',
+    easyPayFeePct: '0.018',
+    proposalAttachmentId: proposalId,
+    submittedBy: pgUser.id,
+  });
+
+  const rfpAttachment: AttachmentRow = {
+    id: rfpId,
+    ownerKind: 'rfq_rfp',
+    ownerId: rfqId,
+    name: 'rfp.pdf',
+    size: 100,
+    mimeType: 'application/pdf',
+    url: '',
+    storagePath: '2026/05/dummy-rfp.pdf',
+    uploadedBy: buyer.id,
+  };
+
+  const bidAttachment: AttachmentRow = {
+    id: proposalId,
+    ownerKind: 'bid_proposal',
+    ownerId: rfqId,
+    name: 'proposal.pdf',
+    size: 200,
+    mimeType: 'application/pdf',
+    url: '',
+    storagePath: '2026/05/dummy-prop.pdf',
+    uploadedBy: pgUser.id,
+  };
+
+  return {
+    rfqId,
+    buyerWsId: buyerWs.id,
+    buyerUserId: buyer.id,
+    pgWsId: pgWs.id,
+    pgUserId: pgUser.id,
+    pgPeerUserId: pgPeer.id,
+    otherPgWsId: otherPgWs.id,
+    otherPgUserId: otherPg.id,
+    randomUserId: random.id,
+    uploaderId: buyer.id,
+    rfpAttachment,
+    bidAttachment,
+  };
+}
+
+async function repos() {
+  return { invitation: await getInvitationRepo() };
+}
+
+describe('canAccessAttachment — rfq_rfp', () => {
+  it('ALLOW for buyer ws member', async () => {
+    const s = await seedScenario();
+    const ok = await canAccessAttachment(
+      db,
+      s.rfpAttachment,
+      {
+        user: {
+          id: s.buyerUserId,
+          workspaceId: s.buyerWsId,
+          workspaceType: 'buyer',
+        },
+      },
+      await repos(),
+    );
+    expect(ok).toBe(true);
+  });
+
+  it('ALLOW for accepted PG invitation', async () => {
+    const s = await seedScenario();
+    const ok = await canAccessAttachment(
+      db,
+      s.rfpAttachment,
+      {
+        user: { id: s.pgUserId, workspaceId: s.pgWsId, workspaceType: 'pg' },
+      },
+      await repos(),
+    );
+    expect(ok).toBe(true);
+  });
+
+  it('DENY for PG ws peer who did not claim the invitation', async () => {
+    const s = await seedScenario();
+    const ok = await canAccessAttachment(
+      db,
+      s.rfpAttachment,
+      {
+        user: { id: s.pgPeerUserId, workspaceId: s.pgWsId, workspaceType: 'pg' },
+      },
+      await repos(),
+    );
+    expect(ok).toBe(false);
+  });
+
+  it('DENY for random unrelated user', async () => {
+    const s = await seedScenario();
+    const ok = await canAccessAttachment(
+      db,
+      s.rfpAttachment,
+      { user: { id: s.randomUserId } },
+      await repos(),
+    );
+    expect(ok).toBe(false);
+  });
+
+  it('ALLOW for uploader regardless of ws (draft window)', async () => {
+    const s = await seedScenario();
+    // Pretend the buyer lost their workspace claim — uploader path still grants.
+    const ok = await canAccessAttachment(
+      db,
+      s.rfpAttachment,
+      { user: { id: s.uploaderId } },
+      await repos(),
+    );
+    expect(ok).toBe(true);
+  });
+});
+
+describe('canAccessAttachment — bid_proposal', () => {
+  it('ALLOW for buyer ws member of underlying RFQ', async () => {
+    const s = await seedScenario();
+    const ok = await canAccessAttachment(
+      db,
+      s.bidAttachment,
+      {
+        user: {
+          id: s.buyerUserId,
+          workspaceId: s.buyerWsId,
+          workspaceType: 'buyer',
+        },
+      },
+      await repos(),
+    );
+    expect(ok).toBe(true);
+  });
+
+  it('ALLOW for PG ws peer (same ws as submitter)', async () => {
+    const s = await seedScenario();
+    const ok = await canAccessAttachment(
+      db,
+      s.bidAttachment,
+      {
+        user: {
+          id: s.pgPeerUserId,
+          workspaceId: s.pgWsId,
+          workspaceType: 'pg',
+        },
+      },
+      await repos(),
+    );
+    expect(ok).toBe(true);
+  });
+
+  it('DENY for PG ws other (different workspace, even if invited)', async () => {
+    const s = await seedScenario();
+    const ok = await canAccessAttachment(
+      db,
+      s.bidAttachment,
+      {
+        user: {
+          id: s.otherPgUserId,
+          workspaceId: s.otherPgWsId,
+          workspaceType: 'pg',
+        },
+      },
+      await repos(),
+    );
+    expect(ok).toBe(false);
+  });
+
+  it('DENY for random unrelated user', async () => {
+    const s = await seedScenario();
+    const ok = await canAccessAttachment(
+      db,
+      s.bidAttachment,
+      { user: { id: s.randomUserId } },
+      await repos(),
+    );
+    expect(ok).toBe(false);
+  });
+});

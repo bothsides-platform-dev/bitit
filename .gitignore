@@ -41,4 +41,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# local file storage (Step 11 LocalStorage). Prod swaps to S3/Supabase Storage.
+/uploads
+
 # drizzle: keep migrations + meta committed (history + snapshots).

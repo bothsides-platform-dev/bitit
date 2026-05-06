@@ -2,10 +2,11 @@
 
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
-import { eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 
 import { requireBuyerSession } from '@/lib/auth/session';
 import {
+  attachments,
   bizProfiles,
   rfqInvitations,
   rfqs,
@@ -20,6 +21,7 @@ import { addMinutes, generateToken } from '@/lib/server/token';
 import { renderRfqInvited } from '@/lib/server/outbox/templates/rfqInvited';
 import { renderRfqSent } from '@/lib/server/outbox/templates/rfqSent';
 import { flushAfterCommit } from '@/lib/server/outbox/post-commit';
+import { DRAFT_OWNER_ID } from '@/lib/server/storage/path';
 import {
   actionDb,
   baseUrl,
@@ -150,6 +152,26 @@ export async function createRfqAction(
         createdBy: userId,
         sentAt: send ? now : null,
       });
+
+      // 5-bis. RFP 첨부 link-up (Step 11). 업로드 시점에는 RFQ가 없어
+      // ownerId='__draft__' 로 들어가 있던 attachments rows를 새 rfqId로
+      // 갱신한다. uploadedBy + ownerKind 가드로 다른 사용자/유형의 row가
+      // 함께 끌려오지 않도록 좁힌다 — 클라이언트가 보낸 id 배열만 바꾸지
+      // 않는 이유는 합치된 가드(소유자+종류)가 한 곳에 모이는 편이 안전.
+      const rfpIds = parsed.data.rfpAttachmentIds ?? [];
+      if (rfpIds.length > 0) {
+        await tx
+          .update(attachments)
+          .set({ ownerId: rfqId })
+          .where(
+            and(
+              inArray(attachments.id, rfpIds),
+              eq(attachments.ownerKind, 'rfq_rfp'),
+              eq(attachments.uploadedBy, userId),
+              eq(attachments.ownerId, DRAFT_OWNER_ID),
+            ),
+          );
+      }
 
       // 6. send 분기 — invitation N + outbox N + 1
       if (send) {
