@@ -33,6 +33,16 @@
   --color-input:              var(--color-hair-strong);
   --color-ring:               var(--color-ink);
 
+  /* Sidebar (shadcn) → bidit night palette */
+  --color-sidebar:                    var(--color-night);
+  --color-sidebar-foreground:         var(--color-paper);
+  --color-sidebar-border:             var(--color-night-2);
+  --color-sidebar-accent:             var(--color-night-2);
+  --color-sidebar-accent-foreground:  var(--color-paper);
+  --color-sidebar-primary:            var(--color-amber);
+  --color-sidebar-primary-foreground: var(--color-night);
+  --color-sidebar-ring:               var(--color-amber);
+
   /* Font aliases */
   --font-sans:    var(--font-sans);
   --font-mono:    var(--font-mono);

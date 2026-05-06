@@ -5,6 +5,7 @@ import { Topbar } from '@/components/shell/Topbar';
 import { NotificationDrawer } from '@/components/shell/NotificationDrawer';
 import { CommandPalette } from '@/components/shell/CommandPalette';
 import { GlobalShortcuts } from '@/components/shell/GlobalShortcuts';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { auth } from '@/auth';
 import { getWorkspaceRepo } from '@/lib/server/repositories/factory';
 
@@ -28,23 +29,28 @@ export default async function AppLayout({
   const workspaceName = ws?.name ?? '';
 
   return (
-    <AppShell>
-      <IconSidebar />
-      <Topbar
-        user={{
-          id: session.user.id,
-          email: session.user.email,
-          name: session.user.name ?? session.user.email,
-        }}
-        workspaceType={session.user.workspaceType}
-        workspaceName={workspaceName}
-      />
-      <main style={{ gridArea: 'content' }} className="overflow-y-auto">
-        {children}
-      </main>
-      <NotificationDrawer />
-      <CommandPalette />
-      <GlobalShortcuts />
-    </AppShell>
+    <SidebarProvider
+      style={{ '--sidebar-width': 'var(--shell-sidebar)', '--sidebar-width-icon': 'var(--shell-sidebar)' } as React.CSSProperties}
+      className="contents"
+    >
+      <AppShell>
+        <IconSidebar />
+        <Topbar
+          user={{
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.name ?? session.user.email,
+          }}
+          workspaceType={session.user.workspaceType}
+          workspaceName={workspaceName}
+        />
+        <main style={{ gridArea: 'content' }} className="overflow-y-auto">
+          {children}
+        </main>
+        <NotificationDrawer />
+        <CommandPalette />
+        <GlobalShortcuts />
+      </AppShell>
+    </SidebarProvider>
   );
 }

@@ -31,9 +31,9 @@ export function InboxIcon({ size = 20, ...p }: IconProps) {
 
 export function SettingsIcon({ size = 20, ...p }: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.4} {...base} {...p}>
-      <circle cx="10" cy="10" r="2.5" />
-      <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} {...base} {...p}>
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+      <circle cx="12" cy="12" r="3" />
     </svg>
   );
 }
@@ -117,6 +117,37 @@ export function ArrowDownIcon({ size = 16, ...p }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4} {...base} {...p}>
       <path d="M8 4v8M4 8l4 4 4-4" />
+    </svg>
+  );
+}
+
+export function MoreHorizontalIcon({ size = 20, ...p }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.4} {...base} {...p}>
+      <circle cx="4.5" cy="10" r="1" fill="currentColor" />
+      <circle cx="10" cy="10" r="1" fill="currentColor" />
+      <circle cx="15.5" cy="10" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function PaperclipIcon({ size = 16, ...p }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4} {...base} {...p}>
+      <path d="M11 6.5L7 10.5a1.5 1.5 0 002.12 2.12l5-5a3 3 0 00-4.24-4.24l-5.5 5.5a4.5 4.5 0 006.36 6.36L13 13" />
+    </svg>
+  );
+}
+
+export function GripIcon({ size = 16, ...p }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.4} {...base} {...p}>
+      <circle cx="6" cy="4" r="0.6" fill="currentColor" />
+      <circle cx="10" cy="4" r="0.6" fill="currentColor" />
+      <circle cx="6" cy="8" r="0.6" fill="currentColor" />
+      <circle cx="10" cy="8" r="0.6" fill="currentColor" />
+      <circle cx="6" cy="12" r="0.6" fill="currentColor" />
+      <circle cx="10" cy="12" r="0.6" fill="currentColor" />
     </svg>
   );
 }
