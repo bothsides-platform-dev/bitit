@@ -1,7 +1,7 @@
 // Forward-declaration drizzle Outbox repo. Step 10 owns full integration; this
 // file lives here so the factory can return a wired instance without changing
 // the import surface later.
-import { eq, sql, lte, and } from 'drizzle-orm';
+import { eq, isNotNull, sql, lte, and } from 'drizzle-orm';
 import { outboxEntries } from '@/lib/db/schema';
 import type { DB } from '@/lib/db/client';
 import type { OutboxEntry, OutboxEvent } from '../../outbox/types';
@@ -47,6 +47,10 @@ export class DrizzleOutboxRepository implements OutboxRepo {
     tx?: Tx,
   ): Promise<OutboxEntry | null> {
     const db = this.h(tx);
+    // The dedupe_key unique index is partial (`WHERE dedupe_key IS NOT NULL`),
+    // so the ON CONFLICT clause must repeat that predicate for the planner to
+    // pick the right arbiter index. Without `where`, postgres errors with
+    // "no unique or exclusion constraint matching the ON CONFLICT specification".
     const inserted = await db
       .insert(outboxEntries)
       .values({
@@ -57,7 +61,10 @@ export class DrizzleOutboxRepository implements OutboxRepo {
         dedupeKey: params.dedupeKey ?? null,
         maxAttempts: params.maxAttempts ?? 5,
       })
-      .onConflictDoNothing({ target: outboxEntries.dedupeKey })
+      .onConflictDoNothing({
+        target: outboxEntries.dedupeKey,
+        where: isNotNull(outboxEntries.dedupeKey),
+      })
       .returning();
     return inserted.length > 0 ? rowToEntry(inserted[0]) : null;
   }

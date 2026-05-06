@@ -1,24 +1,61 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import { Serial } from '@/components/primitives/Serial';
 import { Button } from '@/components/primitives/Button';
 import { PasswordField } from '@/components/auth/PasswordField';
 import { CheckSvg } from '@/components/auth/EnvelopeSvg';
+import { passwordResetAction } from '@/lib/server/actions/auth';
 
-export default function ResetPasswordPage() {
+function ResetContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  if (!token) {
+    return (
+      <p className="text-[13px] text-[var(--color-terracotta)] text-center">
+        잘못된 링크입니다.
+      </p>
+    );
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== passwordConfirm) { setError('비밀번호가 일치하지 않습니다.'); return; }
+    if (password !== passwordConfirm) {
+      setError('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    setError('');
+    setSubmitting(true);
+    const r = await passwordResetAction({ rawToken: token, password });
+    if (!r.ok) {
+      setSubmitting(false);
+      setError('재설정 링크가 만료되었거나 유효하지 않습니다.');
+      return;
+    }
+    // Auto-login per advisor block C — server action returns the plaintext
+    // back; we sign in client-side.
+    const signInResult = await signIn('credentials', {
+      email: r.email,
+      password: r.password,
+      redirect: false,
+    });
+    setSubmitting(false);
+    if (signInResult && signInResult.error) {
+      // Password did update — direct user to log in manually.
+      router.push('/login');
+      return;
+    }
     setDone(true);
-    setTimeout(() => router.push('/home'), 1500);
+    setTimeout(() => router.push('/home'), 1200);
   };
 
   if (done) {
@@ -40,8 +77,18 @@ export default function ResetPasswordPage() {
       <form className="space-y-6" onSubmit={handleSubmit}>
         <PasswordField label="새 비밀번호" value={password} onChange={setPassword} showStrength />
         <PasswordField label="비밀번호 확인" name="passwordConfirm" value={passwordConfirm} onChange={setPasswordConfirm} autoComplete="new-password" error={error} />
-        <Button type="submit" fullWidth size="lg">변경하기</Button>
+        <Button type="submit" fullWidth size="lg" disabled={submitting || !password || !passwordConfirm}>
+          {submitting ? 'LOADING…' : '변경하기'}
+        </Button>
       </form>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<p className="font-mono text-[12px] tracking-[0.16em] uppercase text-center">LOADING…</p>}>
+      <ResetContent />
+    </Suspense>
   );
 }

@@ -1,30 +1,110 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Suspense } from 'react';
+import { Serial } from '@/components/primitives/Serial';
+import { ResendCountdown } from '@/components/auth/ResendCountdown';
+import { EnvelopeSvg } from '@/components/auth/EnvelopeSvg';
+import { verifyEmailAction } from '@/lib/server/actions/auth';
+import {
+  readSignupDraft,
+  writeSignupDraft,
+} from '@/lib/auth/signup-storage';
 
 type TokenState = 'loading' | 'success' | 'expired' | 'invalid' | 'used';
 
+// `/auth/verify` is bivalent:
+//   - `?token=…` → consume the verification row (P4). Success redirects to
+//     /signup/profile carrying email + emailVerified + (optional) inviteToken
+//     in sessionStorage.
+//   - `?email=…` (no token) → "we sent the link" announcement (P3). This
+//     replaces the old /signup/verify shell; that route still exists as a
+//     redirect for back-compat and is marked for deletion in Step 13.
 function VerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const emailQuery = searchParams.get('email');
   const [state, setState] = useState<TokenState>('loading');
+  const ranOnce = useRef(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // mock: 모든 토큰을 success로 처리
-      if (!token) { setState('invalid'); return; }
-      if (token === 'expired') { setState('expired'); return; }
-      if (token === 'used') { setState('used'); return; }
+    if (token == null) return;
+    // Strict-mode guard — verifyEmailAction is *atomic consume*, so a second
+    // invocation on remount would always fail with TOKEN_INVALID_OR_EXPIRED.
+    if (ranOnce.current) return;
+    ranOnce.current = true;
+
+    let cancelled = false;
+    (async () => {
+      const r = await verifyEmailAction(token);
+      if (cancelled) return;
+      if (!r.ok) {
+        // Best-effort classification — the action returns a single error
+        // for invalid/expired/used, so visually fold into 'expired'.
+        setState('expired');
+        return;
+      }
+      const draft = readSignupDraft();
+      writeSignupDraft({
+        ...draft,
+        email: r.email,
+        emailVerified: true,
+        // inviteToken is the only payload that flows from the verify-row's
+        // meta back into the client-side draft; sessionStorage keeps it
+        // alive until /signup/workspace consumes it.
+        inviteToken: r.inviteToken ?? draft.inviteToken,
+      });
       setState('success');
-      setTimeout(() => router.push('/signup/profile'), 800);
-    }, 1000);
-    return () => clearTimeout(timer);
+      setTimeout(() => router.push('/signup/profile'), 600);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [token, router]);
 
+  // Announcement view — `?email=…` with no token.
+  if (token == null) {
+    const displayEmail = emailQuery || readSignupDraft().email || 'your@email.com';
+    return (
+      <div className="space-y-8 text-center">
+        <Serial current={1} total={3} label="VERIFY" className="inline-block mb-4" />
+        <div className="flex justify-center text-[var(--color-ink-faint)]">
+          <EnvelopeSvg size={80} />
+        </div>
+        <div className="space-y-3">
+          <h2 className="text-[20px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+            인증 메일을 보냈습니다
+          </h2>
+          <p className="text-[13px] text-[var(--color-ink-muted)]">
+            <span className="font-mono tabular-nums">{displayEmail}</span>
+          </p>
+          <p className="text-[13px] text-[var(--color-ink-muted)]">
+            메일의 [인증하기] 버튼을 눌러주세요.<br />
+            <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">15분 내 만료됩니다.</span>
+          </p>
+        </div>
+        <div className="space-y-3">
+          <ResendCountdown onResend={() => {}} />
+          <Link
+            href="/signup"
+            className="block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+          >
+            다른 이메일로 변경
+          </Link>
+        </div>
+        <div className="text-[12px] text-[var(--color-ink-soft)] space-y-1">
+          <p>스팸함을 확인해보세요.</p>
+          <p>회사 메일의 경우 도메인 차단 여부를 확인해주세요.</p>
+        </div>
+        <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-faint)]">— FIN —</p>
+      </div>
+    );
+  }
+
+  // Token verification view.
   if (state === 'loading') {
     return <p className="font-mono text-[12px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)] text-center">LOADING…</p>;
   }

@@ -6,13 +6,20 @@ import { Button } from '@/components/primitives/Button';
 import { EnvelopeSvg } from '@/components/auth/EnvelopeSvg';
 import { ResendCountdown } from '@/components/auth/ResendCountdown';
 import Link from 'next/link';
+import { passwordForgotAction } from '@/lib/server/actions/auth';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+    // Action always returns ok:true (info-leak protection); UI shows the same
+    // confirmation regardless of whether the email was on file.
+    await passwordForgotAction({ email });
+    setSubmitting(false);
     setSent(true);
   };
 
@@ -45,7 +52,9 @@ export default function ForgotPasswordPage() {
             className="block w-full bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-2 text-[14px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
             placeholder="your@email.com" />
         </div>
-        <Button type="submit" fullWidth size="lg" disabled={!email.trim()}>재설정 링크 받기</Button>
+        <Button type="submit" fullWidth size="lg" disabled={submitting || !email.trim()}>
+          {submitting ? 'LOADING…' : '재설정 링크 받기'}
+        </Button>
       </form>
       <div className="text-center">
         <Link href="/login" className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors">← 로그인으로</Link>

@@ -6,6 +6,10 @@ import { Serial } from '@/components/primitives/Serial';
 import { Button } from '@/components/primitives/Button';
 import { PasswordField } from '@/components/auth/PasswordField';
 import { useSignupDraftStore } from '@/lib/stores/signup-draft';
+import {
+  readSignupDraft,
+  writeSignupDraft,
+} from '@/lib/auth/signup-storage';
 
 export default function SignupProfilePage() {
   const router = useRouter();
@@ -32,6 +36,16 @@ export default function SignupProfilePage() {
     e.preventDefault();
     if (!validate()) return;
     setProfile(name.trim(), phone.trim() || undefined);
+    // Stash password temporarily so /signup/workspace can pass it to
+    // signupCompleteAction in the same browser session. Cleared right after
+    // the auto-signIn in /signup/workspace's submit handler.
+    const draft = readSignupDraft();
+    writeSignupDraft({
+      ...draft,
+      name: name.trim(),
+      phone: phone.trim() || undefined,
+      password,
+    });
     router.push('/signup/workspace');
   };
 

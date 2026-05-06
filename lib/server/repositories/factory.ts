@@ -167,3 +167,41 @@ export async function __getBackend(): Promise<'memory' | 'drizzle'> {
 export function __resetForTest(): void {
   globalThis.__bidit_repos__ = undefined;
 }
+
+// For tests only — install Drizzle repos backed by a pglite db handle so
+// action tests (Step 5+) can exercise the full repo surface (user, biz, outbox,
+// verification-token, etc.) under NODE_ENV='test'. Bypasses the in-memory
+// shortcut without touching factory selection logic. Pair with __resetForTest
+// in afterEach.
+export async function __useDrizzleWithDbForTest(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db: any,
+): Promise<void> {
+  const { DrizzleRfqRepository } = await import('./drizzle/rfq');
+  const { DrizzleInvitationRepository } = await import('./drizzle/invitation');
+  const { DrizzleWorkspaceRepository } = await import('./drizzle/workspace');
+  const { DrizzleUserRepository } = await import('./drizzle/user');
+  const { DrizzleBizProfileRepository } = await import('./drizzle/biz-profile');
+  const { DrizzleBidRepository } = await import('./drizzle/bid');
+  const { DrizzleNotificationRepository } = await import('./drizzle/notification');
+  const { DrizzleContractRepository } = await import('./drizzle/contract');
+  const { DrizzleVerificationTokenRepository } = await import(
+    './drizzle/verification-token'
+  );
+  const { DrizzleAttachmentRepository } = await import('./drizzle/attachment');
+  const { DrizzleOutboxRepository } = await import('./drizzle/outbox');
+  globalThis.__bidit_repos__ = {
+    rfq: new DrizzleRfqRepository(db),
+    invitation: new DrizzleInvitationRepository(db),
+    workspace: new DrizzleWorkspaceRepository(db),
+    user: new DrizzleUserRepository(db),
+    bizProfile: new DrizzleBizProfileRepository(db),
+    bid: new DrizzleBidRepository(db),
+    notification: new DrizzleNotificationRepository(db),
+    contract: new DrizzleContractRepository(db),
+    verificationToken: new DrizzleVerificationTokenRepository(db),
+    attachment: new DrizzleAttachmentRepository(db),
+    outbox: new DrizzleOutboxRepository(db),
+    __backend: 'drizzle',
+  };
+}
