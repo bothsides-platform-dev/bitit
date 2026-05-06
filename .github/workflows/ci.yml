@@ -1,0 +1,103 @@
+name: ci
+
+# Step 14 — gate every PR with lint + unit tests; gate `main` pushes
+# additionally with the e2e suite (Playwright A/B/C against a real
+# Postgres service container).
+#
+# Why split: e2e boots Next.js + Postgres + Playwright (~3-5min). PRs
+# stay fast (lint+unit only). Main push catches regressions before any
+# tag/deploy.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: lint + tsc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm tsc --noEmit
+      - run: pnpm lint
+
+  unit-test:
+    name: unit (vitest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # vitest workspace projects: unit-node uses pglite (no docker
+      # needed), unit-jsdom uses RTL. 280+ tests, all in-process.
+      - run: pnpm test
+
+  e2e:
+    name: e2e (playwright)
+    # Only on main push — PRs already covered by lint + unit-test.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [lint, unit-test]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: bidit
+          POSTGRES_PASSWORD: bidit
+          POSTGRES_DB: bidit_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U bidit -d bidit_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://bidit:bidit@localhost:5433/bidit_test
+      DATABASE_URL_TEST: postgres://bidit:bidit@localhost:5433/bidit_test
+      AUTH_SECRET: e2e-test-secret-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      NEXT_PUBLIC_BASE_URL: http://localhost:3001
+      RESEND_API_KEY: ''
+      NTS_SERVICE_KEY: ''
+      CRON_SECRET: e2e-cron-secret
+      UPLOAD_DIR: ./uploads-e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Drizzle migrate against the test DB (service container).
+      - run: pnpm db:migrate
+      # Playwright browsers (chromium only — matches projects[] config).
+      # `pnpm exec` uses the lockfile-pinned playwright@1.59.1, not a
+      # transient dlx fetch.
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
