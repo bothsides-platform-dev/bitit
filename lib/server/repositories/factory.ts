@@ -1,0 +1,169 @@
+// Repository factory — single entry point for actions/handlers.
+// Decision is lazy (first call) so vitest's NODE_ENV='test' is observed even
+// when this module is imported by code that runs before env stubbing.
+// Cache lives on globalThis so Next dev HMR doesn't multiply instances.
+import type {
+  AttachmentRepo,
+  BidRepo,
+  BizProfileRepo,
+  ContractRepo,
+  InvitationRepo,
+  NotificationRepo,
+  OutboxRepo,
+  RfqRepo,
+  UserRepo,
+  VerificationTokenRepo,
+  WorkspaceRepo,
+} from './types';
+
+type RepoBundle = {
+  rfq: RfqRepo;
+  invitation: InvitationRepo;
+  workspace: WorkspaceRepo;
+  user: UserRepo;
+  bizProfile: BizProfileRepo;
+  bid: BidRepo;
+  notification: NotificationRepo;
+  contract: ContractRepo;
+  verificationToken: VerificationTokenRepo;
+  attachment: AttachmentRepo;
+  outbox: OutboxRepo;
+  // Backend marker for tests.
+  __backend: 'memory' | 'drizzle';
+};
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __bidit_repos__: RepoBundle | undefined;
+}
+
+function shouldUseInMemory(): boolean {
+  // Single source of truth — if either condition holds, use in-memory.
+  return (
+    process.env.NODE_ENV === 'test' || process.env.REPO_BACKEND === 'memory'
+  );
+}
+
+async function buildBundle(): Promise<RepoBundle> {
+  if (shouldUseInMemory()) {
+    const { InMemoryRfqRepository } = await import('./in-memory/rfq');
+    const { InMemoryInvitationRepository } = await import('./in-memory/invitation');
+    const { InMemoryWorkspaceRepository } = await import('./in-memory/workspace');
+    const rfq = new InMemoryRfqRepository();
+    const invitation = new InMemoryInvitationRepository();
+    const workspace = new InMemoryWorkspaceRepository();
+    // The 8 forward-declared repos return a Proxy that throws on any method
+    // call. Construction stays cheap; the gap surfaces loudly only if Step 5+
+    // code reaches for a not-yet-implemented in-memory repo.
+    const notImplemented = (name: string) =>
+      new Proxy(
+        {},
+        {
+          get() {
+            throw new Error(
+              `${name} not implemented for in-memory backend (Step 4). Set REPO_BACKEND=drizzle or implement in lib/server/repositories/in-memory/${name}.ts.`,
+            );
+          },
+        },
+      );
+    return {
+      rfq,
+      invitation,
+      workspace,
+      user: notImplemented('user') as UserRepo,
+      bizProfile: notImplemented('bizProfile') as BizProfileRepo,
+      bid: notImplemented('bid') as BidRepo,
+      notification: notImplemented('notification') as NotificationRepo,
+      contract: notImplemented('contract') as ContractRepo,
+      verificationToken: notImplemented(
+        'verificationToken',
+      ) as VerificationTokenRepo,
+      attachment: notImplemented('attachment') as AttachmentRepo,
+      outbox: notImplemented('outbox') as OutboxRepo,
+      __backend: 'memory',
+    };
+  }
+
+  // Lazy import the postgres-js client so missing DATABASE_URL doesn't crash
+  // tests that only exercise the in-memory branch.
+  const { db } = await import('@/lib/db/client');
+  const { DrizzleRfqRepository } = await import('./drizzle/rfq');
+  const { DrizzleInvitationRepository } = await import('./drizzle/invitation');
+  const { DrizzleWorkspaceRepository } = await import('./drizzle/workspace');
+  const { DrizzleUserRepository } = await import('./drizzle/user');
+  const { DrizzleBizProfileRepository } = await import('./drizzle/biz-profile');
+  const { DrizzleBidRepository } = await import('./drizzle/bid');
+  const { DrizzleNotificationRepository } = await import('./drizzle/notification');
+  const { DrizzleContractRepository } = await import('./drizzle/contract');
+  const { DrizzleVerificationTokenRepository } = await import(
+    './drizzle/verification-token'
+  );
+  const { DrizzleAttachmentRepository } = await import('./drizzle/attachment');
+  const { DrizzleOutboxRepository } = await import('./drizzle/outbox');
+
+  return {
+    rfq: new DrizzleRfqRepository(db),
+    invitation: new DrizzleInvitationRepository(db),
+    workspace: new DrizzleWorkspaceRepository(db),
+    user: new DrizzleUserRepository(db),
+    bizProfile: new DrizzleBizProfileRepository(db),
+    bid: new DrizzleBidRepository(db),
+    notification: new DrizzleNotificationRepository(db),
+    contract: new DrizzleContractRepository(db),
+    verificationToken: new DrizzleVerificationTokenRepository(db),
+    attachment: new DrizzleAttachmentRepository(db),
+    outbox: new DrizzleOutboxRepository(db),
+    __backend: 'drizzle',
+  };
+}
+
+async function getBundle(): Promise<RepoBundle> {
+  if (!globalThis.__bidit_repos__) {
+    globalThis.__bidit_repos__ = await buildBundle();
+  }
+  return globalThis.__bidit_repos__;
+}
+
+export async function getRfqRepo(): Promise<RfqRepo> {
+  return (await getBundle()).rfq;
+}
+export async function getInvitationRepo(): Promise<InvitationRepo> {
+  return (await getBundle()).invitation;
+}
+export async function getWorkspaceRepo(): Promise<WorkspaceRepo> {
+  return (await getBundle()).workspace;
+}
+export async function getUserRepo(): Promise<UserRepo> {
+  return (await getBundle()).user;
+}
+export async function getBizProfileRepo(): Promise<BizProfileRepo> {
+  return (await getBundle()).bizProfile;
+}
+export async function getBidRepo(): Promise<BidRepo> {
+  return (await getBundle()).bid;
+}
+export async function getNotificationRepo(): Promise<NotificationRepo> {
+  return (await getBundle()).notification;
+}
+export async function getContractRepo(): Promise<ContractRepo> {
+  return (await getBundle()).contract;
+}
+export async function getVerificationTokenRepo(): Promise<VerificationTokenRepo> {
+  return (await getBundle()).verificationToken;
+}
+export async function getAttachmentRepo(): Promise<AttachmentRepo> {
+  return (await getBundle()).attachment;
+}
+export async function getOutboxRepo(): Promise<OutboxRepo> {
+  return (await getBundle()).outbox;
+}
+
+// For tests only — read which backend the cache settled on.
+export async function __getBackend(): Promise<'memory' | 'drizzle'> {
+  return (await getBundle()).__backend;
+}
+
+// For tests only — clear the cache so a different env can re-decide.
+export function __resetForTest(): void {
+  globalThis.__bidit_repos__ = undefined;
+}

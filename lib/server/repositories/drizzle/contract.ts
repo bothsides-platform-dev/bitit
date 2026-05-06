@@ -1,0 +1,51 @@
+import { eq } from 'drizzle-orm';
+import { contracts } from '@/lib/db/schema';
+import type { DB } from '@/lib/db/client';
+import type { Contract } from '@/lib/types/contract';
+import type { ContractRepo, Tx } from '../types';
+
+type ContractRow = typeof contracts.$inferSelect;
+
+function rowToContract(row: ContractRow): Contract {
+  return {
+    id: row.id,
+    rfqId: row.rfqId,
+    bidId: row.bidId,
+    awardedAt: new Date(row.awardedAt).toISOString(),
+    awardedBy: row.awardedBy,
+  };
+}
+
+export class DrizzleContractRepository implements ContractRepo {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(private readonly _db: DB | any) {}
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private h(tx?: Tx): any {
+    return tx ?? this._db;
+  }
+
+  async save(c: Contract, tx?: Tx): Promise<void> {
+    const db = this.h(tx);
+    await db
+      .insert(contracts)
+      .values({
+        id: c.id,
+        rfqId: c.rfqId,
+        bidId: c.bidId,
+        awardedAt: new Date(c.awardedAt),
+        awardedBy: c.awardedBy,
+      })
+      .onConflictDoNothing({ target: contracts.id });
+  }
+
+  async findByRfq(rfqId: string, tx?: Tx): Promise<Contract | undefined> {
+    const db = this.h(tx);
+    const [row] = await db
+      .select()
+      .from(contracts)
+      .where(eq(contracts.rfqId, rfqId))
+      .limit(1);
+    return row ? rowToContract(row) : undefined;
+  }
+}

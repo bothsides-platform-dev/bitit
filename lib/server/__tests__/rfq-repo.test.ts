@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { InMemoryRfqRepository } from '../repositories/rfq';
+import { InMemoryRfqRepository } from '../repositories/in-memory/rfq';
 import type { RFQ } from '@/lib/types/rfq';
 
 function makeRfq(id: string, status: RFQ['status'] = 'draft'): RFQ {
@@ -30,48 +30,48 @@ describe('InMemoryRfqRepository', () => {
     repo = new InMemoryRfqRepository();
   });
 
-  it('saves and retrieves by id', () => {
-    repo.save(makeRfq('rfq-1'));
-    expect(repo.findById('rfq-1')).toMatchObject({ id: 'rfq-1', status: 'draft' });
+  it('saves and retrieves by id', async () => {
+    await repo.save(makeRfq('rfq-1'));
+    expect(await repo.findById('rfq-1')).toMatchObject({ id: 'rfq-1', status: 'draft' });
   });
 
-  it('returns undefined for unknown id', () => {
-    expect(repo.findById('nope')).toBeUndefined();
+  it('returns undefined for unknown id', async () => {
+    expect(await repo.findById('nope')).toBeUndefined();
   });
 
-  it('findByBuyerWs returns only matching workspace RFQs', () => {
-    repo.save(makeRfq('rfq-1'));
-    repo.save({ ...makeRfq('rfq-2'), buyerWsId: 'ws-other' });
-    expect(repo.findByBuyerWs('ws-buyer')).toHaveLength(1);
+  it('findByBuyerWs returns only matching workspace RFQs', async () => {
+    await repo.save(makeRfq('rfq-1'));
+    await repo.save({ ...makeRfq('rfq-2'), buyerWsId: 'ws-other' });
+    expect(await repo.findByBuyerWs('ws-buyer')).toHaveLength(1);
   });
 
-  it('transitions draft → sent', () => {
-    repo.save(makeRfq('rfq-1'));
-    const updated = repo.transition('rfq-1', 'sent');
+  it('transitions draft → sent', async () => {
+    await repo.save(makeRfq('rfq-1'));
+    const updated = await repo.transition('rfq-1', 'sent');
     expect(updated.status).toBe('sent');
   });
 
-  it('transitions sent → awarded with patch', () => {
-    repo.save(makeRfq('rfq-1', 'sent'));
-    const updated = repo.transition('rfq-1', 'awarded', { awardedBidId: 'bid-1' });
+  it('transitions sent → awarded with patch', async () => {
+    await repo.save(makeRfq('rfq-1', 'sent'));
+    const updated = await repo.transition('rfq-1', 'awarded', { awardedBidId: 'bid-1' });
     expect(updated.status).toBe('awarded');
     expect(updated.awardedBidId).toBe('bid-1');
   });
 
-  it('throws on invalid transition (draft → awarded)', () => {
-    repo.save(makeRfq('rfq-1'));
-    expect(() => repo.transition('rfq-1', 'awarded')).toThrow('Invalid RFQ transition');
+  it('throws on invalid transition (draft → awarded)', async () => {
+    await repo.save(makeRfq('rfq-1'));
+    await expect(repo.transition('rfq-1', 'awarded')).rejects.toThrow('Invalid RFQ transition');
   });
 
-  it('throws when RFQ not found', () => {
-    expect(() => repo.transition('nope', 'sent')).toThrow('RFQ not found');
+  it('throws when RFQ not found', async () => {
+    await expect(repo.transition('nope', 'sent')).rejects.toThrow('RFQ not found');
   });
 
-  it('returns immutable copy (store is not mutated from outside)', () => {
-    repo.save(makeRfq('rfq-1'));
-    const copy = repo.findById('rfq-1')!;
+  it('returns immutable copy (store is not mutated from outside)', async () => {
+    await repo.save(makeRfq('rfq-1'));
+    const copy = (await repo.findById('rfq-1'))!;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (copy as any).status = 'sent';
-    expect(repo.findById('rfq-1')!.status).toBe('draft');
+    expect((await repo.findById('rfq-1'))!.status).toBe('draft');
   });
 });

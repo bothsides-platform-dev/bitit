@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { InMemoryWorkspaceRepository } from '../repositories/workspace';
+import { InMemoryWorkspaceRepository } from '../repositories/in-memory/workspace';
 import type { Workspace } from '@/lib/types/workspace';
 import type { User } from '@/lib/types/user';
 
@@ -34,26 +34,26 @@ describe('InMemoryWorkspaceRepository', () => {
     repo = new InMemoryWorkspaceRepository();
   });
 
-  it('auto-joins PG user matching email domain', () => {
-    repo.save(makeWorkspace());
-    const joined = repo.autoJoinPg('sales@toss.im', makeUser('u1', 'sales@toss.im'));
+  it('auto-joins PG user matching email domain', async () => {
+    await repo.save(makeWorkspace());
+    const joined = await repo.autoJoinPg('sales@toss.im', makeUser('u1', 'sales@toss.im'));
     expect(joined).not.toBeNull();
-    expect(joined!.members.some(m => m.id === 'u1')).toBe(true);
+    expect(joined!.members.some((m) => m.id === 'u1')).toBe(true);
   });
 
-  it('returns null for unregistered domain', () => {
-    expect(repo.autoJoinPg('ceo@kakao.com', makeUser('u2', 'ceo@kakao.com'))).toBeNull();
+  it('returns null for unregistered domain', async () => {
+    expect(await repo.autoJoinPg('ceo@kakao.com', makeUser('u2', 'ceo@kakao.com'))).toBeNull();
   });
 
-  it('does not duplicate member on re-join', () => {
-    repo.save(makeWorkspace());
+  it('does not duplicate member on re-join', async () => {
+    await repo.save(makeWorkspace());
     const user = makeUser('u1', 'sales@toss.im');
-    repo.autoJoinPg('sales@toss.im', user);
-    repo.autoJoinPg('sales@toss.im', user);
-    expect(repo.findByDomain('toss.im')!.members.filter(m => m.id === 'u1')).toHaveLength(1);
+    await repo.autoJoinPg('sales@toss.im', user);
+    await repo.autoJoinPg('sales@toss.im', user);
+    expect((await repo.findByDomain('toss.im'))!.members.filter((m) => m.id === 'u1')).toHaveLength(1);
   });
 
-  it('findByDomain returns undefined for unknown domain', () => {
-    expect(repo.findByDomain('stripe.com')).toBeUndefined();
+  it('findByDomain returns undefined for unknown domain', async () => {
+    expect(await repo.findByDomain('stripe.com')).toBeUndefined();
   });
 });
