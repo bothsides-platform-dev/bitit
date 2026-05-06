@@ -144,7 +144,6 @@ export default function PlaygroundPage() {
           <br />
           <Eyebrow>FIG. 03 — 비교 테이블</Eyebrow>
           <br />
-          <Eyebrow>EDITION 01 · v0</Eyebrow>
         </div>
       </Section>
 
