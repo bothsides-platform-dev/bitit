@@ -29,6 +29,15 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm tsc --noEmit
       - run: pnpm lint
+      # Drizzle journal sanity. `drizzle-kit check` validates file/journal
+      # consistency. The node one-liner enforces that `when` timestamps
+      # are strictly increasing by `idx` — without this, a new migration
+      # whose `when` is older than an already-applied entry will be
+      # silently skipped by `drizzle-kit migrate` (Supabase prod hit this).
+      - name: drizzle journal sanity
+        run: |
+          pnpm exec drizzle-kit check
+          node -e "const j=require('./drizzle/meta/_journal.json');for(let i=1;i<j.entries.length;i++){const a=j.entries[i-1],b=j.entries[i];if(b.when<=a.when){console.error('drizzle journal out of order:',b.tag,'when',b.when,'<=',a.tag,a.when);process.exit(1)}}console.log('drizzle journal monotonic ok')"
 
   unit-test:
     name: unit (vitest)
