@@ -56,7 +56,7 @@ export function WorkspaceBizProfileForm({ currentGrade }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Eyebrow>가맹점 등급 갱신</Eyebrow>
-      <div className="border border-[var(--color-hair)] divide-y divide-[var(--color-hair)]">
+      <div className="border-t border-[var(--color-hair)] divide-y divide-[var(--color-hair)]">
         {ALL_GRADES.map((g) => {
           const selected = grade === g;
           return (

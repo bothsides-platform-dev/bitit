@@ -35,7 +35,7 @@ export function Subnav({ title, items, action }: SubnavProps) {
               className={cn(
                 'px-5 py-2.5 text-[13px] transition-colors duration-[140ms]',
                 active
-                  ? 'text-[var(--color-ink)] bg-[var(--color-paper-warm)] font-medium'
+                  ? 'text-[var(--color-ink)] bg-[var(--color-paper-warm)] font-medium border-l-2 border-[var(--color-amber)] pl-[calc(1.25rem-2px)]'
                   : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-warm)]',
               )}
             >
