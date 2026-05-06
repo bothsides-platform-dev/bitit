@@ -52,3 +52,6 @@ next-env.d.ts
 /playwright/.cache
 
 # drizzle: keep migrations + meta committed (history + snapshots).
+
+# Sentry Config File
+.env.sentry-build-plugin
