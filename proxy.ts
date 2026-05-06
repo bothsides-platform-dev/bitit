@@ -1,35 +1,29 @@
+import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
-const PUBLIC_PREFIXES = ['/login', '/signup', '/password', '/invite', '/auth', '/logout'];
-const CLAIMABLE_PUBLIC_PREFIXES = ['/invite/rfq'];
+import authConfig from './auth.config';
+import { decideRoute } from './lib/auth/route-decision';
 
-function readSessionCookie(req: NextRequest): string | undefined {
-  return req.cookies.get('session')?.value;
-}
+// Edge-runtime-only: instantiated from `auth.config.ts` (no DB, no bcrypt).
+// `auth.ts` would pull postgres-js into the edge bundle and break the build.
+const { auth } = NextAuth(authConfig);
 
-export function proxy(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-  const session = readSessionCookie(req);
-  const isPublic = PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
-  const isClaimableInvite = CLAIMABLE_PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
+export default auth((req) => {
+  const { pathname, search } = req.nextUrl;
+  const isAuthenticated = !!req.auth;
+  const decision = decideRoute(pathname, search, isAuthenticated);
 
-  if (isPublic) {
-    if (isClaimableInvite) return NextResponse.next();
-    if (session && pathname !== '/logout') {
-      return NextResponse.redirect(new URL('/home', req.url));
-    }
-    return NextResponse.next();
+  if (decision.kind === 'redirect') {
+    return NextResponse.redirect(new URL(decision.to, req.url));
   }
-
-  if (!session) {
-    const next = encodeURIComponent(pathname + req.nextUrl.search);
-    return NextResponse.redirect(new URL(`/login?next=${next}`, req.url));
-  }
-
   return NextResponse.next();
-}
+});
 
+// Exclude `/api` (especially `/api/auth/*` for NextAuth handlers) and Next
+// internals/static assets. Pre-Auth.js this read `(?!_next|favicon|...)` —
+// `api` is added because `api/auth/*` would otherwise 302 to `/login`.
 export const config = {
-  matcher: ['/((?!_next|favicon.ico|fonts|file|globe|next|vercel|window).*)'],
+  matcher: [
+    '/((?!api|_next|favicon.ico|fonts|file|globe|next|vercel|window).*)',
+  ],
 };
