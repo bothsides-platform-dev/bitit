@@ -1,4 +1,5 @@
 import { Logo } from '@/components/primitives/Logo';
+import { Footer } from '@/components/shell/Footer';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           {children}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
