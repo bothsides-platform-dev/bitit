@@ -70,7 +70,7 @@ export default function InboxSubmittedPage({ params }: Props) {
           {[
             ['RFQ', rfq.id],
             ['제목', rfq.title],
-            ['구매사', rfq.bizProfile.name],
+            ['구매사', '(주)샘플테크'],
             ['등급', rfq.bizProfile.grade ? GRADE_LABELS[rfq.bizProfile.grade] : '—'],
             ['마감', formatDate(rfq.deadline)],
           ].map(([label, value]) => (

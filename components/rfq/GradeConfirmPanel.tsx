@@ -9,7 +9,7 @@ import type { MerchantGrade } from '@/lib/types/biz-profile';
 
 type GradeResult = {
   grade: MerchantGrade;
-  gradeSource: 'auto_nice' | 'user_confirmed' | 'user_overridden';
+  gradeSource: 'user_confirmed' | 'user_overridden';
   estimatedRevenue?: number;
   revenueYear?: string;
 };

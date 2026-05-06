@@ -123,7 +123,6 @@ export default function ProfilePage() {
             ['이름', ws.name],
             ...(biz ? [
               ['사업자번호', biz.bizNo],
-              ['대표자', biz.ceoName],
               ['업태', biz.taxType === 'general' ? '일반과세' : '간이/면세'],
               ...(grade ? ([
                 ['가맹점 등급', GRADE_LABELS[grade]],

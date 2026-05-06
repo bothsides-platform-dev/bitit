@@ -1,6 +1,17 @@
-import type { BizProfile, MerchantGrade } from '@/lib/types/biz-profile';
+import type { MerchantGrade } from '@/lib/types/biz-profile';
 
-type BizRecord = Omit<BizProfile, 'grade' | 'gradeSource' | 'gradeConfirmedBy' | 'gradeConfirmedAt' | 'estimatedRevenue' | 'revenueYear' | 'niceLookedUpAt'>;
+// Mock NTS lookup response — narrower than the slim BizProfile (which is the DB shape).
+// Kept independent so Step 2's BizProfile slim-down doesn't break this mock surface.
+// Step 13 deletes this file along with the rest of the mock layer.
+type BizRecord = {
+  bizNo: string;
+  name: string;
+  ceoName: string;
+  ksic: string;
+  taxType: 'general' | 'simple' | 'exempt';
+  status: 'active' | 'suspended' | 'closed';
+  mailOrderNo?: string;
+};
 type NiceRecord = { grade: MerchantGrade; estimatedRevenue: number; revenueYear: string };
 
 const BIZ_DB: Record<string, BizRecord> = {

@@ -42,7 +42,17 @@ export function RfqCreateForm() {
   const rfqs = useRfqListStore((s) => s.rfqs);
   const addNotification = useNotificationsStore((s) => s.add);
 
-  const [baseProfile, setBaseProfile] = useState<Omit<BizProfile, 'grade' | 'gradeSource' | 'gradeConfirmedBy' | 'gradeConfirmedAt' | 'estimatedRevenue' | 'revenueYear' | 'niceLookedUpAt'> | null>(null);
+  // Local mock NTS shape (matches BizLookupField's BaseProfile). Slim BizProfile in
+  // the draft store is constructed from a subset of these fields below.
+  const [baseProfile, setBaseProfile] = useState<{
+    bizNo: string;
+    name: string;
+    ceoName: string;
+    ksic: string;
+    taxType: 'general' | 'simple' | 'exempt';
+    status: 'active' | 'suspended' | 'closed';
+    mailOrderNo?: string;
+  } | null>(null);
   const [gradeConfirmed, setGradeConfirmed] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [minDate] = useState(() => new Date(Date.now() + 86_400_000).toISOString().slice(0, 10));
@@ -70,12 +80,14 @@ export function RfqCreateForm() {
     revenueYear?: string;
   }) => {
     if (!baseProfile) return;
+    // Slim BizProfile only stores DB-shaped fields. Mock NTS extras (name/ceoName/etc.)
+    // remain in local component state and are dropped here.
     draft.setBizProfile({
-      ...baseProfile,
+      bizNo: baseProfile.bizNo,
+      taxType: baseProfile.taxType,
+      status: baseProfile.status,
       grade: result.grade,
       gradeSource: result.gradeSource,
-      estimatedRevenue: result.estimatedRevenue,
-      revenueYear: result.revenueYear,
     });
     setGradeConfirmed(true);
   };
