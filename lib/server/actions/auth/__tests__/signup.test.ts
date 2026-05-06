@@ -126,6 +126,20 @@ describe('signupEmailAction + verifyEmailAction', () => {
     if (!v.ok) return;
     expect(v.workspaceType).toBe('pg');
   });
+
+  it('returns EMAIL_TAKEN if user with that email already exists', async () => {
+    await signupCompleteAction({
+      email: 'existing@example.com',
+      name: '기존사용자',
+      password: 'Password123!',
+      wsKind: 'buyer',
+      wsName: '테스트워크스페이스',
+    });
+
+    const r = await signupEmailAction({ email: 'existing@example.com' });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toBe('EMAIL_TAKEN');
+  });
 });
 
 function tokenFromHtml(html: string): string {

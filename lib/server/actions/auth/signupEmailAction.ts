@@ -2,6 +2,7 @@
 
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
+import { eq } from 'drizzle-orm';
 
 import {
   getOutboxRepo,
@@ -10,7 +11,9 @@ import {
 import { addMinutes, generateToken, hashToken } from '@/lib/server/token';
 import { renderAuthVerify } from '@/lib/server/outbox/templates/authVerify';
 import { flushAfterCommit } from '@/lib/server/outbox/post-commit';
+import { users } from '@/lib/db/schema';
 import {
+  actionDb,
   baseUrl,
   bucket15Min,
   normalizeEmail,
@@ -43,6 +46,14 @@ export async function signupEmailAction(
   if (!parsed.success) return { ok: false, error: 'INVALID_INPUT' };
 
   const email = normalizeEmail(parsed.data.email);
+
+  const [existing] = await actionDb()
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+  if (existing) return { ok: false, error: 'EMAIL_TAKEN' };
+
   const rawToken = generateToken();
   const tokenHash = hashToken(rawToken);
   const expiresAt = addMinutes(new Date(), 15);

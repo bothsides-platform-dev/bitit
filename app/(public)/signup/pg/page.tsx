@@ -54,7 +54,7 @@ export default function PgSignupEmailPage() {
 
     if (!r.ok) {
       setSubmitting(false);
-      setError('이메일을 보내지 못했습니다. 잠시 후 다시 시도해주세요.');
+      setError(r.error);
       return;
     }
 
@@ -107,14 +107,26 @@ export default function PgSignupEmailPage() {
 
         <AgreementCheckboxes value={agreements} onChange={setAgreements} />
 
-        {error && (
+        {error === 'EMAIL_TAKEN' ? (
+          <div role="alert" className="space-y-0.5">
+            <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]">
+              이미 가입된 이메일입니다.
+            </p>
+            <Link
+              href={`/login?email=${encodeURIComponent(emailInput)}`}
+              className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-ink)] underline underline-offset-2 block"
+            >
+              → 로그인하기
+            </Link>
+          </div>
+        ) : error ? (
           <p
             role="alert"
             className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]"
           >
-            {error}
+            이메일을 보내지 못했습니다. 잠시 후 다시 시도해주세요.
           </p>
-        )}
+        ) : null}
 
         <Button type="submit" fullWidth size="lg" disabled={!canSubmit}>
           {submitting ? 'LOADING…' : '인증 메일 받기'}

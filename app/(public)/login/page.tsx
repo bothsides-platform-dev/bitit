@@ -12,7 +12,9 @@ function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get('next') ?? '/home';
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(
+    () => searchParams.get('email') ?? '',
+  );
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
