@@ -26,6 +26,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@react-email/render": "^2.0.8",
+    "@supabase/supabase-js": "^2.105.3",
     "@tanstack/react-table": "^8.21.3",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",

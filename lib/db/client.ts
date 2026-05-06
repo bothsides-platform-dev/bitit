@@ -11,8 +11,7 @@ declare global {
 const client =
   globalThis.__bidit_pg__ ??
   postgres(process.env.DATABASE_URL!, {
-    // Reasonable defaults for Next.js dev/prod runtimes.
-    max: 10,
+    max: 1,
     idle_timeout: 20,
     connect_timeout: 10,
   });
