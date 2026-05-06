@@ -9,11 +9,13 @@ type SignupDraftStore = SignupDraft & {
   setProfile: (name: string, phone?: string) => void;
   setAgreedAt: (at: string) => void;
   setStep: (step: SignupDraft['step']) => void;
+  setWorkspaceType: (t: 'buyer' | 'pg') => void;
   reset: () => void;
 };
 
 const initial: SignupDraft = {
   step: 'email',
+  workspaceType: undefined,
   email: '',
   emailVerified: false,
 };
@@ -25,5 +27,6 @@ export const useSignupDraftStore = create<SignupDraftStore>((set) => ({
   setProfile: (name, phone) => set({ name, phone }),
   setAgreedAt: (agreedAt) => set({ agreedAt }),
   setStep: (step) => set({ step }),
+  setWorkspaceType: (workspaceType) => set({ workspaceType }),
   reset: () => set(initial),
 }));

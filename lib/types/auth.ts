@@ -15,6 +15,7 @@ export type Credentials = { email: string; password: string };
 
 export type SignupDraft = {
   step: 'email' | 'profile' | 'workspace';
+  workspaceType?: 'buyer' | 'pg';
   email: string;
   emailVerified: boolean;
   name?: string;

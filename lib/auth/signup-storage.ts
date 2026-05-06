@@ -12,6 +12,7 @@
 const KEY = 'signupDraft';
 
 export type SignupClientDraft = {
+  workspaceType?: 'buyer' | 'pg';
   email?: string;
   emailVerified?: boolean;
   inviteToken?: string;
