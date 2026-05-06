@@ -1,0 +1,197 @@
+'use server';
+
+import { z } from 'zod';
+import { randomUUID } from 'node:crypto';
+import { and, eq } from 'drizzle-orm';
+
+import { requireBuyerSession } from '@/lib/auth/session';
+import {
+  bids,
+  rfqs,
+  users,
+  workspaceMembers,
+} from '@/lib/db/schema';
+import {
+  getContractRepo,
+  getNotificationRepo,
+  getOutboxRepo,
+  getRfqRepo,
+} from '@/lib/server/repositories/factory';
+import { actionDb, type RfqActionResult } from './_shared';
+
+const Input = z
+  .object({
+    rfqId: z.string().min(1),
+    awardedBidId: z.string().uuid(),
+  })
+  .strict();
+
+export type AwardRfqInput = z.infer<typeof Input>;
+export type AwardRfqResult = RfqActionResult;
+
+/**
+ * RFQ 수주 확정.
+ *
+ * 트랜잭션:
+ *   1) ownership 검증 — `rfq.buyer_ws_id === session.workspaceId`
+ *   2) `rfqRepo.transition(id, 'awarded', { awardedBidId })`
+ *      DB 레이어 `WHERE status='sent'` 가드 + assertTransition 동시 적용
+ *   3) `contracts` insert (RFQ 1:1 unique — 중복 awardRfq 시 throw 안 하고
+ *      onConflictDoNothing)
+ *   4) **알림 비대칭 (advisor pin 6)**:
+ *        - winner = 낙찰 PG ws 멤버 each:
+ *            notifications.insert(channel='in_app', type='rfq.awarded')
+ *          + outbox_entries.enqueue(rfq.awarded, dedupe rfq:{id}:awarded:{email})
+ *        - loser  = 다른 입찰 PG ws 멤버 each (status='submitted', id != awardedBid):
+ *            notifications.insert(channel='in_app', type='rfq.rejected')
+ *          ❌ outbox enqueue **안 함** — 이메일 안 보냄.
+ */
+export async function awardRfqAction(
+  input: AwardRfqInput,
+): Promise<AwardRfqResult> {
+  let session;
+  try {
+    session = await requireBuyerSession();
+  } catch {
+    return { ok: false, error: 'FORBIDDEN_BUYER' };
+  }
+
+  const parsed = Input.safeParse(input);
+  if (!parsed.success) return { ok: false, error: 'INVALID_INPUT' };
+
+  const { rfqId, awardedBidId } = parsed.data;
+  const wsId = session.user.workspaceId;
+  const userId = session.user.id;
+  const db = actionDb();
+
+  return await db.transaction(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async (tx: any): Promise<AwardRfqResult> => {
+      // 1. ownership 검증
+      const [rfqRow] = await tx
+        .select({ buyerWsId: rfqs.buyerWsId, status: rfqs.status })
+        .from(rfqs)
+        .where(eq(rfqs.id, rfqId))
+        .limit(1);
+      if (!rfqRow) return { ok: false, error: 'RFQ_NOT_FOUND' };
+      if (rfqRow.buyerWsId !== wsId) {
+        return { ok: false, error: 'FORBIDDEN_BUYER' };
+      }
+
+      // 2. transition — repo가 assertTransition + WHERE status='sent' 가드.
+      const rfqRepo = await getRfqRepo();
+      try {
+        await rfqRepo.transition(rfqId, 'awarded', { awardedBidId }, tx);
+      } catch (e) {
+        return {
+          ok: false,
+          error: `INVALID_TRANSITION: ${(e as Error).message}`,
+        };
+      }
+
+      // 3. contract row.
+      const contracts = await getContractRepo();
+      await contracts.save(
+        {
+          id: randomUUID(),
+          rfqId,
+          bidId: awardedBidId,
+          awardedAt: new Date().toISOString(),
+          awardedBy: userId,
+        },
+        tx,
+      );
+
+      // 4. winner / loser 분리.
+      const allBids = await tx
+        .select({ id: bids.id, pgWsId: bids.pgWsId })
+        .from(bids)
+        .where(and(eq(bids.rfqId, rfqId), eq(bids.status, 'submitted')));
+
+      const winner = allBids.find(
+        (b: { id: string; pgWsId: string }) => b.id === awardedBidId,
+      );
+      if (!winner) return { ok: false, error: 'WINNING_BID_NOT_FOUND' };
+
+      const losers = allBids.filter(
+        (b: { id: string; pgWsId: string }) => b.id !== awardedBidId,
+      );
+
+      const notifRepo = await getNotificationRepo();
+      const outbox = await getOutboxRepo();
+
+      // — winner: in-app 알림 N + 이메일 outbox N (멤버 수만큼)
+      const winnerMembers = await tx
+        .select({ userId: workspaceMembers.userId })
+        .from(workspaceMembers)
+        .where(eq(workspaceMembers.workspaceId, winner.pgWsId));
+      for (const m of winnerMembers as { userId: string }[]) {
+        const notifId = randomUUID();
+        await notifRepo.save(
+          {
+            id: notifId,
+            userId: m.userId,
+            workspaceId: winner.pgWsId,
+            type: 'rfq.awarded',
+            title: `[${rfqId}] 낙찰`,
+            body: '제출하신 견적이 낙찰되었습니다.',
+            channel: 'inapp',
+            status: 'pending',
+            linkUrl: `/inbox/${rfqId}`,
+            createdAt: new Date().toISOString(),
+          },
+          tx,
+        );
+      }
+
+      // 이메일은 사람 단위가 아니라 RFQ × ws 단위 1통 — 정책상 멤버별로 보낼
+      // 이유 없음 + dedupeKey 필요. 여기서는 winner 멤버 each address 로 발송
+      // (각자 이메일이 다름) + dedupe `rfq:{id}:awarded:{email}` 로 collapse.
+      const winnerEmails = await tx
+        .select({ email: users.email })
+        .from(workspaceMembers)
+        .innerJoin(users, eq(workspaceMembers.userId, users.id))
+        .where(eq(workspaceMembers.workspaceId, winner.pgWsId));
+      for (const row of winnerEmails as { email: string }[]) {
+        await outbox.enqueue(
+          {
+            event: 'rfq.awarded',
+            to: row.email,
+            subject: `[${rfqId}] 낙찰 결과`,
+            html: `<p>제출하신 ${rfqId} 견적이 낙찰되었습니다.</p>`,
+            dedupeKey: `rfq:${rfqId}:awarded:${row.email}`,
+          },
+          tx,
+        );
+      }
+
+      // — loser: in-app 알림만 (이메일 없음 — advisor pin 6).
+      for (const loser of losers as { id: string; pgWsId: string }[]) {
+        const memberRows = await tx
+          .select({ userId: workspaceMembers.userId })
+          .from(workspaceMembers)
+          .where(eq(workspaceMembers.workspaceId, loser.pgWsId));
+        for (const m of memberRows as { userId: string }[]) {
+          const notifId = randomUUID();
+          await notifRepo.save(
+            {
+              id: notifId,
+              userId: m.userId,
+              workspaceId: loser.pgWsId,
+              type: 'rfq.rejected',
+              title: `[${rfqId}] 미낙찰`,
+              body: '다른 PG가 선정되었습니다.',
+              channel: 'inapp',
+              status: 'pending',
+              linkUrl: `/inbox/${rfqId}`,
+              createdAt: new Date().toISOString(),
+            },
+            tx,
+          );
+        }
+      }
+
+      return { ok: true };
+    },
+  );
+}
