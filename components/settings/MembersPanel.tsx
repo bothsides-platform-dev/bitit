@@ -7,15 +7,13 @@
  * 역할 토글 모두 클라이언트 로컬 상태로만 처리(서버 액션 미구현 — 후속 마일스톤).
  */
 import { useState } from 'react';
+import { Avatar } from '@/components/primitives/Avatar';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
 import { Button } from '@/components/primitives/Button';
-import { Avatar } from '@/components/primitives/Avatar';
 import { RoleBadge } from '@/components/primitives/RoleBadge';
 import { Tag } from '@/components/primitives/Tag';
 import { formatDate } from '@/lib/format';
 import type { User, Role } from '@/lib/types/user';
-
-const COLORS: User['avatarColor'][] = ['lavender', 'amber', 'moss', 'accent', 'terra', 'ink'];
 
 type Props = {
   workspaceName: string;
@@ -77,7 +75,7 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
       {/* Members list */}
       <section>
         <div className="flex items-center gap-3 mb-4">
-          <Eyebrow>FIG. 01 — 활성 멤버</Eyebrow>
+          <Eyebrow>활성 멤버</Eyebrow>
           <span className="font-mono tabular-nums text-[11px] text-[var(--color-ink-soft)]">
             {String(members.length).padStart(2, '0')}
           </span>
@@ -111,7 +109,7 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
       {pendingInvites.length > 0 && (
         <section>
           <div className="flex items-center gap-3 mb-4">
-            <Eyebrow>FIG. 02 — 초대 대기</Eyebrow>
+            <Eyebrow>초대 대기</Eyebrow>
             <span className="font-mono tabular-nums text-[11px] text-[var(--color-amber)]">
               {String(pendingInvites.length).padStart(2, '0')}
             </span>
@@ -144,7 +142,7 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
       {/* Invite form */}
       <section>
         <div className="flex items-center gap-3 mb-4">
-          <Eyebrow>FIG. {pendingInvites.length > 0 ? '03' : '02'} — 멤버 초대</Eyebrow>
+          <Eyebrow>멤버 초대</Eyebrow>
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
         <form onSubmit={handleInvite} className="space-y-4">
@@ -167,7 +165,7 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
                     key={r}
                     type="button"
                     onClick={() => setInviteRole(r)}
-                    className={`flex-1 h-10 px-3 font-mono text-[11px] tracking-[0.1em] uppercase transition-colors ${
+                    className={`flex-1 h-10 px-3 font-mono text-[11px] tracking-[0.1em] uppercase rounded-[var(--r)] transition-colors ${
                       inviteRole === r
                         ? 'border border-[var(--color-ink)] text-[var(--color-ink)]'
                         : 'border border-[var(--color-hair)] text-[var(--color-ink-soft)] hover:border-[var(--color-hair-strong)]'
@@ -178,7 +176,7 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
                 ))}
               </div>
             </div>
-            <Button type="submit" disabled={!inviteEmail.trim()}>
+            <Button type="submit" disabled={!inviteEmail.trim()} className="md:ml-4">
               초대 발송
             </Button>
           </div>
@@ -193,15 +191,6 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
         </form>
       </section>
 
-      {/* Avatar swatches preview (decorative) */}
-      <section className="pt-6 border-t border-[var(--color-hair)]">
-        <Eyebrow className="block mb-3">아바타 색상 팔레트</Eyebrow>
-        <div className="flex gap-2">
-          {COLORS.map((c) => (
-            <Avatar key={c} name={c.toUpperCase()} color={c} size="sm" />
-          ))}
-        </div>
-      </section>
     </>
   );
 }

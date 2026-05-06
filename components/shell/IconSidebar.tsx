@@ -68,11 +68,6 @@ export function IconSidebar() {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="mb-1 items-center p-0">
-        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-sidebar-foreground opacity-20 [writing-mode:vertical-lr] rotate-180">
-          v0 · 2026
-        </span>
-      </SidebarFooter>
     </Sidebar>
   );
 }
