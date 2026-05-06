@@ -17,10 +17,12 @@ type NotificationsStore = {
   retry: (id: string) => void;
 };
 
-let seq = 0;
 function nextId(): string {
-  seq += 1;
-  return `notif-runtime-${seq.toString().padStart(3, '0')}`;
+  const uuid =
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  return `notif-runtime-${uuid}`;
 }
 
 export const useNotificationsStore = create<NotificationsStore>((set) => ({

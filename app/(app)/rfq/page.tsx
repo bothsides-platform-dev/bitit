@@ -33,7 +33,7 @@ export default function RfqListPage() {
   const router = useRouter();
   const rowRefs = useRef<Array<HTMLTableRowElement | null>>([]);
 
-  const { active, setActive } = useListNavigation(rfqs.length, {
+  const { active } = useListNavigation(rfqs.length, {
     onEnter: (i) => router.push(`/rfq/${rfqs[i].id}`),
     onEdit: (i) => router.push(`/rfq/${rfqs[i].id}`),
   });
@@ -85,7 +85,6 @@ export default function RfqListPage() {
                   key={rfq.id}
                   ref={(el) => { rowRefs.current[i] = el; }}
                   onClick={() => router.push(`/rfq/${rfq.id}`)}
-                  onMouseEnter={() => setActive(i)}
                   data-active={active === i}
                   className="group border-b border-[var(--color-hair)] hover:bg-[var(--color-paper-warm)] data-[active=true]:bg-[var(--color-paper-warm)] cursor-pointer transition-colors"
                 >

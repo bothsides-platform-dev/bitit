@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 export type ShortcutOptions = {
   meta?: boolean; // ⌘ (mac) or Ctrl (win/linux)
@@ -24,19 +24,27 @@ export function useShortcut(
   handler: (e: KeyboardEvent) => void,
   opts: ShortcutOptions = {},
 ) {
+  const handlerRef = useRef(handler);
+  useLayoutEffect(() => {
+    handlerRef.current = handler;
+  }, [handler]);
+
+  const { meta, shift, preventInInput } = opts;
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (opts.preventInInput !== false && isEditable(e.target)) {
-        if (e.key !== 'Escape') return;
+      const isEscape = e.key === 'Escape';
+      if (preventInInput !== false && isEditable(e.target) && !isEscape) return;
+      if (!isEscape) {
+        if (meta && !(e.metaKey || e.ctrlKey)) return;
+        if (!meta && (e.metaKey || e.ctrlKey)) return;
       }
-      if (opts.meta && !(e.metaKey || e.ctrlKey)) return;
-      if (!opts.meta && (e.metaKey || e.ctrlKey)) return;
-      if (opts.shift !== undefined && opts.shift !== e.shiftKey) return;
+      if (shift !== undefined && shift !== e.shiftKey) return;
       if (e.key.toLowerCase() !== key.toLowerCase()) return;
 
-      handler(e);
+      handlerRef.current(e);
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [key, handler, opts.meta, opts.shift, opts.preventInInput]);
+  }, [key, meta, shift, preventInInput]);
 }

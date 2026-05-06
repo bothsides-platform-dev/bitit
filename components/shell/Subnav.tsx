@@ -18,7 +18,7 @@ export function Subnav({ title, items, action }: SubnavProps) {
 
   return (
     <aside
-      className="flex flex-col border-r border-[var(--color-hair)] bg-[var(--color-paper)] overflow-y-auto"
+      className="flex flex-col shrink-0 border-r border-[var(--color-hair)] bg-[var(--color-paper)] overflow-y-auto"
       style={{ width: 'var(--shell-subnav)' }}
     >
       <div className="px-5 py-4 border-b border-[var(--color-hair)] flex items-center justify-between">

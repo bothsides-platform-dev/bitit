@@ -83,6 +83,7 @@ export default function RfqDetailPage({ params }: Props) {
           bids={rfqBids}
           grade={bizProfile.grade}
           rfqStatus={rfq.status}
+          awardedBidId={rfq.awardedBidId}
         />
       </section>
 

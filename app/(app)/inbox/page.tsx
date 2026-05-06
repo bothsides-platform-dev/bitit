@@ -45,7 +45,7 @@ export default function InboxPage() {
       .filter((r): r is { inv: typeof myInvitations[0]; rfq: typeof MOCK_RFQS[0] } => r !== null);
   }, []);
 
-  const { active, setActive } = useListNavigation(rows.length, {
+  const { active } = useListNavigation(rows.length, {
     onEnter: (i) => router.push(`/inbox/${rows[i].rfq.id}`),
     onEdit: (i) => router.push(`/inbox/${rows[i].rfq.id}`),
   });
@@ -96,7 +96,6 @@ export default function InboxPage() {
                     key={inv.id}
                     ref={(el) => { rowRefs.current[i] = el; }}
                     onClick={() => router.push(`/inbox/${rfq.id}`)}
-                    onMouseEnter={() => setActive(i)}
                     data-active={active === i}
                     className="group border-b border-[var(--color-hair)] hover:bg-[var(--color-paper-warm)] data-[active=true]:bg-[var(--color-paper-warm)] cursor-pointer transition-colors"
                   >

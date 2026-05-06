@@ -13,8 +13,9 @@ export function GlobalShortcuts() {
 
   useShortcut('n', (e) => {
     e.preventDefault();
+    if (paletteOpen) closePalette();
     router.push('/rfq/new');
-  }, { meta: true });
+  }, { meta: true, preventInInput: false });
 
   useShortcut('Escape', () => {
     if (paletteOpen) closePalette();

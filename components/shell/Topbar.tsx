@@ -5,10 +5,11 @@ import { useNotificationsStore } from '@/lib/stores/notifications';
 import { IconButton } from '@/components/primitives/IconButton';
 import { BellIcon, SearchIcon } from '@/components/icons';
 import { Avatar } from '@/components/primitives/Avatar';
-import { MOCK_SESSION_BUYER } from '@/lib/mock/workspaces';
+import { useMockSession } from '@/lib/mock/session';
 
 export function Topbar() {
   const { openNotificationDrawer, openCommandPalette } = useUIStore();
+  const { session, user } = useMockSession();
   const unreadCount = useNotificationsStore((s) =>
     s.notifications.filter((n) => n.status === 'pending' || n.status === 'sent').length,
   );
@@ -43,8 +44,8 @@ export function Topbar() {
 
         {/* User avatar */}
         <Avatar
-          name={MOCK_SESSION_BUYER.name}
-          color="accent"
+          name={user?.name ?? session.name}
+          color={user?.avatarColor ?? 'ink'}
           size="sm"
           className="cursor-pointer"
         />

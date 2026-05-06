@@ -54,9 +54,10 @@ type Props = {
   bids: Bid[];
   grade: MerchantGrade | undefined;
   rfqStatus: string;
+  awardedBidId?: string;
 };
 
-export function BidComparisonTable({ rfqId, bids, grade, rfqStatus }: Props) {
+export function BidComparisonTable({ rfqId, bids, grade, rfqStatus, awardedBidId }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('settle');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
 
@@ -154,8 +155,11 @@ export function BidComparisonTable({ rfqId, bids, grade, rfqStatus }: Props) {
                       <Button variant="secondary" size="sm">선택</Button>
                     </Link>
                   )}
-                  {!canAward && (
+                  {!canAward && awardedBidId === bid.id && (
                     <Tag variant="moss">수주</Tag>
+                  )}
+                  {!canAward && awardedBidId && awardedBidId !== bid.id && (
+                    <Tag variant="muted">미선정</Tag>
                   )}
                 </td>
               </tr>

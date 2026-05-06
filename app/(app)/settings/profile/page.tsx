@@ -12,6 +12,14 @@ import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
 import { formatDate } from '@/lib/format';
 
 const AVATAR_COLORS = ['ink', 'accent', 'lavender', 'amber', 'moss', 'terra'] as const;
+const AVATAR_COLOR_VAR: Record<typeof AVATAR_COLORS[number], string> = {
+  ink: 'var(--color-ink)',
+  accent: 'var(--color-accent)',
+  lavender: 'var(--color-lavender)',
+  amber: 'var(--color-amber)',
+  moss: 'var(--color-moss)',
+  terra: 'var(--color-terracotta)',
+};
 
 export default function ProfilePage() {
   const ws = MOCK_WORKSPACES.find((w) => w.id === MOCK_SESSION_BUYER.workspaceId)!;
@@ -60,7 +68,7 @@ export default function ProfilePage() {
                   className={`w-6 h-6 rounded-[var(--r-sm)] transition-all ${
                     color === c ? 'ring-2 ring-offset-2 ring-[var(--color-ink)] ring-offset-[var(--color-paper)]' : 'opacity-60 hover:opacity-100'
                   }`}
-                  style={{ background: `var(--color-${c === 'terra' ? 'terracotta' : c})` }}
+                  style={{ background: AVATAR_COLOR_VAR[c] }}
                 />
               ))}
             </div>

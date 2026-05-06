@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/primitives/Button';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
@@ -10,7 +10,9 @@ import { PgEmailAllowlist } from './PgEmailAllowlist';
 import { RfpAttachmentDropzone } from './RfpAttachmentDropzone';
 import { useRfqDraftStore } from '@/lib/stores/rfq-draft';
 import { useRfqListStore } from '@/lib/stores/rfq-list';
+import { useNotificationsStore } from '@/lib/stores/notifications';
 import { useShortcut } from '@/lib/hooks/useShortcut';
+import { MOCK_SESSION_BUYER } from '@/lib/mock/workspaces';
 import type { BizProfile } from '@/lib/types/biz-profile';
 import type { RFQ } from '@/lib/types/rfq';
 
@@ -38,12 +40,12 @@ export function RfqCreateForm() {
   const draft = useRfqDraftStore();
   const addRfq = useRfqListStore((s) => s.addRfq);
   const rfqs = useRfqListStore((s) => s.rfqs);
+  const addNotification = useNotificationsStore((s) => s.add);
 
   const [baseProfile, setBaseProfile] = useState<Omit<BizProfile, 'grade' | 'gradeSource' | 'gradeConfirmedBy' | 'gradeConfirmedAt' | 'estimatedRevenue' | 'revenueYear' | 'niceLookedUpAt'> | null>(null);
   const [gradeConfirmed, setGradeConfirmed] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
-  // eslint-disable-next-line react-hooks/purity
-  const minDate = useMemo(() => new Date(Date.now() + 86_400_000).toISOString().slice(0, 10), []);
+  const [minDate] = useState(() => new Date(Date.now() + 86_400_000).toISOString().slice(0, 10));
 
   const handleDraftSave = useCallback(() => {
     setSavedAt(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
@@ -99,6 +101,18 @@ export function RfqCreateForm() {
     };
 
     addRfq(rfq);
+
+    addNotification({
+      userId: MOCK_SESSION_BUYER.userId,
+      workspaceId: MOCK_SESSION_BUYER.workspaceId,
+      type: 'rfq_invited',
+      title: `${rfq.id} — ${draft.allowedPgEmails.length}개 PG에 초대 발송`,
+      body: `${rfq.title.trim()} 견적 요청이 ${draft.allowedPgEmails.join(', ')} 에 발송되었습니다.`,
+      channel: 'email',
+      status: 'sent',
+      linkUrl: `/rfq/${rfq.id}`,
+    });
+
     draft.reset();
     router.push('/rfq');
   };

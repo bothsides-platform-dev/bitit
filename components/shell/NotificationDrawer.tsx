@@ -1,13 +1,13 @@
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useUIStore } from '@/lib/stores/ui';
 import { useNotificationsStore } from '@/lib/stores/notifications';
 import { XIcon, EnvelopeIcon } from '@/components/icons';
 import { IconButton } from '@/components/primitives/IconButton';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
 import { Tag } from '@/components/primitives/Tag';
-import type { NotificationStatus } from '@/lib/types/notification';
+import type { Notification, NotificationStatus } from '@/lib/types/notification';
 
 const statusVariant: Record<NotificationStatus, 'amber' | 'moss' | 'terracotta' | 'muted'> = {
   pending: 'amber',
@@ -32,6 +32,7 @@ function timeAgo(iso: string): string {
 }
 
 export function NotificationDrawer() {
+  const router = useRouter();
   const { notificationDrawerOpen, closeNotificationDrawer } = useUIStore();
   const notifications = useNotificationsStore((s) => s.notifications);
   const markRead = useNotificationsStore((s) => s.markRead);
@@ -41,9 +42,10 @@ export function NotificationDrawer() {
     (n) => n.status === 'pending' || n.status === 'sent',
   ).length;
 
-  const handleClick = (id: string) => {
-    markRead(id);
+  const handleClick = (notif: Notification) => {
+    markRead(notif.id);
     closeNotificationDrawer();
+    if (notif.linkUrl) router.push(notif.linkUrl);
   };
 
   return (
@@ -104,12 +106,14 @@ export function NotificationDrawer() {
           ) : (
             notifications.map((notif) => {
               const isUnread = notif.status === 'pending' || notif.status === 'sent';
-              const Inner = (
-                <div
-                  className={`relative px-6 py-4 border-b border-[var(--color-hair)] hover:bg-[var(--color-paper-warm)] transition-colors cursor-pointer ${
+              return (
+                <button
+                  key={notif.id}
+                  type="button"
+                  onClick={() => handleClick(notif)}
+                  className={`w-full text-left relative px-6 py-4 border-b border-[var(--color-hair)] hover:bg-[var(--color-paper-warm)] transition-colors ${
                     isUnread ? 'bg-[var(--color-paper)]' : 'opacity-60'
                   }`}
-                  onClick={() => handleClick(notif.id)}
                 >
                   {isUnread && (
                     <span className="absolute left-2 top-5 w-1 h-1 rounded-full bg-[var(--color-amber)]" />
@@ -128,15 +132,7 @@ export function NotificationDrawer() {
                   <span className="font-mono text-[10px] text-[var(--color-ink-soft)] mt-2 block tabular-nums">
                     {timeAgo(notif.createdAt)}
                   </span>
-                </div>
-              );
-
-              return notif.linkUrl ? (
-                <Link key={notif.id} href={notif.linkUrl}>
-                  {Inner}
-                </Link>
-              ) : (
-                <div key={notif.id}>{Inner}</div>
+                </button>
               );
             })
           )}
