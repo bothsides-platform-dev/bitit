@@ -96,7 +96,7 @@ describe('scenario A — buyer signs up, captures bizProfile, creates+sends RFQ'
     });
     expect(p6.ok).toBe(true);
     if (!p6.ok) return;
-    expect(p6.redirectTo).toBe('/home');
+    expect(p6.redirectTo).toBe('/rfq');
 
     const [u] = await db
       .select()
