@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Tag } from '@/components/primitives/Tag';
 import { Button } from '@/components/primitives/Button';
 import { EmptyState } from '@/components/primitives/EmptyState';
-import { MOCK_WORKSPACES } from '@/lib/mock/workspaces';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
 import { formatKRW, formatPct } from '@/lib/format';
 import type { Bid } from '@/lib/types/bid';
@@ -19,10 +18,6 @@ const SETTLE_ORDER: Record<string, number> = { 'D+0': 0, 'D+1': 1, 'D+2': 2, wee
 const SETTLE_LABEL: Record<string, string> = {
   'D+0': 'D+0', 'D+1': 'D+1', 'D+2': 'D+2', weekly: '주1회', monthly: '월1회',
 };
-
-function pgName(wsId: string): string {
-  return MOCK_WORKSPACES.find((w) => w.id === wsId)?.name ?? wsId;
-}
 
 function min(bids: Bid[], key: (b: Bid) => number): number {
   return Math.min(...bids.map(key));
@@ -54,11 +49,15 @@ type Props = {
   grade: MerchantGrade | undefined;
   rfqStatus: string;
   awardedBidId?: string;
+  /** pgWsId → workspace name. RSC 호출자가 dedup된 id 목록으로 미리 채움. */
+  pgWsNameMap: Record<string, string>;
 };
 
-export function BidComparisonTable({ rfqId, bids, grade, rfqStatus, awardedBidId }: Props) {
+export function BidComparisonTable({ rfqId, bids, grade, rfqStatus, awardedBidId, pgWsNameMap }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('settle');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  const pgName = (wsId: string): string => pgWsNameMap[wsId] ?? wsId;
 
   if (bids.length === 0) {
     return (
