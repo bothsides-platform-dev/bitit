@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useUIStore } from '@/lib/stores/ui';
 import { useNotifications } from '@/lib/hooks/useNotifications';
 import { IconButton } from '@/components/primitives/IconButton';
@@ -23,6 +24,7 @@ export function Topbar({ user }: TopbarProps) {
   const { openNotificationDrawer, openCommandPalette } = useUIStore();
   // Step 9: unread 배지 = SSE 라이브 카운트.
   const { unreadCount } = useNotifications();
+  const router = useRouter();
 
   async function handleLogout() {
     await fetch('/logout', { method: 'POST' });
@@ -38,12 +40,12 @@ export function Topbar({ user }: TopbarProps) {
       <button
         type="button"
         onClick={openCommandPalette}
-        className="flex items-center gap-2 h-8 px-3 rounded-[var(--r-sm)] border border-[var(--color-hair)] text-[var(--color-ink-soft)] hover:border-[var(--color-hair-strong)] hover:text-[var(--color-ink)] transition-colors duration-[140ms]"
+        className="flex items-center gap-2 h-8 w-72 px-3 rounded-[var(--r-sm)] border border-[var(--color-hair)] text-[var(--color-ink-soft)] hover:border-[var(--color-hair-strong)] hover:text-[var(--color-ink)] transition-colors duration-[140ms]"
         aria-label="검색 (⌘K)"
       >
         <SearchIcon size={14} />
         <span className="font-mono text-[11px] tracking-[0.1em]">검색</span>
-        <kbd className="ml-2 font-mono text-[9px] tracking-[0.1em] opacity-50">⌘K</kbd>
+        <kbd className="ml-auto font-mono text-[9px] tracking-[0.1em] opacity-50">⌘K</kbd>
       </button>
 
       <div className="flex items-center gap-2">
@@ -77,6 +79,12 @@ export function Topbar({ user }: TopbarProps) {
               </p>
             </div>
             <DropdownMenuSeparator className="bg-[var(--color-hair)]" />
+            <DropdownMenuItem
+              onClick={() => router.push('/settings/profile')}
+              className="font-mono text-[11px] tracking-[0.04em] text-[var(--color-ink)] cursor-pointer px-2 py-1.5 rounded-[var(--r-sm)] hover:bg-[var(--color-field)]"
+            >
+              설정
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={handleLogout}
               className="font-mono text-[11px] tracking-[0.04em] text-[var(--color-ink)] cursor-pointer px-2 py-1.5 rounded-[var(--r-sm)] hover:bg-[var(--color-field)]"
