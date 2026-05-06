@@ -32,11 +32,15 @@ declare global {
  */
 export function getStorage(): Storage {
   if (!globalThis.__bidit_storage__) {
-    // Lazy require so the file system module isn't pulled into edge bundles
-    // by accident (route handlers explicitly opt in via `runtime='nodejs'`).
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { LocalStorage } = require('./local') as typeof import('./local');
-    globalThis.__bidit_storage__ = new LocalStorage();
+    if (process.env.STORAGE_BACKEND === 'supabase') {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { SupabaseStorage } = require('./supabase') as typeof import('./supabase');
+      globalThis.__bidit_storage__ = new SupabaseStorage();
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { LocalStorage } = require('./local') as typeof import('./local');
+      globalThis.__bidit_storage__ = new LocalStorage();
+    }
   }
   return globalThis.__bidit_storage__;
 }

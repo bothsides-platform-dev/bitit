@@ -6,6 +6,7 @@ import { Button } from '@/components/primitives/Button';
 import { EmptyState } from '@/components/primitives/EmptyState';
 import { PageEnter } from '@/components/primitives/PageEnter';
 import { FileTextIcon } from '@/components/icons';
+import { KpiCell } from '@/components/primitives/KpiCell';
 import { auth } from '@/auth';
 import { getRfqRepo, getUserRepo } from '@/lib/server/repositories/factory';
 import { formatDate } from '@/lib/format';
@@ -24,6 +25,7 @@ export default async function HomePage() {
 
   const rfqs = await (await getRfqRepo()).findByBuyerWs(session.user.workspaceId);
   const sentRfqs = rfqs.filter((r) => r.status === 'sent');
+  const awardedRfqs = rfqs.filter((r) => r.status === 'awarded');
 
   // 디스플레이 이름 (Topbar는 별도). hydrate 비용 최소화 위해 user repo 1회.
   const userRepo = await getUserRepo();
@@ -48,6 +50,25 @@ export default async function HomePage() {
           안녕하세요, <span>{displayName}</span>
           <span className="font-[200]"> — 님.</span>
         </h1>
+      </div>
+
+      {/* KPI Strip */}
+      <div className="flex items-start gap-16 mb-12 pb-12 border-b border-[var(--color-hair)]">
+        <KpiCell
+          label="전체 견적"
+          serial="A"
+          value={String(rfqs.length)}
+        />
+        <KpiCell
+          label="진행 중"
+          serial="B"
+          value={String(sentRfqs.length)}
+        />
+        <KpiCell
+          label="수주 완료"
+          serial="C"
+          value={String(awardedRfqs.length)}
+        />
       </div>
 
       {/* Active RFQs */}
@@ -75,7 +96,7 @@ export default async function HomePage() {
               <Link
                 key={rfq.id}
                 href={`/rfq/${rfq.id}`}
-                className="py-4 flex items-center justify-between group hover:bg-[var(--color-paper-warm)] -mx-4 px-4 cursor-pointer transition-colors"
+                className="relative py-4 flex items-center justify-between group hover:bg-[var(--color-paper-warm)] -mx-4 px-4 cursor-pointer transition-colors before:absolute before:left-0 before:top-0 before:bottom-0 before:w-2 before:bg-[var(--color-ink)] before:opacity-0 hover:before:opacity-100 before:transition-opacity"
               >
                 <div>
                   <p className="text-[13px] font-medium text-[var(--color-ink)]">

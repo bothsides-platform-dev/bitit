@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/primitives/Button';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Select } from '@/components/primitives/Select';
 import { StatutoryCardFeeNotice } from './StatutoryCardFeeNotice';
 import { submitBidAction } from '@/lib/server/actions/bid';
 import { STATUTORY_CARD_FEE, type CardIssuer } from '@/lib/types/bid';
@@ -248,15 +249,11 @@ export function BidForm({ rfqId, grade }: Props) {
         <div className="grid grid-cols-2 gap-x-6 gap-y-5">
           <div className="col-span-2 space-y-1">
             <Eyebrow>정산 주기</Eyebrow>
-            <select
+            <Select
+              options={SETTLE_CYCLES.map((c) => ({ value: c.value, label: c.label }))}
               value={settleCycle}
-              onChange={(e) => setSettleCycle(e.target.value as SettlementCycle)}
-              className={inputBase}
-            >
-              {SETTLE_CYCLES.map((c) => (
-                <option key={c.value} value={c.value}>{c.label}</option>
-              ))}
-            </select>
+              onChange={(v) => setSettleCycle(v as SettlementCycle)}
+            />
           </div>
           <KrwInput label="보증금" value={deposit} onChange={setDeposit} />
           <KrwInput label="셋업비" value={setupFee} onChange={setSetupFee} />
