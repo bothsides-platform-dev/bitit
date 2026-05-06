@@ -13,7 +13,7 @@
 |---|---|---|
 | **M0** | Next.js 16 + TS + Tailwind v4 + ESLint + 폰트 + 토큰 부트스트랩 | `pnpm dev` 정상, `/` 페이지에 Pretendard 적용 |
 | **M1** | AppShell + 공통 컴포넌트 12종 (primitives) | `/playground` 페이지에서 모든 컴포넌트 표시 |
-| **M1.5** | Public 영역 (인증/가입 11종) + AuthShell + middleware + mock 인증 | 시나리오 D·E·F 클릭스루, 60초 재발송 카운트다운, 비밀번호 강도 인디케이터 |
+| **M1.5** | Public 영역 — 역할 선택(Rs1), 구매사 가입(Bs1~Bs4), PG사 가입(Gs1~Gs4) + AuthShell + middleware + mock 인증 | 시나리오 D·E·F·G 클릭스루, 60초 재발송 카운트다운, 비밀번호 강도 인디케이터, PG 초대 핸드오프 |
 | **M1.6** | 서버 계약 골격: in-memory repositories, token hash, 상태 정책, notification outbox adapter | 상태 전이/토큰/권한/outbox Vitest 통과, DB 없이 API 계약 테스트 가능 |
 | **M2** | 구매사 RFQ 작성 (`/rfq/new`) + 사업자번호 enrichment + PG 이메일 allowlist | 시나리오 A 1~6단계 클릭스루 |
 | **M3** | PG 수신함/응답 (`/inbox`, `/inbox/:rfqId`) + 등급별 정형 6필드/카드사 9필드 | 시나리오 B 클릭스루, 일반등급 조건부 필드 노출 |
@@ -291,20 +291,24 @@ export default nextConfig;
 
 ### 8.2 시나리오 (M1.5 검증)
 
-**D · 신규 가입 (셀프서비스)**
-1. `/login` → `회원가입` → P2 이메일 + 약관 동의
-2. 인증 메일 발송 → P3 대기
-3. (mock) 토큰 URL 진입 → P4 → P5 자동
-4. 프로필 입력 → P6 워크스페이스 신규 생성 → `/home` (관리자)
+**D · 구매사 신규 가입 (셀프서비스)**
+1. `/login` → `회원가입` → Rs1 역할 선택 → "구매사" 카드
+2. Bs1 이메일 + 약관 → [인증 메일 받기] → Bs2 대기
+3. (mock) 토큰 URL → `/auth/verify` 스플래시 → Bs3 자동 이동
+4. 프로필 입력 → Bs4 워크스페이스 이름·산업 → [만들기] → `/rfq` (관리자)
 
-**E · 초대 수락**
-1. (mock) `/invite?token=...` 진입
-2. 미가입 이메일 → P5 (이메일 자동 채움) → P6 스킵 (자동 합류) → `/home` (멤버)
-3. 가입된 이메일이면 `/login?next=/invite?token=...` → 로그인 후 자동 합류
+**E · PG 초대 진입**
+1. (mock) `/invite/rfq/:token` 진입 — `SignupDraft` 선 채움 (workspaceType='pg', email, rfqInviteToken)
+2. Rs1 건너뜀 → Gs2 (이메일 자동 채움, 인증 메일 즉시 발송)
+3. (mock) 토큰 → Gs3 프로필 → Gs4 워크스페이스 자동 합류 → [합류하기] → `/inbox/:rfqId` (멤버)
 
-**F · 비밀번호 분실**
-1. `/login` → `비밀번호를 잊으셨나요?` → P7
-2. (mock) 토큰 → P8 새 비밀번호 → 자동 로그인 → `/home`
+**F · PG 직접 가입**
+1. `/signup` → Rs1 → "PG사 영업담당" 카드 → Gs1 이메일
+2. Gs2 → Gs3 → Gs4 → [합류하기] → `/inbox` (멤버)
+
+**G · 비밀번호 분실**
+1. `/login` → `비밀번호를 잊으셨나요?` → `/password/forgot`
+2. (mock) 토큰 → `/password/reset` → 새 비밀번호 → 자동 로그인 → `/home`
 
 ### 8.3 M1.5 검증 체크리스트
 
@@ -318,9 +322,16 @@ export default nextConfig;
 - [ ] `/logout` POST → 세션 삭제 → `/login`
 
 #### 시나리오
-- [ ] 시나리오 D 클릭스루 (P2 → P3 → P4 → P5 → P6 → /home)
-- [ ] 시나리오 E 클릭스루 (`/invite?token=...` → P5 → /home)
-- [ ] 시나리오 F 클릭스루 (P7 → P8 → /home)
+- [ ] 시나리오 D 클릭스루 (Rs1 → Bs1 → Bs2 → Bs3 → Bs4 → /rfq)
+- [ ] 시나리오 E 클릭스루 (`/invite/rfq/:token` → Gs2 → Gs3 → Gs4 → /inbox/:rfqId)
+- [ ] 시나리오 F 클릭스루 (Rs1 → Gs1 → Gs2 → Gs3 → Gs4 → /inbox)
+- [ ] 시나리오 G 클릭스루 (/password/forgot → /password/reset → /home)
+- [ ] 역할 선택 랜딩(Rs1) — 두 카드 클릭 시 각 경로로 이동
+- [ ] PG 초대 토큰 진입 — 이메일 자동 채움 + Rs1/Gs1 건너뜀 + Gs2 진입
+- [ ] SignupDraft.workspaceType — Rs1 선택 후 Bs4/Gs4까지 보존
+- [ ] 구매사 완료 후 `/rfq` 이동 확인
+- [ ] PG 완료 후 `/inbox` 이동 (초대 있으면 `/inbox/:rfqId`)
+- [ ] Stepper 단계 수: 구매사 04/04, PG 직접 04/04, PG 초대 03/03
 
 #### 폼 검증 (zod)
 - [ ] 잘못된 이메일 형식 → 인라인 에러

@@ -15,6 +15,8 @@
 // keep the request alive across the deploy boundary we'll swap this helper
 // without changing call sites.
 
+import * as Sentry from '@sentry/nextjs';
+
 import { getOutboxRepo } from '@/lib/server/repositories/factory';
 import { getResendSender } from '@/lib/integrations/resend';
 
@@ -31,5 +33,6 @@ export function flushAfterCommit(): void {
     })
     .catch((err) => {
       console.error('post-commit flush failed', err);
+      Sentry.captureException(err, { extra: { context: 'post-commit-flush' } });
     });
 }

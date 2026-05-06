@@ -28,7 +28,7 @@ function InviteContent() {
         </div>
       </div>
       <div className="space-y-3">
-        <Button fullWidth size="lg" onClick={() => router.push('/signup/profile')}>가입하고 합류</Button>
+        <Button fullWidth size="lg" onClick={() => router.push(`/signup/pg?token=${token}`)}>가입하고 합류</Button>
         <Button fullWidth variant="secondary" size="md" onClick={() => router.push('/login')}>로그인 후 합류</Button>
         <button type="button" className="block w-full text-center font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)] hover:text-[var(--color-ink-soft)] transition-colors">
           거절하기

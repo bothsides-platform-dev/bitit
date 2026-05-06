@@ -19,10 +19,11 @@
 // with HTTP 403. The default value is intentionally non-routable so a missing
 // override surfaces immediately.
 
+import * as Sentry from '@sentry/nextjs';
 import { Resend } from 'resend';
 import type { Sender } from '@/lib/server/outbox/types';
 
-const DEFAULT_FROM = 'noreply@bidit.local';
+const DEFAULT_FROM = 'send@bidit.store';
 
 function resolveFrom(): string {
   return process.env.RESEND_FROM ?? DEFAULT_FROM;
@@ -68,11 +69,27 @@ export const ResendSender: Sender = async (entry) => {
     if ('error' in result && result.error) {
       const err = result.error as { name?: string; message?: string };
       const message = err.message ?? err.name ?? 'resend_unknown_error';
+      Sentry.captureException(new Error(`Email send failed: ${message}`), {
+        extra: {
+          event: entry.event,
+          to: entry.to,
+          subject: entry.subject,
+          dedupeKey: entry.dedupeKey ?? null,
+        },
+      });
       return { ok: false, error: message };
     }
 
     return { ok: true };
   } catch (e) {
+    Sentry.captureException(e, {
+      extra: {
+        event: entry.event,
+        to: entry.to,
+        subject: entry.subject,
+        dedupeKey: entry.dedupeKey ?? null,
+      },
+    });
     return { ok: false, error: (e as Error).message ?? 'resend_threw' };
   }
 };

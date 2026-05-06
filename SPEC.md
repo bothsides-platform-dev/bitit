@@ -462,10 +462,17 @@ app/
 │  ├─ layout.tsx                        # 좁은 컬럼 레이아웃
 │  ├─ login/page.tsx                    # P1
 │  ├─ signup/
-│  │  ├─ page.tsx                       # P2
-│  │  ├─ verify/page.tsx                # P3
-│  │  ├─ profile/page.tsx               # P5
-│  │  └─ workspace/page.tsx             # P6
+│  │  ├─ page.tsx                       # Rs1 — 가입 유형 선택
+│  │  ├─ buyer/
+│  │  │  ├─ page.tsx                    # Bs1 — 구매사 이메일 + 약관
+│  │  │  ├─ verify/page.tsx             # Bs2 — 인증 대기
+│  │  │  ├─ profile/page.tsx            # Bs3 — 프로필
+│  │  │  └─ workspace/page.tsx          # Bs4 — 워크스페이스 생성
+│  │  └─ pg/
+│  │     ├─ page.tsx                    # Gs1 — PG사 이메일 + 약관
+│  │     ├─ verify/page.tsx             # Gs2 — 인증 대기
+│  │     ├─ profile/page.tsx            # Gs3 — 프로필
+│  │     └─ workspace/page.tsx          # Gs4 — 도메인 자동 합류 확인
 │  ├─ password/
 │  │  ├─ forgot/page.tsx                # P7
 │  │  └─ reset/page.tsx                 # P8
@@ -481,13 +488,15 @@ app/
 
 components/auth/
 ├─ AuthShell.tsx                        # 워드마크 + 카드 + serial
-├─ Stepper.tsx                          # 01 / 03 — EMAIL
+├─ Stepper.tsx                          # 01 / 04 — EMAIL (workspaceType별 단계 수 분기)
 ├─ EmailField.tsx
 ├─ PasswordField.tsx                    # 보기 토글 + 강도 인디케이터
 ├─ AgreementCheckboxes.tsx
 ├─ ResendCountdown.tsx                  # 60초 카운트다운
 ├─ InvitationCard.tsx
-└─ WorkspaceChooser.tsx                 # P6 좌/우 두 카드
+├─ RoleChooser.tsx                      # Rs1 — 구매사/PG사 두 카드
+├─ BuyerWorkspaceForm.tsx               # Bs4 — 워크스페이스 생성 폼
+└─ PgWorkspaceConfirm.tsx               # Gs4 — 도메인 자동 합류 확인 카드
 
 lib/
 ├─ types/auth.ts
@@ -500,6 +509,7 @@ lib/
 
 ```ts
 // middleware.ts
+// '/signup' startsWith 커버리지가 '/signup/buyer/*', '/signup/pg/*' 를 포함함
 const PUBLIC_PREFIXES = ['/login', '/signup', '/password', '/invite', '/auth', '/logout'];
 const CLAIMABLE_PUBLIC_PREFIXES = ['/invite/rfq'];
 
@@ -522,6 +532,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // 가입 완료 후 리디렉트: buyer → '/rfq', pg → '/inbox' (또는 '/inbox/:rfqId')
   // (app)/* 는 세션 필수
   if (!session) {
     const next = encodeURIComponent(pathname + req.nextUrl.search);
@@ -554,11 +565,14 @@ export type Credentials = { email: string; password: string };
 
 export type SignupDraft = {
   step: 'email' | 'profile' | 'workspace';
+  workspaceType: 'buyer' | 'pg';        // Rs1 선택 또는 /invite/rfq/:token 핸드오프에서 설정
   email: string;
   emailVerified: boolean;
   name?: string;
   phone?: string;
   agreedAt?: string;
+  rfqInviteToken?: string;              // /invite/rfq/:token 진입 시 보존 → 가입 완료 후 claim
+  pgDomainWorkspaceId?: string;         // Gs4에서 도메인 resolve 결과 캐싱
   // password는 메모리에만, sessionStorage 저장 X
 };
 
