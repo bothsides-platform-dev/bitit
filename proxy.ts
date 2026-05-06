@@ -24,6 +24,6 @@ export default auth((req) => {
 // `api` is added because `api/auth/*` would otherwise 302 to `/login`.
 export const config = {
   matcher: [
-    '/((?!api|_next|favicon.ico|fonts|file|globe|next|vercel|window).*)',
+    '/((?!monitoring|api|_next|favicon.ico|fonts|file|globe|next|vercel|window).*)',
   ],
 };
