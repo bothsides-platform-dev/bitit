@@ -43,7 +43,7 @@ export function Logo({ variant = 'default', className }: LogoProps) {
 
   return (
     <Link
-      href="/home"
+      href="/"
       aria-label="bidit 홈"
       className={cn(
         'group inline-flex items-center',

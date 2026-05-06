@@ -34,7 +34,7 @@ type Props = {
    * read-only로 표시. createRfqAction이 서버에서 직접 workspace.bizProfileId
    * 를 읽어 스냅샷을 만들기 때문에 클라가 bizNo를 보내지는 않는다.
    */
-  bizProfile: Pick<BizProfile, 'bizNo' | 'taxType' | 'status' | 'grade'>;
+  bizProfile?: Pick<BizProfile, 'bizNo' | 'taxType' | 'status' | 'grade'>;
   /** 회사명 (Workspace.name) — 표시용 */
   workspaceName: string;
 };
@@ -78,7 +78,7 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
     draft.allowedPgEmails.length > 0 &&
     draft.deadline !== '';
 
-  const effectiveGrade = overrideGrade ?? bizProfile.grade;
+  const effectiveGrade = overrideGrade ?? bizProfile?.grade;
   const cardFee = effectiveGrade ? STATUTORY_CARD_FEE[effectiveGrade] : Number.NaN;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -114,40 +114,44 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
         <div className="border border-[var(--color-hair)] divide-y divide-[var(--color-hair)]">
           <div className="px-4 py-2 flex items-center justify-between">
             <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
-              WORKSPACE — 등록된 사업자
+              WORKSPACE — {bizProfile ? '등록된 사업자' : '사업자 정보 미등록'}
             </span>
-            <span className="font-mono text-[10px] tracking-[0.1em] text-[var(--color-moss)]">
-              ✓ 확인됨
+            <span className={`font-mono text-[10px] tracking-[0.1em] ${bizProfile ? 'text-[var(--color-moss)]' : 'text-[var(--color-terracotta)]'}`}>
+              {bizProfile ? '✓ 확인됨' : '[ 미등록 ]'}
             </span>
           </div>
           {[
             ['상호명', workspaceName],
-            ['사업자번호', bizProfile.bizNo],
-            [
-              '과세 유형',
-              bizProfile.taxType === 'general'
-                ? '일반과세'
-                : bizProfile.taxType === 'simple'
-                  ? '간이과세'
-                  : '면세',
-            ],
-            [
-              '사업자 상태',
-              bizProfile.status === 'active'
-                ? '정상'
-                : bizProfile.status === 'suspended'
-                  ? '휴업'
-                  : '폐업',
-            ],
-            ...(bizProfile.grade
+            ...(bizProfile
               ? [
-                  ['가맹점 등급 (현재)', GRADE_LABELS[bizProfile.grade]],
+                  ['사업자번호', bizProfile.bizNo],
                   [
-                    '카드 수수료',
-                    Number.isNaN(cardFee)
-                      ? '카드사별 협의'
-                      : `${(cardFee * 100).toFixed(2)}%`,
+                    '과세 유형',
+                    bizProfile.taxType === 'general'
+                      ? '일반과세'
+                      : bizProfile.taxType === 'simple'
+                        ? '간이과세'
+                        : '면세',
                   ],
+                  [
+                    '사업자 상태',
+                    bizProfile.status === 'active'
+                      ? '정상'
+                      : bizProfile.status === 'suspended'
+                        ? '휴업'
+                        : '폐업',
+                  ],
+                  ...(bizProfile.grade
+                    ? [
+                        ['가맹점 등급 (현재)', GRADE_LABELS[bizProfile.grade]],
+                        [
+                          '카드 수수료',
+                          Number.isNaN(cardFee)
+                            ? '카드사별 협의'
+                            : `${(cardFee * 100).toFixed(2)}%`,
+                        ],
+                      ]
+                    : []),
                 ]
               : []),
           ].map(([label, value]) => (

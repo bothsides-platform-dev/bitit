@@ -208,6 +208,8 @@ describe('createRfqAction', () => {
     if (!r.ok) return;
 
     const [rfqRow] = await db.select().from(rfqs).where(eq(rfqs.id, r.rfqId));
+    expect(rfqRow.bizProfileId).not.toBeNull();
+    if (!rfqRow.bizProfileId) return;
     const [snap] = await db
       .select()
       .from(bizProfiles)
@@ -228,6 +230,8 @@ describe('createRfqAction', () => {
     if (!r.ok) return;
 
     const [rfqRow] = await db.select().from(rfqs).where(eq(rfqs.id, r.rfqId));
+    expect(rfqRow.bizProfileId).not.toBeNull();
+    if (!rfqRow.bizProfileId) return;
     const [snap] = await db
       .select()
       .from(bizProfiles)
@@ -235,8 +239,7 @@ describe('createRfqAction', () => {
     expect(snap.gradeSource).toBe('user_confirmed');
   });
 
-  it('rejects when workspace has no biz_profile_id', async () => {
-    // Detach biz from the buyer ws.
+  it('succeeds when workspace has no biz_profile_id — rfqRow.bizProfileId is null', async () => {
     await db
       .update(workspaces)
       .set({ bizProfileId: null })
@@ -247,9 +250,10 @@ describe('createRfqAction', () => {
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
       allowedPgEmails: ['x@y.com'],
     });
-    expect(r.ok).toBe(false);
-    if (r.ok) return;
-    expect(r.error).toBe('WORKSPACE_BIZ_PROFILE_MISSING');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const [rfqRow] = await db.select().from(rfqs).where(eq(rfqs.id, r.rfqId));
+    expect(rfqRow.bizProfileId).toBeNull();
   });
 
   it('issues monotonic Q-YYMM-NNNN ids within the month', async () => {
