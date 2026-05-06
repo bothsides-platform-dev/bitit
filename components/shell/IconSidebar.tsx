@@ -35,7 +35,7 @@ export function IconSidebar() {
     <Sidebar
       collapsible="none"
       style={{ gridArea: 'sidebar' }}
-      className="row-span-2 items-center border-r border-sidebar-border py-4"
+      className="fixed inset-y-0 left-0 z-30 h-svh w-[var(--shell-sidebar)] items-center border-r border-sidebar-border py-4"
     >
       <SidebarHeader className="mb-8 items-center p-0">
         <Logo variant="compact" />

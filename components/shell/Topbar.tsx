@@ -34,7 +34,7 @@ export function Topbar({ user }: TopbarProps) {
   return (
     <header
       style={{ gridArea: 'topbar' }}
-      className="flex items-center justify-between px-6 border-b border-[var(--color-hair)] bg-[var(--color-paper)]"
+      className="fixed top-0 left-[var(--shell-sidebar)] right-0 z-20 h-[var(--shell-topbar)] flex items-center justify-between px-6 border-b border-[var(--color-hair)] bg-[var(--color-paper)]"
     >
       {/* Search shortcut */}
       <button

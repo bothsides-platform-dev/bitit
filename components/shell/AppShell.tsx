@@ -9,7 +9,7 @@ export function AppShell({ children, className }: AppShellProps) {
   return (
     <div
       className={cn(
-        'min-h-screen bg-[var(--color-paper)]',
+        'min-h-svh bg-[var(--color-paper)]',
         'grid',
         className,
       )}
