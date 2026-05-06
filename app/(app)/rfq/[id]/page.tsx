@@ -58,8 +58,18 @@ export default async function RfqDetailPage({ params }: Props) {
   const allBids = await (await getBidRepo()).findByRfq(id);
   const rfqBids = allBids.filter((b) => b.status === 'submitted');
 
-  const ws = await (await getWorkspaceRepo()).findById(rfq.buyerWsId);
+  const wsRepo = await getWorkspaceRepo();
+  const ws = await wsRepo.findById(rfq.buyerWsId);
   const companyName = ws?.name ?? '—';
+
+  // pgWsId → name map. dedup 후 parallel fetch — RFQ 당 PG 수가 작아(≤10) 직접 N
+  // 회 호출도 안전하지만, Set으로 중복 제거 + Promise.all 병렬화가 정석 형태.
+  const pgWsIds = Array.from(new Set(rfqBids.map((b) => b.pgWsId)));
+  const pgWorkspaces = await Promise.all(pgWsIds.map((pgId) => wsRepo.findById(pgId)));
+  const pgWsNameMap: Record<string, string> = {};
+  pgWorkspaces.forEach((w, i) => {
+    if (w) pgWsNameMap[pgWsIds[i]] = w.name;
+  });
 
   const { bizProfile } = rfq;
   const cardFee = bizProfile.grade ? STATUTORY_CARD_FEE[bizProfile.grade] : NaN;
@@ -107,6 +117,7 @@ export default async function RfqDetailPage({ params }: Props) {
           grade={bizProfile.grade}
           rfqStatus={rfq.status}
           awardedBidId={rfq.awardedBidId}
+          pgWsNameMap={pgWsNameMap}
         />
       </section>
 

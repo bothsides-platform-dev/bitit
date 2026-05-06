@@ -13,6 +13,8 @@
  * never runs this script; passwords are hashed with bcrypt cost=12 via the
  * shared `lib/auth/password.ts` helper.
  */
+import 'dotenv/config';
+
 import { sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
