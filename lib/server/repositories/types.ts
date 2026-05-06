@@ -44,8 +44,15 @@ export interface InvitationRepo {
   save(inv: RfqInvitation, rawToken: string, tx?: Tx): Promise<void>;
   /** id 조회. */
   findById(id: string, tx?: Tx): Promise<RfqInvitation | undefined>;
+  /** raw 토큰의 sha256 hash로 조회. claim 전 email 매칭 검사용. */
+  findByTokenHash(tokenHash: string, tx?: Tx): Promise<RfqInvitation | undefined>;
   /** 한 RFQ의 초대 목록. */
   findByRfq(rfqId: string, tx?: Tx): Promise<RfqInvitation[]>;
+  /** PG 사용자가 클레임한 초대 + 해당 RFQ pair (PG 인박스용). */
+  findByPgUser(
+    userId: string,
+    tx?: Tx,
+  ): Promise<{ invitation: RfqInvitation; rfq: RFQ }[]>;
   /** 토큰 atomic claim — 만료/사용/무효 분기. 동일 raw 토큰 동시 진입 가드. */
   claimToken(rawToken: string, userId: string, tx?: Tx): Promise<TokenClaimResult>;
   /** 같은 도메인 동료도 차단 — acceptedByUserId 매칭만 통과. */

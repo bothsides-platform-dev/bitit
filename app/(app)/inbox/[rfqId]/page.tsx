@@ -1,38 +1,44 @@
-'use client';
-
-import { use } from 'react';
+// Step 8: PG RFQ 상세 (RSC) + 견적 작성 폼.
+//
+// 가드 (advisor pin 2): canAccess(rfqId, userId) — 도메인 동료 차단.
+// 클레임한 본인만 진입 가능. false면 notFound() (404).
+import Link from 'next/link';
+import { notFound, redirect } from 'next/navigation';
+import { auth } from '@/auth';
+import {
+  getBidRepo,
+  getInvitationRepo,
+  getRfqRepo,
+} from '@/lib/server/repositories/factory';
 import { RfqBriefPanel } from '@/components/inbox/RfqBriefPanel';
 import { BidForm } from '@/components/inbox/BidForm';
-import { MOCK_RFQS } from '@/lib/mock/rfqs';
-import { MOCK_INVITATIONS } from '@/lib/mock/invitations';
-import { MOCK_SESSION_PG } from '@/lib/mock/workspaces';
-import { useBidListStore } from '@/lib/stores/bid-list';
-import Link from 'next/link';
 
 type Props = { params: Promise<{ rfqId: string }> };
 
-export default function InboxDetailPage({ params }: Props) {
-  const { rfqId } = use(params);
-  const bids = useBidListStore((s) => s.bids);
+export const dynamic = 'force-dynamic';
 
-  const rfq = MOCK_RFQS.find((r) => r.id === rfqId);
-  const invitation = MOCK_INVITATIONS.find(
-    (inv) => inv.rfqId === rfqId && inv.acceptedByUserId === MOCK_SESSION_PG.userId,
-  ) ?? MOCK_INVITATIONS.find((inv) => inv.rfqId === rfqId);
+export default async function InboxDetailPage({ params }: Props) {
+  const { rfqId } = await params;
 
-  const myBid = bids.find(
-    (b) => b.rfqId === rfqId && b.pgWsId === MOCK_SESSION_PG.workspaceId,
+  const session = await auth();
+  if (!session?.user?.id) redirect(`/login?next=/inbox/${rfqId}`);
+
+  const invRepo = await getInvitationRepo();
+  // canAccess: 클레임한 본인만 진입(도메인 동료 차단). false면 404.
+  const ok = await invRepo.canAccess(rfqId, session.user.id);
+  if (!ok) notFound();
+
+  const rfqRepo = await getRfqRepo();
+  const rfq = await rfqRepo.findById(rfqId);
+  if (!rfq) notFound();
+
+  // 이미 입찰을 제출했는지 확인 — submitted 상태면 작성 폼 대신 confirm 화면.
+  const bidRepo = await getBidRepo();
+  const allBids = await bidRepo.findByRfq(rfqId);
+  const myBid = allBids.find(
+    (b) =>
+      b.pgWsId === session.user!.workspaceId && b.status === 'submitted',
   );
-
-  if (!rfq) {
-    return (
-      <div className="px-8 py-8">
-        <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
-          RFQ를 찾을 수 없습니다.
-        </p>
-      </div>
-    );
-  }
 
   if (myBid) {
     return (
@@ -43,7 +49,10 @@ export default function InboxDetailPage({ params }: Props) {
             ✓ 견적 제출 완료
           </p>
           <p className="text-[13px] text-[var(--color-ink-muted)]">
-            제출 시각: {myBid.submittedAt ? new Date(myBid.submittedAt).toLocaleString('ko-KR') : '—'}
+            제출 시각:{' '}
+            {myBid.submittedAt
+              ? new Date(myBid.submittedAt).toLocaleString('ko-KR')
+              : '—'}
           </p>
           <Link
             href={`/inbox/${rfqId}/submitted`}
@@ -73,11 +82,7 @@ export default function InboxDetailPage({ params }: Props) {
             견적 작성
           </h2>
         </div>
-        <BidForm
-          rfqId={rfqId}
-          invitationId={invitation?.id ?? ''}
-          grade={rfq.bizProfile.grade}
-        />
+        <BidForm rfqId={rfqId} grade={rfq.bizProfile.grade} />
       </div>
     </div>
   );

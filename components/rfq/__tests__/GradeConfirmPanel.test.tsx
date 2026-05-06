@@ -8,9 +8,9 @@ describe('GradeConfirmPanel', () => {
     render(<GradeConfirmPanel onConfirm={() => {}} />);
     expect(screen.getAllByRole('radio')).toHaveLength(5);
     expect(screen.getByLabelText(/영세/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/중소 1/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/중소 2/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/중소 3/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/중소1/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/중소2/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/중소3/)).toBeInTheDocument();
     expect(screen.getByLabelText(/일반/)).toBeInTheDocument();
   });
 
@@ -30,7 +30,7 @@ describe('GradeConfirmPanel', () => {
     const onConfirm = vi.fn();
     render(<GradeConfirmPanel onConfirm={onConfirm} />);
 
-    await user.click(screen.getByLabelText(/중소 3/));
+    await user.click(screen.getByLabelText(/중소3/));
     await user.click(screen.getByRole('button', { name: '확인' }));
 
     expect(onConfirm).toHaveBeenCalledTimes(1);

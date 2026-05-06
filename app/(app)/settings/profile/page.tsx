@@ -11,17 +11,9 @@ import {
 } from '@/lib/server/repositories/factory';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
 import { formatDate } from '@/lib/format';
-import type { MerchantGrade } from '@/lib/types/biz-profile';
+import { GRADE_LABELS } from '@/lib/types/biz-profile';
 
 export const dynamic = 'force-dynamic';
-
-const GRADE_LABELS: Record<MerchantGrade, string> = {
-  small: '영세',
-  sme1: '중소 1',
-  sme2: '중소 2',
-  sme3: '중소 3',
-  general: '일반',
-};
 
 const VALID_AVATAR = ['ink', 'accent', 'lavender', 'amber', 'moss', 'terra'] as const;
 

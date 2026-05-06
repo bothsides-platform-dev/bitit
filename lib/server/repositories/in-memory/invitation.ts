@@ -1,10 +1,19 @@
 import type { RfqInvitation } from '@/lib/types/invitation';
+import type { RFQ } from '@/lib/types/rfq';
 import { hashToken, isExpired } from '../../token';
-import type { InvitationRepo, TokenClaimResult, Tx } from '../types';
+import type { InvitationRepo, RfqRepo, TokenClaimResult, Tx } from '../types';
 
 export class InMemoryInvitationRepository implements InvitationRepo {
   private store = new Map<string, RfqInvitation>();
   private tokenHashIndex = new Map<string, string>(); // hash → id
+  // Optional getter for the RFQ repo so findByPgUser can hydrate the JOIN
+  // shape without inverting factory ordering. Wired by the factory; tests
+  // that only exercise invitation-only methods can leave it unset.
+  private rfqRepoRef?: () => RfqRepo;
+
+  setRfqRepoRef(getter: () => RfqRepo): void {
+    this.rfqRepoRef = getter;
+  }
 
   async save(inv: RfqInvitation, rawToken: string, _tx?: Tx): Promise<void> {
     void _tx;
@@ -23,6 +32,35 @@ export class InMemoryInvitationRepository implements InvitationRepo {
     return [...this.store.values()]
       .filter((i) => i.rfqId === rfqId)
       .map((i) => ({ ...i }));
+  }
+
+  async findByTokenHash(
+    tokenHash: string,
+    _tx?: Tx,
+  ): Promise<RfqInvitation | undefined> {
+    void _tx;
+    const id = this.tokenHashIndex.get(tokenHash);
+    if (!id) return undefined;
+    const inv = this.store.get(id);
+    return inv ? { ...inv } : undefined;
+  }
+
+  async findByPgUser(
+    userId: string,
+    _tx?: Tx,
+  ): Promise<{ invitation: RfqInvitation; rfq: RFQ }[]> {
+    void _tx;
+    if (!this.rfqRepoRef) return [];
+    const rfqRepo = this.rfqRepoRef();
+    const claimed = [...this.store.values()].filter(
+      (i) => i.acceptedByUserId === userId,
+    );
+    const out: { invitation: RfqInvitation; rfq: RFQ }[] = [];
+    for (const inv of claimed) {
+      const rfq = await rfqRepo.findById(inv.rfqId);
+      if (rfq) out.push({ invitation: { ...inv }, rfq });
+    }
+    return out;
   }
 
   async claimToken(

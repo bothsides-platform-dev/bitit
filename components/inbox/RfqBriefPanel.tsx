@@ -1,6 +1,6 @@
 import { Tag } from '@/components/primitives/Tag';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
-import { GRADE_LABELS } from '@/lib/mock/biz-lookup';
+import { GRADE_LABELS } from '@/lib/types/biz-profile';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
 import { formatDate, formatDeadline } from '@/lib/format';
 import type { RFQ } from '@/lib/types/rfq';

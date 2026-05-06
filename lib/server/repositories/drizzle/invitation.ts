@@ -1,11 +1,46 @@
 import { and, eq, exists, gt, isNull, sql } from 'drizzle-orm';
-import { rfqInvitations } from '@/lib/db/schema';
+import { rfqInvitations, rfqs, bizProfiles } from '@/lib/db/schema';
 import type { DB } from '@/lib/db/client';
 import type { RfqInvitation, InvitationStatus } from '@/lib/types/invitation';
+import type { RFQ } from '@/lib/types/rfq';
+import type { BizProfile } from '@/lib/types/biz-profile';
 import { hashToken } from '../../token';
 import type { InvitationRepo, TokenClaimResult, Tx } from '../types';
 
 type InvRow = typeof rfqInvitations.$inferSelect;
+type RfqRow = typeof rfqs.$inferSelect;
+type BizRow = typeof bizProfiles.$inferSelect;
+
+function toIso(d: Date | null | undefined): string | undefined {
+  return d ? new Date(d).toISOString() : undefined;
+}
+
+function rowToRfq(row: RfqRow, biz: BizRow): RFQ {
+  const profile: BizProfile = {
+    bizNo: biz.bizNo,
+    taxType: biz.taxType,
+    status: biz.status,
+    grade: biz.grade ?? undefined,
+    gradeSource: biz.gradeSource,
+    gradeConfirmedBy: biz.gradeConfirmedBy ?? undefined,
+    gradeConfirmedAt: toIso(biz.gradeConfirmedAt),
+  };
+  return {
+    id: row.id,
+    buyerWsId: row.buyerWsId,
+    bizProfile: profile,
+    title: row.title,
+    memo: row.memo,
+    rfpFiles: [],
+    allowedPgEmails: row.allowedPgEmails ?? [],
+    deadline: new Date(row.deadline).toISOString(),
+    status: row.status,
+    awardedBidId: row.awardedBidId ?? undefined,
+    createdBy: row.createdBy,
+    createdAt: new Date(row.createdAt).toISOString(),
+    sentAt: toIso(row.sentAt),
+  };
+}
 
 // DB enum is a subset of UI InvitationStatus — collapse 'declined' (UI-only) to
 // the closest persisted value when encountered (defensive).
@@ -100,6 +135,40 @@ export class DrizzleInvitationRepository implements InvitationRepo {
       .from(rfqInvitations)
       .where(eq(rfqInvitations.rfqId, rfqId));
     return rows.map(rowToInvitation);
+  }
+
+  async findByTokenHash(
+    tokenHash: string,
+    tx?: Tx,
+  ): Promise<RfqInvitation | undefined> {
+    const db = this.h(tx);
+    const [row] = await db
+      .select()
+      .from(rfqInvitations)
+      .where(eq(rfqInvitations.tokenHash, tokenHash))
+      .limit(1);
+    return row ? rowToInvitation(row) : undefined;
+  }
+
+  async findByPgUser(
+    userId: string,
+    tx?: Tx,
+  ): Promise<{ invitation: RfqInvitation; rfq: RFQ }[]> {
+    const db = this.h(tx);
+    const rows = (await db
+      .select({ inv: rfqInvitations, rfq: rfqs, biz: bizProfiles })
+      .from(rfqInvitations)
+      .innerJoin(rfqs, eq(rfqInvitations.rfqId, rfqs.id))
+      .innerJoin(bizProfiles, eq(rfqs.bizProfileId, bizProfiles.id))
+      .where(eq(rfqInvitations.acceptedByUserId, userId))) as {
+      inv: InvRow;
+      rfq: RfqRow;
+      biz: BizRow;
+    }[];
+    return rows.map((r) => ({
+      invitation: rowToInvitation(r.inv),
+      rfq: rowToRfq(r.rfq, r.biz),
+    }));
   }
 
   async claimToken(

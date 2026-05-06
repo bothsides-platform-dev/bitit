@@ -1,41 +1,24 @@
-'use client';
-
-import { use, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import {
-  readSignupDraft,
-  writeSignupDraft,
-} from '@/lib/auth/signup-storage';
+// Step 8: RFQ invite landing.
+//
+// - 비인증: sessionStorage signupDraft.inviteToken 저장 후 /login?next=/invite/rfq/<token>
+//   으로 redirect. (Step 5 보존 — `<InviteUnauthClient />`)
+// - 인증: claimInviteTokenAction 호출 → ok면 /inbox/<rfqId>로 redirect, error면 표시.
+//
+// RSC + 작은 client 컴포넌트 분리. 인증된 경우 클라이언트가 액션을 호출해야
+// error 상태(만료/사용/email 불일치)를 렌더할 수 있다.
+import { auth } from '@/auth';
+import { InviteUnauthClient } from './InviteUnauthClient';
+import { InviteAuthedClient } from './InviteAuthedClient';
 
 type Props = { params: Promise<{ token: string }> };
 
-// Step 5: this is the unauthenticated landing for an RFQ invite. We stash
-// the raw token into sessionStorage so the signup flow can carry it through
-// /signup → /auth/verify → /signup/profile → /signup/workspace, then redirect
-// to /login?next=/invite/rfq/<token> for users who already have an account.
-//
-// Authenticated direct claim is owned by Step 8 (claimInviteTokenAction); for
-// now an authed user redirected here is asked to re-enter via /login (the
-// middleware will bounce them back into /home if their session is valid).
-export default function InviteRfqPage({ params }: Props) {
-  const { token } = use(params);
-  const router = useRouter();
+export default async function InviteRfqPage({ params }: Props) {
+  const { token } = await params;
+  const session = await auth();
 
-  useEffect(() => {
-    const draft = readSignupDraft();
-    writeSignupDraft({ ...draft, inviteToken: token });
-    const next = `/invite/rfq/${token}`;
-    router.replace(`/login?next=${encodeURIComponent(next)}`);
-  }, [token, router]);
+  if (!session?.user?.id) {
+    return <InviteUnauthClient token={token} />;
+  }
 
-  return (
-    <div className="py-8 text-center">
-      <p className="font-mono text-[12px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
-        LOADING…
-      </p>
-      <p className="mt-2 text-[13px] text-[var(--color-ink-muted)]">
-        초대 링크를 확인하는 중입니다.
-      </p>
-    </div>
-  );
+  return <InviteAuthedClient token={token} />;
 }
