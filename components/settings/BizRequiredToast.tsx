@@ -1,11 +1,16 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { toast } from '@/lib/toast';
 
 export function BizRequiredToast() {
+  const fired = useRef(false);
+
   useEffect(() => {
-    toast('견적 생성 전 사업자번호를 등록해 주세요.', { id: 'biz-required', type: 'info' });
+    if (fired.current) return;
+    fired.current = true;
+    toast('견적 생성 전 사업자번호를 등록해 주세요.', { type: 'info' });
   }, []);
+
   return null;
 }
