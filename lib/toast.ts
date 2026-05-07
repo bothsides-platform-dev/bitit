@@ -4,6 +4,6 @@ const { createToastManager } = Toast;
 
 export const toastManager = createToastManager();
 
-export function toast(message: string, opts?: { type?: 'info' | 'error'; timeout?: number }) {
-  return toastManager.add({ title: message, type: opts?.type ?? 'info', timeout: opts?.timeout ?? 5000 });
+export function toast(message: string, opts?: { id?: string; type?: 'info' | 'error'; timeout?: number }) {
+  return toastManager.add({ id: opts?.id, title: message, type: opts?.type ?? 'info', timeout: opts?.timeout ?? 5000 });
 }
