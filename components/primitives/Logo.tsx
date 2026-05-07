@@ -31,8 +31,10 @@ export function Logo({ variant = 'default', className }: LogoProps) {
           className="opacity-[0.82] group-hover:opacity-100 transition-opacity duration-[140ms]"
         >
           <rect width="32" height="32" rx="6" fill="var(--color-paper)" />
-          <rect x="6" y="4" width="4.5" height="24" rx="2.25" fill="var(--color-ink)" />
-          <circle cx="16.5" cy="21" r="7" fill="var(--color-ink)" />
+          <rect x="5.5" y="5" width="4.5" height="22" rx="2.25" fill="var(--color-ink)" />
+          <circle cx="21" cy="16" r="9" fill="var(--color-ink)" />
+          {/* paper gap separates bar from circle */}
+          <rect x="10" y="0" width="3" height="32" fill="var(--color-paper)" />
         </svg>
       </Link>
     )
