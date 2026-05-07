@@ -34,18 +34,18 @@ export function Topbar({ user, workspaceType }: TopbarProps) {
   return (
     <header
       style={{ gridArea: 'topbar' }}
-      className="fixed top-0 left-[var(--shell-sidebar)] right-0 z-20 h-[var(--shell-topbar)] flex items-center justify-between px-6 border-b border-[var(--color-hair)] bg-[var(--color-paper)]"
+      className="fixed top-0 left-[var(--shell-sidebar)] right-0 z-20 h-[var(--shell-topbar)] flex items-center justify-between px-4 md:px-6 border-b border-[var(--color-hair)] bg-[var(--color-paper)]"
     >
       {/* Search shortcut */}
       <button
         type="button"
         onClick={openCommandPalette}
-        className="flex items-center gap-2 h-8 w-72 px-3 rounded-[var(--r-sm)] border border-[var(--color-hair)] text-[var(--color-ink-soft)] hover:border-[var(--color-hair-strong)] hover:text-[var(--color-ink)] transition-colors duration-[140ms]"
+        className="flex items-center md:gap-2 h-8 w-8 md:w-72 px-0 md:px-3 justify-center md:justify-start rounded-[var(--r-sm)] border border-[var(--color-hair)] text-[var(--color-ink-soft)] hover:border-[var(--color-hair-strong)] hover:text-[var(--color-ink)] transition-colors duration-[140ms]"
         aria-label="검색 (⌘K)"
       >
         <SearchIcon size={14} />
-        <span className="font-mono text-[11px] tracking-[0.1em]">검색</span>
-        <kbd className="ml-auto font-mono text-[9px] tracking-[0.1em] opacity-50">⌘K</kbd>
+        <span className="hidden md:inline font-mono text-[11px] tracking-[0.1em]">검색</span>
+        <kbd className="hidden md:block ml-auto font-mono text-[9px] tracking-[0.1em] opacity-50">⌘K</kbd>
       </button>
 
       <div className="flex items-center gap-2">

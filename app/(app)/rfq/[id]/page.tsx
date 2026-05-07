@@ -75,7 +75,7 @@ export default async function RfqDetailPage({ params }: Props) {
   const cardFee = bizProfile?.grade ? STATUTORY_CARD_FEE[bizProfile.grade] : NaN;
 
   return (
-    <PageEnter className="px-8 py-8 max-w-[1100px] space-y-10">
+    <PageEnter className="px-8 py-8 space-y-10">
       {/* Header */}
       <div>
         <span className="font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)]">

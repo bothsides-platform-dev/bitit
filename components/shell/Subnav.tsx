@@ -18,14 +18,13 @@ export function Subnav({ title, items, action }: SubnavProps) {
 
   return (
     <aside
-      className="flex flex-col shrink-0 border-r border-[var(--color-hair)] bg-[var(--color-paper)] overflow-y-auto"
-      style={{ width: 'var(--shell-subnav)' }}
+      className="flex shrink-0 bg-[var(--color-paper)] flex-row md:flex-col w-full md:w-[var(--shell-subnav)] border-b md:border-b-0 md:border-r border-[var(--color-hair)] overflow-x-auto md:overflow-y-auto"
     >
-      <div className="px-5 py-4 border-b border-[var(--color-hair)] flex items-center justify-between">
+      <div className="hidden md:flex px-5 py-4 border-b border-[var(--color-hair)] items-center justify-between">
         <Eyebrow>{title}</Eyebrow>
         {action}
       </div>
-      <nav className="flex flex-col py-2">
+      <nav className="flex flex-row md:flex-col md:py-2">
         {items.map((item) => {
           const active = pathname === item.href;
           return (
@@ -33,10 +32,10 @@ export function Subnav({ title, items, action }: SubnavProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                'px-5 py-2.5 text-[13px] transition-colors duration-[140ms]',
+                'relative whitespace-nowrap transition-colors duration-[140ms] px-4 md:px-5 h-11 md:h-auto md:py-2.5 flex items-center font-mono text-[11px] tracking-[0.14em] uppercase md:font-sans md:text-[13px] md:tracking-normal md:normal-case',
                 active
-                  ? 'text-[var(--color-ink)] bg-[var(--color-paper-warm)] font-medium border-l-2 border-[var(--color-amber)] pl-[calc(1.25rem-2px)]'
-                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-paper-warm)]',
+                  ? 'text-[var(--color-ink)] md:bg-[var(--color-paper-warm)] md:font-medium after:absolute after:left-0 after:right-0 after:bottom-0 after:h-px after:bg-[var(--color-ink)] md:after:hidden md:border-l-2 md:border-[var(--color-amber)] md:pl-[calc(1.25rem-2px)]'
+                  : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] md:hover:bg-[var(--color-paper-warm)]',
               )}
             >
               {item.label}

@@ -76,7 +76,7 @@ export function AwardConfirm(props: Props) {
 
   if (confirmed) {
     return (
-      <div className="px-8 py-8 max-w-[640px] space-y-10">
+      <div className="px-8 py-8 space-y-10">
         <div>
           <p className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-moss)] mb-3">
             ✓ 수주 확정
@@ -133,7 +133,7 @@ export function AwardConfirm(props: Props) {
   }
 
   return (
-    <div className="px-8 py-8 max-w-[720px] space-y-10">
+    <div className="px-8 py-8 space-y-10">
       {/* Header */}
       <div>
         <span className="font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)]">

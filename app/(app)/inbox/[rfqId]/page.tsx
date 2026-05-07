@@ -42,7 +42,7 @@ export default async function InboxDetailPage({ params }: Props) {
 
   if (myBid) {
     return (
-      <div className="px-8 py-8 max-w-[600px]">
+      <div className="px-8 py-8">
         <RfqBriefPanel rfq={rfq} />
         <div className="mt-10 border-t border-[var(--color-hair)] pt-8 space-y-4">
           <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-moss)]">
@@ -66,7 +66,7 @@ export default async function InboxDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="px-8 py-8 grid grid-cols-[340px_1fr] gap-12 max-w-[1100px]">
+    <div className="px-8 py-8 grid grid-cols-[340px_1fr] gap-12">
       {/* Left: RFQ brief */}
       <div className="border-r border-[var(--color-hair)] pr-10">
         <RfqBriefPanel rfq={rfq} />

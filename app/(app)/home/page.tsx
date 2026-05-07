@@ -8,7 +8,7 @@ import { PageEnter } from '@/components/primitives/PageEnter';
 import { FileTextIcon } from '@/components/icons';
 import { KpiCell } from '@/components/primitives/KpiCell';
 import { auth } from '@/auth';
-import { getRfqRepo, getUserRepo } from '@/lib/server/repositories/factory';
+import { getRfqRepo } from '@/lib/server/repositories/factory';
 import { formatDate } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
@@ -27,31 +27,8 @@ export default async function HomePage() {
   const sentRfqs = rfqs.filter((r) => r.status === 'sent');
   const awardedRfqs = rfqs.filter((r) => r.status === 'awarded');
 
-  // 디스플레이 이름 (Topbar는 별도). hydrate 비용 최소화 위해 user repo 1회.
-  const userRepo = await getUserRepo();
-  const me = await userRepo.findById(session.user.id);
-  const displayName = me?.name ?? session.user.email ?? '사용자';
-
-  const today = new Date()
-    .toISOString()
-    .slice(0, 10)
-    .replace(/-/g, '.');
-
   return (
-    <PageEnter className="px-8 py-10 max-w-[var(--content-max)]">
-      {/* Greeting */}
-      <div className="mb-12">
-        <div className="flex items-center gap-3 mb-6">
-          <Eyebrow>BIDIT · BUYER DASHBOARD</Eyebrow>
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
-          <Eyebrow>{today}</Eyebrow>
-        </div>
-        <h1 className="text-[52px] font-[800] tracking-[-0.034em] leading-[1.1] text-[var(--color-ink)]">
-          안녕하세요, <span>{displayName}</span>
-          <span className="font-[200]"> — 님.</span>
-        </h1>
-      </div>
-
+    <PageEnter className="px-8 py-10">
       {/* KPI Strip */}
       <div className="flex items-start gap-16 mb-12 pb-12 border-b border-[var(--color-hair)]">
         <KpiCell

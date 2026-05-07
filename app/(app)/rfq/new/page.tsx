@@ -24,7 +24,7 @@ export default async function RfqNewPage() {
   // RFQ 작성 폼에서 인라인으로 사업자번호·등급 추가 가능.
 
   return (
-    <div className="px-8 py-8 max-w-[1100px] mx-auto">
+    <div className="px-8 py-8">
       <div className="mb-10">
         <Serial current={1} total={4} label="RFQ" className="block mb-3" />
         <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">

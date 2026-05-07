@@ -87,18 +87,18 @@ export function WorkspaceBizNoForm({ currentBizNo, returnUrl }: Props) {
     <div className="space-y-4">
       <Eyebrow>사업자 등록번호</Eyebrow>
       {!editing && currentBizNo !== null ? (
-        <div className="flex items-center justify-between border-y border-[var(--color-hair)] py-2.5">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-y border-[var(--color-hair)] py-2.5">
           <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
             현재
           </span>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
             <span className="text-[13px] text-[var(--color-ink)] font-mono tabular-nums">
               {currentBizNo}
             </span>
             <button
               type="button"
               onClick={handleStartEdit}
-              className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+              className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors shrink-0"
             >
               수정
             </button>

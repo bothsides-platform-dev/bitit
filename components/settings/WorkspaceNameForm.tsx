@@ -60,19 +60,19 @@ export function WorkspaceNameForm({ currentName, canEdit }: Props) {
 
   if (!editing) {
     return (
-      <div className="py-2.5 flex items-baseline justify-between">
+      <div className="py-2 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
         <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
           이름
         </span>
-        <div className="flex items-center gap-4">
-          <span className="text-[13px] text-[var(--color-ink)] font-mono tabular-nums">
+        <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
+          <span className="text-[13px] text-[var(--color-ink)] font-mono tabular-nums break-all sm:break-normal">
             {currentName}
           </span>
           {canEdit && (
             <button
               type="button"
               onClick={handleStart}
-              className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+              className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors shrink-0"
             >
               수정
             </button>
@@ -84,7 +84,7 @@ export function WorkspaceNameForm({ currentName, canEdit }: Props) {
 
   return (
     <div className="py-3 space-y-3">
-      <div className="flex items-baseline justify-between gap-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
         <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
           이름
         </span>
@@ -103,7 +103,7 @@ export function WorkspaceNameForm({ currentName, canEdit }: Props) {
               handleCancel();
             }
           }}
-          className="flex-1 max-w-[360px] bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-1 text-[14px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-ink)] transition-colors text-right"
+          className="w-full sm:flex-1 sm:max-w-[360px] bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-1 text-[14px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-ink)] transition-colors text-left sm:text-right"
         />
       </div>
 

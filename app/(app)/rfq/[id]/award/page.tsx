@@ -25,7 +25,7 @@ export default async function AwardPage({ params, searchParams }: Props) {
   const rfq = await (await getRfqRepo()).findById(id);
   if (!rfq || rfq.buyerWsId !== session.user.workspaceId) {
     return (
-      <div className="px-8 py-8 max-w-[600px]">
+      <div className="px-8 py-8">
         <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
           RFQ를 찾을 수 없습니다.
         </p>
@@ -46,7 +46,7 @@ export default async function AwardPage({ params, searchParams }: Props) {
   const selected = bidId ? allBids.find((b) => b.id === bidId) : undefined;
   if (!selected) {
     return (
-      <div className="px-8 py-8 max-w-[600px]">
+      <div className="px-8 py-8">
         <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
           선택된 견적을 찾을 수 없습니다.
         </p>

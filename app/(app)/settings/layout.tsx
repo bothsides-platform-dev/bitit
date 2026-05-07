@@ -8,7 +8,7 @@ const items = [
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col md:flex-row h-full">
       <Subnav title="SETTINGS" items={items} />
       <div className="flex-1 overflow-y-auto">{children}</div>
     </div>

@@ -46,7 +46,7 @@ export default async function InboxSubmittedPage({ params }: Props) {
 
   if (!bid) {
     return (
-      <div className="px-8 py-8 max-w-[600px]">
+      <div className="px-8 py-8">
         <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
           제출된 견적이 없습니다.
         </p>
@@ -63,7 +63,7 @@ export default async function InboxSubmittedPage({ params }: Props) {
   const grade = rfq.bizProfile?.grade;
 
   return (
-    <div className="px-8 py-8 max-w-[640px] space-y-10">
+    <div className="px-8 py-8 space-y-10">
       {/* Status */}
       <div>
         <p className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-moss)] mb-3">

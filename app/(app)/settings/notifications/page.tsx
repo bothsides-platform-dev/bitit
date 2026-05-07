@@ -25,7 +25,7 @@ export default async function NotificationsSettingsPage() {
   const unreadCount = notifications.filter((n) => n.status !== 'read').length;
 
   return (
-    <PageEnter className="px-8 py-8 max-w-[860px] space-y-8">
+    <PageEnter className="px-4 py-6 md:px-8 md:py-8 space-y-8">
       <div>
         <Eyebrow className="block mb-2">SETTINGS · NOTIFICATIONS</Eyebrow>
         <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">

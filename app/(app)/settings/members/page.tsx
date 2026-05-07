@@ -24,7 +24,7 @@ export default async function MembersPage() {
   }
 
   return (
-    <PageEnter className="px-8 py-8 max-w-[840px] space-y-12">
+    <PageEnter className="px-4 py-6 md:px-8 md:py-8 space-y-8 md:space-y-10">
       <MembersPanel workspaceName={ws.name} initialMembers={ws.members} />
     </PageEnter>
   );
