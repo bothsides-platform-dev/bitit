@@ -76,7 +76,7 @@ describe('SupabaseStorage', () => {
 
   it('read() returns a ReadableStream and correct byte size', async () => {
     const body = Buffer.from('hello supabase');
-    mockDownload.mockResolvedValue({ data: new Blob([body]), error: null });
+    mockDownload.mockResolvedValue({ data: new Blob([new Uint8Array(body)]), error: null });
     const storage = new SupabaseStorage();
     const key = newAttachmentPath('hello.txt');
 
