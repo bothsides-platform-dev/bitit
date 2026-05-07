@@ -61,7 +61,7 @@ const MetaInput = z
   .strict();
 
 declare global {
-  // eslint-disable-next-line no-var
+   
   var __bidit_files_db_override__: unknown | undefined;
 }
 

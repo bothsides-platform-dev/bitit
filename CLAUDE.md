@@ -107,3 +107,11 @@ The 7 docs cross-reference each other heavily. After any change:
 - `/design-review` — 화면 시각 폴리시 (Korean Editorial Modernism 정합 검증)
 - `/investigate` — 버그·에러·예상치 못한 동작
 - `/ship` — PR 생성·배포 단계
+
+## Health Stack
+
+`/health` 가 사용하는 도구 체인. e2e는 별도 (`/qa` 또는 `pnpm e2e`).
+
+- typecheck: `pnpm tsc --noEmit`
+- lint: `pnpm lint`
+- test: `pnpm test`

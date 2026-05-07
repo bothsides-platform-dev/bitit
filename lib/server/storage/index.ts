@@ -19,7 +19,7 @@ import type { Storage } from './local';
 export type { Storage };
 
 declare global {
-  // eslint-disable-next-line no-var
+   
   var __bidit_storage__: Storage | undefined;
 }
 

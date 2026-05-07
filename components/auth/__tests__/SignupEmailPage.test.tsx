@@ -35,7 +35,6 @@ async function fillAndSubmit(email = 'kim@example.com') {
   await user.click(screen.getByRole('checkbox', { name: /이용약관 동의/i }));
   await user.click(screen.getByRole('checkbox', { name: /개인정보 처리방침 동의/i }));
   // submit the form directly (form element has no accessible name so getByRole('form') fails)
-  // eslint-disable-next-line testing-library/no-node-access
   const form = document.querySelector('form')!;
   fireEvent.submit(form);
   await new Promise((r) => setTimeout(r, 0)); // flush microtasks

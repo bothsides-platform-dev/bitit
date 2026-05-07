@@ -8,7 +8,6 @@ import { Logo } from '@/components/primitives/Logo';
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
