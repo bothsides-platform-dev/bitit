@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { AppShell } from '@/components/shell/AppShell';
 import { IconSidebar } from '@/components/shell/IconSidebar';
 import { Topbar } from '@/components/shell/Topbar';
+import { ToasterProvider } from '@/components/shell/Toaster';
 import { NotificationDrawer } from '@/components/shell/NotificationDrawer';
 import { CommandPalette } from '@/components/shell/CommandPalette';
 import { GlobalShortcuts } from '@/components/shell/GlobalShortcuts';
@@ -34,6 +35,7 @@ export default async function AppLayout({
   const workspaceName = ws?.name ?? '';
 
   return (
+    <ToasterProvider>
     <SidebarProvider
       style={{ '--sidebar-width': 'var(--shell-sidebar)', '--sidebar-width-icon': 'var(--shell-sidebar)' } as React.CSSProperties}
       className="contents"
@@ -57,5 +59,6 @@ export default async function AppLayout({
         <GlobalShortcuts />
       </AppShell>
     </SidebarProvider>
+    </ToasterProvider>
   );
 }
