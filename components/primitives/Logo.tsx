@@ -52,51 +52,20 @@ export function Logo({ variant = 'default', className }: LogoProps) {
         className,
       )}
     >
-      {/* "bidit" wordmark — navy→cyan gradient across "dit" */}
+      {/* icon mark — bar + circle, ink on transparent */}
       <svg
-        viewBox="0 0 92 34"
-        width="92"
-        height="34"
-        aria-label="bidit"
-        role="img"
+        viewBox="0 0 32 32"
+        width="22"
+        height="22"
+        aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <defs>
-          <linearGradient
-            id="logo-wm-grad"
-            x1="0"
-            x2="92"
-            y1="0"
-            y2="0"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop offset="0%" stopColor="#0B1560" />
-            <stop offset="33%" stopColor="#0B1560" />
-            <stop offset="70%" stopColor="#1565C0" />
-            <stop offset="100%" stopColor="#29B6F6" />
-          </linearGradient>
-          <clipPath id="logo-wm-clip">
-            <text
-              x="1"
-              y="27"
-              fontFamily="'Pretendard Variable', Pretendard, sans-serif"
-              fontWeight="800"
-              fontSize="27"
-              letterSpacing="-0.5"
-            >
-              bidit
-            </text>
-          </clipPath>
-        </defs>
-        <rect
-          x="0"
-          y="0"
-          width="92"
-          height="34"
-          fill="url(#logo-wm-grad)"
-          clipPath="url(#logo-wm-clip)"
-        />
+        <rect x="5.5" y="5" width="4.5" height="22" rx="2.25" fill="var(--color-ink)" />
+        <circle cx="21" cy="16" r="9" fill="var(--color-ink)" />
       </svg>
+      <span className="font-sans font-extrabold text-[22px] leading-none tracking-[-0.04em] text-[var(--color-ink)]">
+        bidit
+      </span>
     </Link>
   )
 }
