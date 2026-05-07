@@ -197,30 +197,7 @@ describe('createRfqAction', () => {
     expect(after[0].id).toBe(wsBizBefore);
   });
 
-  it('gradeOverride: snapshot grade differs + gradeSource=user_overridden + confirmedBy=session.user', async () => {
-    const r = await createRfqAction({
-      title: 'override',
-      deadline: new Date(Date.now() + 86_400_000).toISOString(),
-      allowedPgEmails: ['x@y.com'],
-      gradeOverride: 'sme1',
-    });
-    expect(r.ok).toBe(true);
-    if (!r.ok) return;
-
-    const [rfqRow] = await db.select().from(rfqs).where(eq(rfqs.id, r.rfqId));
-    expect(rfqRow.bizProfileId).not.toBeNull();
-    if (!rfqRow.bizProfileId) return;
-    const [snap] = await db
-      .select()
-      .from(bizProfiles)
-      .where(eq(bizProfiles.id, rfqRow.bizProfileId));
-    expect(snap.grade).toBe('sme1');
-    expect(snap.gradeSource).toBe('user_overridden');
-    expect(snap.gradeConfirmedBy).toBe(buyerUserId);
-    expect(snap.gradeConfirmedAt).not.toBeNull();
-  });
-
-  it('without gradeOverride: snapshot inherits source/confirmedBy from current biz_profile', async () => {
+  it('snapshot inherits grade/source/confirmedBy from current biz_profile verbatim', async () => {
     const r = await createRfqAction({
       title: 'inherit',
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
@@ -239,7 +216,7 @@ describe('createRfqAction', () => {
     expect(snap.gradeSource).toBe('user_confirmed');
   });
 
-  it('succeeds when workspace has no biz_profile_id — rfqRow.bizProfileId is null', async () => {
+  it('rejects with BIZ_PROFILE_REQUIRED when workspace has no biz_profile_id', async () => {
     await db
       .update(workspaces)
       .set({ bizProfileId: null })
@@ -250,10 +227,14 @@ describe('createRfqAction', () => {
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
       allowedPgEmails: ['x@y.com'],
     });
-    expect(r.ok).toBe(true);
-    if (!r.ok) return;
-    const [rfqRow] = await db.select().from(rfqs).where(eq(rfqs.id, r.rfqId));
-    expect(rfqRow.bizProfileId).toBeNull();
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.error).toBe('BIZ_PROFILE_REQUIRED');
+
+    // RFQ 가 commit 되지 않았는지 확인 — 가드는 트랜잭션 진입 후이므로
+    // 이전에 발급된 nextRfqId 가 있을 수 있지만 rfqs row 자체는 만들어지면 안 됨.
+    const all = await db.select().from(rfqs);
+    expect(all).toHaveLength(0);
   });
 
   it('issues monotonic Q-YYMM-NNNN ids within the month', async () => {
