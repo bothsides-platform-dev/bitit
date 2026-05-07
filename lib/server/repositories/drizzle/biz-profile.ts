@@ -9,9 +9,9 @@ type BizRow = typeof bizProfiles.$inferSelect;
 function rowToProfile(row: BizRow): BizProfile & { id: string } {
   return {
     id: row.id,
-    bizNo: row.bizNo,
-    taxType: row.taxType,
-    status: row.status,
+    bizNo: row.bizNo ?? undefined,
+    taxType: row.taxType ?? undefined,
+    status: row.status ?? undefined,
     grade: row.grade ?? undefined,
     gradeSource: row.gradeSource,
     gradeConfirmedBy: row.gradeConfirmedBy ?? undefined,
@@ -34,9 +34,9 @@ export class DrizzleBizProfileRepository implements BizProfileRepo {
     const db = this.h(tx);
     await db.insert(bizProfiles).values({
       id: profile.id,
-      bizNo: profile.bizNo,
-      taxType: profile.taxType,
-      status: profile.status,
+      bizNo: profile.bizNo ?? null,
+      taxType: profile.taxType ?? null,
+      status: profile.status ?? null,
       grade: profile.grade ?? null,
       gradeSource: profile.gradeSource,
       gradeConfirmedBy: profile.gradeConfirmedBy ?? null,

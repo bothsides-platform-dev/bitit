@@ -82,7 +82,7 @@ export default async function InboxDetailPage({ params }: Props) {
             견적 작성
           </h2>
         </div>
-        <BidForm rfqId={rfqId} grade={rfq.bizProfile.grade} />
+        <BidForm rfqId={rfqId} grade={rfq.bizProfile?.grade} />
       </div>
     </div>
   );

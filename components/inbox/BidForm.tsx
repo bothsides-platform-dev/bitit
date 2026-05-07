@@ -183,15 +183,18 @@ export function BidForm({ rfqId, grade }: Props) {
   const proposalReady = proposal && 'id' in proposal;
   const proposalUploading = proposal && 'status' in proposal && proposal.status === 'uploading';
 
-  const isGeneral = grade === 'general';
-  const cardFeeStatutory = grade && !isGeneral ? STATUTORY_CARD_FEE[grade] : null;
+  // 등급 미입력 RFQ 는 일반 가정 폴백 — 9개 카드사 입력 모드 활성.
+  // (서버에서도 grade ∈ {null, 'general'} 일 때만 cardFeesByIssuer 채택)
+  const allowCardFees = grade === undefined || grade === 'general';
+  const cardFeeStatutory =
+    grade && grade !== 'general' ? STATUTORY_CARD_FEE[grade] : null;
 
   const canSubmit =
     !pending &&
     !proposalUploading &&
     bankPct !== '' && parseFloat(bankPct) >= 0 &&
     easyPayPct !== '' && parseFloat(easyPayPct) >= 0 &&
-    (!isGeneral || CARD_ISSUERS.every((c) => cardFees[c.key] !== ''));
+    (!allowCardFees || CARD_ISSUERS.every((c) => cardFees[c.key] !== ''));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,8 +204,8 @@ export function BidForm({ rfqId, grade }: Props) {
     const pct = (s: string) => parseFloat(s) / 100;
 
     // 영세/중소 1~3 등급은 클라이언트가 cardFeesByIssuer 생략(서버도 강제로 null
-    // 처리 — advisor pin 1). 일반에서만 9개 카드사 입력.
-    const cardFeesByIssuer = isGeneral
+    // 처리 — advisor pin 1). 일반·등급 미입력에서만 9개 카드사 입력.
+    const cardFeesByIssuer = allowCardFees
       ? (Object.fromEntries(
           CARD_ISSUERS.map((c) => [c.key, pct(cardFees[c.key])]),
         ) as Record<CardIssuer, number>)
@@ -218,7 +221,7 @@ export function BidForm({ rfqId, grade }: Props) {
         bankTransferFeePct: pct(bankPct),
         easyPayFeePct: pct(easyPayPct),
         cardFeesByIssuer,
-        overseasCardFeePct: isGeneral && overseasPct ? pct(overseasPct) : undefined,
+        overseasCardFeePct: allowCardFees && overseasPct ? pct(overseasPct) : undefined,
         proposalAttachmentId: proposalReady ? proposal.id : undefined,
         memo: memo.trim() || undefined,
       });
@@ -233,9 +236,19 @@ export function BidForm({ rfqId, grade }: Props) {
 
   return (
     <form className="space-y-10" onSubmit={handleSubmit}>
-      {/* 법정 수수료 안내 */}
-      {grade && !isGeneral && cardFeeStatutory !== null && (
+      {/* 법정 수수료 안내 (영세/중소1~3 만). 일반·등급 미입력은 9개 카드사 입력 모드. */}
+      {grade && grade !== 'general' && cardFeeStatutory !== null && (
         <StatutoryCardFeeNotice grade={grade} />
+      )}
+      {grade === undefined && (
+        <div className="border border-[var(--color-hair)] px-4 py-3 space-y-1">
+          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
+            [ 등급 미입력 ] 일반 가정 견적
+          </p>
+          <p className="text-[13px] text-[var(--color-ink-muted)]">
+            구매사가 가맹점 등급을 입력하지 않은 사전 견적 RFQ 입니다. 일반 등급 가정으로 9개 카드사별 수수료를 직접 입력해주세요.
+          </p>
+        </div>
       )}
 
       {/* 01 정산 조건 */}
@@ -272,7 +285,7 @@ export function BidForm({ rfqId, grade }: Props) {
         <div className="grid grid-cols-2 gap-x-6 gap-y-5">
           <PctInput label="계좌이체 수수료 *" value={bankPct} onChange={setBankPct} placeholder="1.50" />
           <PctInput label="간편결제 수수료 *" value={easyPayPct} onChange={setEasyPayPct} placeholder="1.80" />
-          {isGeneral && (
+          {allowCardFees && (
             <>
               {CARD_ISSUERS.map((c) => (
                 <PctInput
@@ -380,7 +393,7 @@ export function BidForm({ rfqId, grade }: Props) {
       {!canSubmit && !pending && (
         <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
           · 계좌이체·간편결제 수수료 입력 필요
-          {isGeneral && ' · 카드사 9개 수수료 모두 입력 필요'}
+          {allowCardFees && ' · 카드사 9개 수수료 모두 입력 필요'}
         </p>
       )}
 

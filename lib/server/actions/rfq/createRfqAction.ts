@@ -28,6 +28,8 @@ import {
   type RfqActionResult,
 } from './_shared';
 
+const MERCHANT_GRADES = ['small', 'sme1', 'sme2', 'sme3', 'general'] as const;
+
 const Input = z
   .object({
     title: z.string().min(1).max(200),
@@ -36,6 +38,14 @@ const Input = z
     allowedPgEmails: z.array(z.string().email()).min(1).max(50),
     rfpAttachmentIds: z.array(z.string().uuid()).optional(),
     send: z.boolean().optional().default(false),
+    // bizProfile 분기 — default 'inherit' 은 워크스페이스 bizProfile 을 스냅샷.
+    // 워크스페이스에 bizProfile 이 없으면 자동으로 'none' 으로 폴백.
+    bizProfileMode: z
+      .enum(['inherit', 'override', 'none'])
+      .optional()
+      .default('inherit'),
+    bizNoOverride: z.string().min(1).max(50).optional(),
+    gradeOverride: z.enum(MERCHANT_GRADES).optional(),
   })
   .strict();
 
@@ -46,29 +56,17 @@ export type CreateRfqResult = RfqActionResult<{ rfqId: string }>;
 
 const INVITE_TTL_DAYS = 7;
 
-/**
- * RFQ 생성. send=false면 draft 저장, send=true면 sent + invitation/outbox 일괄.
- *
- * 사전 조건: 워크스페이스에 bizProfile이 등록되어 있어야 한다. 미등록이면
- * `BIZ_PROFILE_REQUIRED` 로 거부 — RFQ row를 NULL bizProfileId로 만들어 두면
- * `findById`/`findByBuyerWs` 의 INNER JOIN(bizProfiles) 이 그 row를 조용히
- * 떨어뜨려 대시보드/상세에서 '사라진' 상태가 되기 때문.
- *
- * 트랜잭션 단계 (advisor pin 1: workspace.biz_profile_id 절대 변경 금지):
- *   1) `nextRfqId(tx)` 로 ID 발급
- *   2) workspace 행에서 현재 bizProfileId 조회 → null이면 즉시 거부
- *   3) 그 row를 그대로 복사해 **새 biz_profiles row insert (RFQ 스냅샷)**
- *   4) `rfqs` insert — `bizProfileId = 새 스냅샷 id`. status는 send에 따라
- *      'sent'/'draft', sentAt도 그에 따라 now() 또는 null
- *   5) **workspace.biz_profile_id 는 그대로 둔다** — RFQ 시점 스냅샷이지
- *      workspace 업데이트가 아님. workspace 갱신은
- *      `updateWorkspaceBizProfileAction` 전용
- *   6) send=true 면 추가:
- *        - rfq_invitations N개 insert + InvitationRepo.save (token hash 저장)
- *        - rfq.invited 아웃박스 N개 (dedupe rfq:{id}:invite:{email})
- *        - rfq.sent 아웃박스 1개 (buyer 본인용 alert, dedupe rfq:{id}:sent)
- *        - dev 콘솔에 invite URL 출력 (Step 10에서 줄 제거)
- */
+// RFQ 생성. send=false면 draft 저장, send=true면 sent + invitation/outbox 일괄.
+//
+// bizProfileMode 분기:
+//   'inherit' (기본): 워크스페이스 bizProfile 을 스냅샷. 워크스페이스가 미등록이면
+//                     자동으로 'none' 으로 폴백 (사전 견적 모드).
+//   'override'      : bizNoOverride / gradeOverride 로 새 row insert. 둘 다
+//                     비어있으면 INVALID_BIZ_PROFILE 에러 (DB CHECK 와 정합).
+//   'none'          : biz_profiles row 생성 없이 rfqs.biz_profile_id=NULL.
+//
+// workspace.biz_profile_id 는 절대 변경하지 않음 — RFQ 시점 스냅샷일 뿐.
+// workspace 갱신은 updateWorkspaceBizProfileAction 전용.
 export async function createRfqAction(
   input: CreateRfqInput,
 ): Promise<CreateRfqResult> {
@@ -93,9 +91,7 @@ export async function createRfqAction(
       // 1. RFQ id 발급 (atomic counter)
       const rfqId = await nextRfqId(tx);
 
-      // 2. workspace의 현재 biz_profile_id 조회 (advisor pin 2: hydrated
-      //    Workspace 타입이 아니라 raw 컬럼 직접 read). name도 함께 픽업해
-      //    rfq.invited 메일 본문의 buyerName으로 쓴다.
+      // 2. workspace name 조회 (rfq.invited 메일 본문의 buyerName) + 현재 biz_profile_id.
       const [wsRow] = await tx
         .select({
           bizProfileId: workspaces.bizProfileId,
@@ -105,38 +101,59 @@ export async function createRfqAction(
         .where(eq(workspaces.id, wsId))
         .limit(1);
       if (!wsRow) return { ok: false, error: 'FORBIDDEN_BUYER' };
-      if (!wsRow.bizProfileId) return { ok: false, error: 'BIZ_PROFILE_REQUIRED' };
 
-      // 3. RFQ별 immutable 스냅샷 row insert. workspace.bizProfileId 가 가리키는
-      //    bizProfiles row 가 실제로 없으면 FK 정합성 깨짐 — 트랜잭션 throw 로
-      //    rollback (사용자에 노출하지 않음, 운영 차원에서 잡을 incident).
-      const [currentBiz] = await tx
-        .select()
-        .from(bizProfiles)
-        .where(eq(bizProfiles.id, wsRow.bizProfileId))
-        .limit(1);
-      if (!currentBiz) {
-        throw new Error(
-          `workspace.biz_profile_id=${wsRow.bizProfileId} points to missing biz_profiles row`,
-        );
-      }
-      const snapshotId = randomUUID();
+      // 3. bizProfile 분기 — 스냅샷 row id 또는 null 결정
       const now = new Date();
-      await tx.insert(bizProfiles).values({
-        id: snapshotId,
-        bizNo: currentBiz.bizNo,
-        taxType: currentBiz.taxType,
-        status: currentBiz.status,
-        grade: currentBiz.grade ?? null,
-        gradeSource: currentBiz.gradeSource,
-        gradeConfirmedBy: currentBiz.gradeConfirmedBy ?? null,
-        gradeConfirmedAt: currentBiz.gradeConfirmedAt ?? null,
-      });
+      let snapshotId: string | null = null;
 
-      // 4. NOTE: workspace.biz_profile_id 는 건드리지 않음.
-      //    (RFQ 시점 스냅샷일 뿐, workspace 시점 갱신은 updateWorkspaceBizProfileAction 전용)
+      const mode = parsed.data.bizProfileMode;
+      const bizNoOverride = parsed.data.bizNoOverride?.trim();
+      const gradeOverride = parsed.data.gradeOverride;
 
-      // 5. rfqs insert
+      if (mode === 'override') {
+        if (!bizNoOverride && !gradeOverride) {
+          return { ok: false, error: 'INVALID_BIZ_PROFILE' };
+        }
+        snapshotId = randomUUID();
+        await tx.insert(bizProfiles).values({
+          id: snapshotId,
+          bizNo: bizNoOverride ?? null,
+          taxType: null,
+          status: null,
+          grade: gradeOverride ?? null,
+          gradeSource: gradeOverride ? 'user_overridden' : 'unset',
+          gradeConfirmedBy: gradeOverride ? userId : null,
+          gradeConfirmedAt: gradeOverride ? now : null,
+        });
+      } else if (mode === 'inherit' && wsRow.bizProfileId) {
+        // workspace bizProfile 을 RFQ 스냅샷으로 복제. workspace.bizProfileId 는
+        // 그대로 둔다 (workspace 갱신은 updateWorkspaceBizProfileAction 전용).
+        const [currentBiz] = await tx
+          .select()
+          .from(bizProfiles)
+          .where(eq(bizProfiles.id, wsRow.bizProfileId))
+          .limit(1);
+        if (!currentBiz) {
+          throw new Error(
+            `workspace.biz_profile_id=${wsRow.bizProfileId} points to missing biz_profiles row`,
+          );
+        }
+        snapshotId = randomUUID();
+        await tx.insert(bizProfiles).values({
+          id: snapshotId,
+          bizNo: currentBiz.bizNo,
+          taxType: currentBiz.taxType,
+          status: currentBiz.status,
+          grade: currentBiz.grade ?? null,
+          gradeSource: currentBiz.gradeSource,
+          gradeConfirmedBy: currentBiz.gradeConfirmedBy ?? null,
+          gradeConfirmedAt: currentBiz.gradeConfirmedAt ?? null,
+        });
+      }
+      // mode==='none' 또는 mode==='inherit' && workspace bizProfile 미등록
+      // → snapshotId 가 null 인 채로 rfqs insert. 사전 견적 RFQ.
+
+      // 4. rfqs insert
       await tx.insert(rfqs).values({
         id: rfqId,
         buyerWsId: wsId,

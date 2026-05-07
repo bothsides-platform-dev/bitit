@@ -29,7 +29,7 @@ type Props = {
   rfqDeadline: string;
   rfqAllowedCount: number;
   bizProfile: {
-    bizNo: string;
+    bizNo?: string;
     grade?: MerchantGrade;
   };
   buyerWorkspaceName: string;
@@ -201,7 +201,7 @@ export function AwardConfirm(props: Props) {
         <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
           {[
             ['구매사', buyerWorkspaceName],
-            ['사업자번호', bizProfile.bizNo],
+            ['사업자번호', bizProfile.bizNo ?? '미입력'],
             ['등급', grade ? GRADE_LABELS[grade] : '—'],
             ['마감', formatDate(rfqDeadline)],
             ['초대 PG', `${rfqAllowedCount}개사`],

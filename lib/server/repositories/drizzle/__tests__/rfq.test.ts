@@ -55,7 +55,7 @@ describe('DrizzleRfqRepository', () => {
     await repo.save(makeRfq('Q-2605-0001', ctx.ws.id, ctx.user.id));
     const fetched = await repo.findById('Q-2605-0001');
     expect(fetched).toMatchObject({ id: 'Q-2605-0001', status: 'draft' });
-    expect(fetched!.bizProfile.bizNo).toBe('1234567890');
+    expect(fetched!.bizProfile?.bizNo).toBe('1234567890');
   });
 
   it('returns undefined for unknown id', async () => {

@@ -285,19 +285,15 @@ export type User = {
 // lib/types/biz-profile.ts
 export type MerchantGrade = 'small' | 'sme1' | 'sme2' | 'sme3' | 'general';
 
+// 슬림화 (BACKEND_MIGRATION 반영): name/ceoName/ksic/mailOrderNo/estimatedRevenue/revenueYear/niceLookedUpAt 제거.
+// 회사명은 Workspace.name 사용. NICE/공정위 enrichment 는 v0 제외.
+// 사업자번호·등급 모두 옵셔널. 둘 다 NULL 인 row 는 DB CHECK 로 금지.
 export type BizProfile = {
-  bizNo: string;
-  name: string;
-  ceoName: string;
-  ksic: string;
-  taxType: 'general' | 'simple' | 'exempt';
-  status: 'active' | 'suspended' | 'closed';
-  mailOrderNo?: string;
-  estimatedRevenue?: number;
-  revenueYear?: string;
-  niceLookedUpAt?: string;
+  bizNo?: string;
+  taxType?: 'general' | 'simple' | 'exempt';
+  status?: 'active' | 'suspended' | 'closed';
   grade?: MerchantGrade;
-  gradeSource: 'auto_nice' | 'user_confirmed' | 'user_overridden';
+  gradeSource: 'user_confirmed' | 'user_overridden' | 'unset';
   gradeConfirmedBy?: string;
   gradeConfirmedAt?: string;
 };
@@ -313,7 +309,7 @@ export type RfqStatus = 'draft' | 'sent' | 'closed' | 'cancelled' | 'awarded';
 export type RFQ = {
   id: string;                 // RFQ-2605-0001
   buyerWsId: string;
-  bizProfile: BizProfile;     // 발송 시점 스냅샷
+  bizProfile?: BizProfile;    // 발송 시점 스냅샷. bizNo·grade 모두 미입력 시 undefined.
   title: string;
   memo: string;
   rfpFiles: Attachment[];

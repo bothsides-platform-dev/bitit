@@ -15,6 +15,13 @@
       "when": 1778054541120,
       "tag": "0001_optional_rfq_biz_profile",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778137283598,
+      "tag": "0002_left_xavin",
+      "breakpoints": true
     }
   ]
 }

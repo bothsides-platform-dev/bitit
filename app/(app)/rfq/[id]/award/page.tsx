@@ -78,8 +78,8 @@ export default async function AwardPage({ params, searchParams }: Props) {
       rfqDeadline={rfq.deadline}
       rfqAllowedCount={rfq.allowedPgEmails.length}
       bizProfile={{
-        bizNo: rfq.bizProfile.bizNo,
-        grade: rfq.bizProfile.grade,
+        bizNo: rfq.bizProfile?.bizNo,
+        grade: rfq.bizProfile?.grade,
       }}
       buyerWorkspaceName={buyerWs?.name ?? '—'}
       selected={selected}

@@ -71,8 +71,8 @@ export default async function RfqDetailPage({ params }: Props) {
     if (w) pgWsNameMap[pgWsIds[i]] = w.name;
   });
 
-  const { bizProfile } = rfq;
-  const cardFee = bizProfile.grade ? STATUTORY_CARD_FEE[bizProfile.grade] : NaN;
+  const bizProfile = rfq.bizProfile;
+  const cardFee = bizProfile?.grade ? STATUTORY_CARD_FEE[bizProfile.grade] : NaN;
 
   return (
     <PageEnter className="px-8 py-8 max-w-[1100px] space-y-10">
@@ -114,7 +114,7 @@ export default async function RfqDetailPage({ params }: Props) {
         <BidComparisonView
           rfqId={id}
           bids={rfqBids}
-          grade={bizProfile.grade}
+          grade={bizProfile?.grade}
           rfqStatus={rfq.status}
           awardedBidId={rfq.awardedBidId}
           pgWsNameMap={pgWsNameMap}
@@ -134,8 +134,8 @@ export default async function RfqDetailPage({ params }: Props) {
           <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
             {[
               ['상호명', companyName],
-              ['사업자번호', bizProfile.bizNo],
-              ...(bizProfile.grade
+              ['사업자번호', bizProfile?.bizNo ?? '미입력'],
+              ...(bizProfile?.grade
                 ? [
                     ['등급', GRADE_LABELS[bizProfile.grade]],
                     [
@@ -145,7 +145,7 @@ export default async function RfqDetailPage({ params }: Props) {
                         : `${(cardFee * 100).toFixed(2)}%`,
                     ],
                   ]
-                : []),
+                : [['등급', '미정']]),
             ].map(([label, value]) => (
               <div
                 key={label}

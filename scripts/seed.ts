@@ -236,6 +236,19 @@ export async function runSeed(db: AnyDb): Promise<SeedResult> {
       createdBy: buyerUserId,
       sentAt: null,
     },
+    // 사전 견적 RFQ — bizProfileId NULL. PG가 일반 등급 가정으로 9개 카드사 입력.
+    {
+      id: 'Q-2605-0002',
+      buyerWsId,
+      bizProfileId: null,
+      title: '사전 견적 (법인 설립 전)',
+      memo: '월 예상 매출 5천만원 규모, 일반 등급 가정 견적 부탁드립니다.',
+      allowedPgEmails: [tossEmail],
+      deadline: sevenDays,
+      status: 'sent',
+      createdBy: buyerUserId,
+      sentAt,
+    },
   ]);
 
   // 8. Invitations for the sent RFQ. toss/inicis are accepted (PG admin
@@ -278,6 +291,18 @@ export async function runSeed(db: AnyDb): Promise<SeedResult> {
       sentAt,
       expiresAt: sevenDays,
       status: 'pending',
+    },
+    // 사전 견적 RFQ Q-2605-0002 — toss 만 초대됨. accepted 상태로 시드.
+    {
+      id: randomUUID(),
+      rfqId: 'Q-2605-0002',
+      pgEmail: tossEmail,
+      pgWsId: tossWsId,
+      acceptedByUserId: tossUserId,
+      tokenHash: hashToken(generateToken()),
+      sentAt,
+      expiresAt: sevenDays,
+      status: 'accepted',
     },
   ]);
 

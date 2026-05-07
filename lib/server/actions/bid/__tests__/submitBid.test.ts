@@ -224,6 +224,47 @@ describe('submitBidAction', () => {
     expect(row.overseasCardFeePct).toBeNull();
   });
 
+  it('null grade (사업자번호 미입력 RFQ) preserves cardFeesByIssuer (general fallback)', async () => {
+    const s = await seedSetup('general');
+    // Drop bizProfile entirely — RFQ created in 사전 견적 mode.
+    await db.update(rfqs).set({ bizProfileId: null }).where(eq(rfqs.id, s.rfqId));
+
+    sessionRef.value = {
+      user: {
+        id: s.pgUserId,
+        email: s.pgUserEmail,
+        workspaceId: s.pgWsId,
+        workspaceType: 'pg',
+        role: 'admin',
+      },
+    };
+
+    const cardFees = {
+      BC: 0.012,
+      SHINHAN: 0.013,
+      SAMSUNG: 0.013,
+      HYUNDAI: 0.013,
+      KB: 0.013,
+      LOTTE: 0.013,
+      NH: 0.013,
+      HANA: 0.013,
+      WOORI: 0.013,
+    } as const;
+    const r = await submitBidAction({
+      rfqId: s.rfqId,
+      ...baseInput,
+      cardFeesByIssuer: cardFees,
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+
+    const [row] = await db
+      .select()
+      .from(bids)
+      .where(eq(bids.id, r.bidId));
+    expect(row.cardFeesByIssuer).toEqual(cardFees);
+  });
+
   it('general grade preserves cardFeesByIssuer', async () => {
     const s = await seedSetup('general');
     sessionRef.value = {

@@ -74,9 +74,9 @@ export class DrizzleWorkspaceRepository implements WorkspaceRepo {
         .limit(1)) as BizRow[];
       if (biz) {
         bizProfile = {
-          bizNo: biz.bizNo,
-          taxType: biz.taxType,
-          status: biz.status,
+          bizNo: biz.bizNo ?? undefined,
+          taxType: biz.taxType ?? undefined,
+          status: biz.status ?? undefined,
           grade: biz.grade ?? undefined,
           gradeSource: biz.gradeSource,
           gradeConfirmedBy: biz.gradeConfirmedBy ?? undefined,

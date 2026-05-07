@@ -15,16 +15,18 @@ function toIso(d: Date | null | undefined): string | undefined {
   return d ? new Date(d).toISOString() : undefined;
 }
 
-function rowToRfq(row: RfqRow, biz: BizRow): RFQ {
-  const profile: BizProfile = {
-    bizNo: biz.bizNo,
-    taxType: biz.taxType,
-    status: biz.status,
-    grade: biz.grade ?? undefined,
-    gradeSource: biz.gradeSource,
-    gradeConfirmedBy: biz.gradeConfirmedBy ?? undefined,
-    gradeConfirmedAt: toIso(biz.gradeConfirmedAt),
-  };
+function rowToRfq(row: RfqRow, biz: BizRow | null): RFQ {
+  const profile: BizProfile | undefined = biz
+    ? {
+        bizNo: biz.bizNo ?? undefined,
+        taxType: biz.taxType ?? undefined,
+        status: biz.status ?? undefined,
+        grade: biz.grade ?? undefined,
+        gradeSource: biz.gradeSource,
+        gradeConfirmedBy: biz.gradeConfirmedBy ?? undefined,
+        gradeConfirmedAt: toIso(biz.gradeConfirmedAt),
+      }
+    : undefined;
   return {
     id: row.id,
     buyerWsId: row.buyerWsId,
@@ -159,11 +161,11 @@ export class DrizzleInvitationRepository implements InvitationRepo {
       .select({ inv: rfqInvitations, rfq: rfqs, biz: bizProfiles })
       .from(rfqInvitations)
       .innerJoin(rfqs, eq(rfqInvitations.rfqId, rfqs.id))
-      .innerJoin(bizProfiles, eq(rfqs.bizProfileId, bizProfiles.id))
+      .leftJoin(bizProfiles, eq(rfqs.bizProfileId, bizProfiles.id))
       .where(eq(rfqInvitations.acceptedByUserId, userId))) as {
       inv: InvRow;
       rfq: RfqRow;
-      biz: BizRow;
+      biz: BizRow | null;
     }[];
     return rows.map((r) => ({
       invitation: rowToInvitation(r.inv),

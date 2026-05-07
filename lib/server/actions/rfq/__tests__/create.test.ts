@@ -216,7 +216,7 @@ describe('createRfqAction', () => {
     expect(snap.gradeSource).toBe('user_confirmed');
   });
 
-  it('rejects with BIZ_PROFILE_REQUIRED when workspace has no biz_profile_id', async () => {
+  it('falls through to bizProfileId=null when workspace has no biz_profile_id (사전 견적)', async () => {
     await db
       .update(workspaces)
       .set({ bizProfileId: null })
@@ -227,14 +227,60 @@ describe('createRfqAction', () => {
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
       allowedPgEmails: ['x@y.com'],
     });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+
+    const [rfqRow] = await db.select().from(rfqs).where(eq(rfqs.id, r.rfqId));
+    expect(rfqRow.bizProfileId).toBeNull();
+  });
+
+  it('bizProfileMode=none skips biz_profiles snapshot insert', async () => {
+    const r = await createRfqAction({
+      title: 'pre-quote',
+      deadline: new Date(Date.now() + 86_400_000).toISOString(),
+      allowedPgEmails: ['x@y.com'],
+      bizProfileMode: 'none',
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+
+    const [rfqRow] = await db.select().from(rfqs).where(eq(rfqs.id, r.rfqId));
+    expect(rfqRow.bizProfileId).toBeNull();
+  });
+
+  it('bizProfileMode=override with neither bizNo nor grade returns INVALID_BIZ_PROFILE', async () => {
+    const r = await createRfqAction({
+      title: 't',
+      deadline: new Date(Date.now() + 86_400_000).toISOString(),
+      allowedPgEmails: ['x@y.com'],
+      bizProfileMode: 'override',
+    });
     expect(r.ok).toBe(false);
     if (r.ok) return;
-    expect(r.error).toBe('BIZ_PROFILE_REQUIRED');
+    expect(r.error).toBe('INVALID_BIZ_PROFILE');
+  });
 
-    // RFQ 가 commit 되지 않았는지 확인 — 가드는 트랜잭션 진입 후이므로
-    // 이전에 발급된 nextRfqId 가 있을 수 있지만 rfqs row 자체는 만들어지면 안 됨.
-    const all = await db.select().from(rfqs);
-    expect(all).toHaveLength(0);
+  it('bizProfileMode=override with gradeOverride creates new biz_profiles row', async () => {
+    const r = await createRfqAction({
+      title: 'override',
+      deadline: new Date(Date.now() + 86_400_000).toISOString(),
+      allowedPgEmails: ['x@y.com'],
+      bizProfileMode: 'override',
+      gradeOverride: 'sme3',
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+
+    const [rfqRow] = await db.select().from(rfqs).where(eq(rfqs.id, r.rfqId));
+    expect(rfqRow.bizProfileId).not.toBeNull();
+    if (!rfqRow.bizProfileId) return;
+    const [snap] = await db
+      .select()
+      .from(bizProfiles)
+      .where(eq(bizProfiles.id, rfqRow.bizProfileId));
+    expect(snap.grade).toBe('sme3');
+    expect(snap.gradeSource).toBe('user_overridden');
+    expect(snap.bizNo).toBeNull();
   });
 
   it('issues monotonic Q-YYMM-NNNN ids within the month', async () => {

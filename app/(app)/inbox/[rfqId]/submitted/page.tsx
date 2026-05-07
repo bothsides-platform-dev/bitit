@@ -60,7 +60,7 @@ export default async function InboxSubmittedPage({ params }: Props) {
     );
   }
 
-  const grade = rfq.bizProfile.grade;
+  const grade = rfq.bizProfile?.grade;
 
   return (
     <div className="px-8 py-8 max-w-[640px] space-y-10">

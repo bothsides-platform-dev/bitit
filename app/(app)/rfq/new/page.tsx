@@ -20,12 +20,8 @@ export default async function RfqNewPage() {
   if (!ws) {
     redirect('/login?next=/rfq/new');
   }
-  // 사업자번호 미등록 워크스페이스는 RFQ 생성 자체를 차단. createRfqAction 도
-  // 같은 가드를 가지지만 (race 안전망), 사용자는 form 까지 도달하지 않게
-  // 설정 페이지로 곧장 보낸다 — 거기 WorkspaceBizNoForm 으로 등록 후 복귀.
-  if (!ws.bizProfile) {
-    redirect('/settings/profile?biz_required=1');
-  }
+  // ws.bizProfile 이 undefined 여도 RFQ 작성 진입 허용 (사전 견적 모드).
+  // RFQ 작성 폼에서 인라인으로 사업자번호·등급 추가 가능.
 
   return (
     <div className="px-8 py-8 max-w-[1100px] mx-auto">

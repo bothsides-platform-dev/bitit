@@ -13,16 +13,18 @@ function toIso(d: Date | null | undefined): string | undefined {
   return d ? new Date(d).toISOString() : undefined;
 }
 
-function rowToRfq(row: RfqRow, biz: BizRow): RFQ {
-  const profile: BizProfile = {
-    bizNo: biz.bizNo,
-    taxType: biz.taxType,
-    status: biz.status,
-    grade: biz.grade ?? undefined,
-    gradeSource: biz.gradeSource,
-    gradeConfirmedBy: biz.gradeConfirmedBy ?? undefined,
-    gradeConfirmedAt: toIso(biz.gradeConfirmedAt),
-  };
+function rowToRfq(row: RfqRow, biz: BizRow | null): RFQ {
+  const profile: BizProfile | undefined = biz
+    ? {
+        bizNo: biz.bizNo ?? undefined,
+        taxType: biz.taxType ?? undefined,
+        status: biz.status ?? undefined,
+        grade: biz.grade ?? undefined,
+        gradeSource: biz.gradeSource,
+        gradeConfirmedBy: biz.gradeConfirmedBy ?? undefined,
+        gradeConfirmedAt: toIso(biz.gradeConfirmedAt),
+      }
+    : undefined;
   return {
     id: row.id,
     buyerWsId: row.buyerWsId,
@@ -51,19 +53,21 @@ export class DrizzleRfqRepository implements RfqRepo {
 
   async save(rfq: RFQ, tx?: Tx): Promise<void> {
     const db = this.h(tx);
-    // bizProfile은 별도 row로 선존재해야 함 — RFQ.bizProfile에는 id가 없으므로
-    // 호출자(액션 레이어)가 BizProfileRepo.save 후 rfq.bizProfileId를 들고 와야 함.
-    // 여기서는 RFQ.bizProfile의 bizNo로 매칭되는 가장 최근 row를 사용.
-    const [biz] = await db
-      .select()
-      .from(bizProfiles)
-      .where(eq(bizProfiles.bizNo, rfq.bizProfile.bizNo))
-      .orderBy(sql`${bizProfiles.createdAt} desc`)
-      .limit(1);
-    if (!biz) {
-      throw new Error(
-        `BizProfile not found for bizNo=${rfq.bizProfile.bizNo} — call BizProfileRepo.save first`,
-      );
+    // bizProfile 은 옵셔널. 들어있으면 bizNo 로 가장 최근 row 매칭, 없으면 null.
+    let bizProfileId: string | null = null;
+    if (rfq.bizProfile?.bizNo) {
+      const [biz] = await db
+        .select()
+        .from(bizProfiles)
+        .where(eq(bizProfiles.bizNo, rfq.bizProfile.bizNo))
+        .orderBy(sql`${bizProfiles.createdAt} desc`)
+        .limit(1);
+      if (!biz) {
+        throw new Error(
+          `BizProfile not found for bizNo=${rfq.bizProfile.bizNo} — call BizProfileRepo.save first`,
+        );
+      }
+      bizProfileId = biz.id;
     }
 
     await db
@@ -71,7 +75,7 @@ export class DrizzleRfqRepository implements RfqRepo {
       .values({
         id: rfq.id,
         buyerWsId: rfq.buyerWsId,
-        bizProfileId: biz.id,
+        bizProfileId,
         title: rfq.title,
         memo: rfq.memo,
         allowedPgEmails: rfq.allowedPgEmails,
@@ -100,7 +104,7 @@ export class DrizzleRfqRepository implements RfqRepo {
     const [row] = await db
       .select({ rfq: rfqs, biz: bizProfiles })
       .from(rfqs)
-      .innerJoin(bizProfiles, eq(rfqs.bizProfileId, bizProfiles.id))
+      .leftJoin(bizProfiles, eq(rfqs.bizProfileId, bizProfiles.id))
       .where(eq(rfqs.id, id))
       .limit(1);
     return row ? rowToRfq(row.rfq, row.biz) : undefined;
@@ -111,9 +115,11 @@ export class DrizzleRfqRepository implements RfqRepo {
     const rows = await db
       .select({ rfq: rfqs, biz: bizProfiles })
       .from(rfqs)
-      .innerJoin(bizProfiles, eq(rfqs.bizProfileId, bizProfiles.id))
+      .leftJoin(bizProfiles, eq(rfqs.bizProfileId, bizProfiles.id))
       .where(eq(rfqs.buyerWsId, wsId));
-    return rows.map((r: { rfq: RfqRow; biz: BizRow }) => rowToRfq(r.rfq, r.biz));
+    return rows.map((r: { rfq: RfqRow; biz: BizRow | null }) =>
+      rowToRfq(r.rfq, r.biz),
+    );
   }
 
   async transition(

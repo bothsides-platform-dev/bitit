@@ -26,7 +26,7 @@ export default async function InboxPage() {
     rfqId: rfq.id,
     rfqTitle: rfq.title,
     rfqDeadline: rfq.deadline,
-    grade: rfq.bizProfile.grade
+    grade: rfq.bizProfile?.grade
       ? GRADE_LABELS[rfq.bizProfile.grade]
       : '—',
   }));

@@ -25,7 +25,7 @@
 
 **확정 결정 (PG_RFQ_SPEC 기준)**
 - 메인 IA: 홈 / RFQ / 받은 RFQ / 설정
-- RFQ 작성 워크플로우: 사업자번호 조회 → 등급 확인 → 자유 메모·첨부 → PG 이메일 allowlist → 발송
+- RFQ 작성 워크플로우: **(선택)** 사업자번호 조회 → **(선택)** 등급 확인 → 자유 메모·첨부 → PG 이메일 allowlist → 발송 (사업자번호·등급 모두 옵셔널)
 - PG 응답 워크플로우: 초대 URL → 가입/로그인 → 도메인 기반 PG 워크스페이스 → 정형 Bid 제출
 - v0 결재선 없음. 승인 UI를 만들지 않는다.
 
@@ -72,7 +72,7 @@ Authenticated AppShell
 |---|---|---|---|
 | B1 | `/home` | 진행 중 RFQ, 임박 마감, 받은 Bid, 최근 활동 | `KpiStrip`, `DeadlineWidget`, `RfqProgressWidget`, `NotificationWidget` |
 | B2 | `/rfq` | RFQ 목록. 작성중/진행중/마감/계약완료 탭 | `RfqList`, `DataTable`, `Tag` |
-| B3 | `/rfq/new` | 사업자 조회, 등급 확인, RFP 첨부, PG 이메일 allowlist, 발송 | `BizLookupField`, `GradeConfirmPanel`, `PgEmailAllowlist`, `RfpAttachmentDropzone` |
+| B3 | `/rfq/new` | 사업자 조회 (선택), 등급 확인 (선택), RFP 첨부, PG 이메일 allowlist, 발송 | `BizLookupField`, `GradeConfirmPanel`, `PgEmailAllowlist`, `RfpAttachmentDropzone` |
 | B4 | `/rfq/:id` | RFQ 상세 + 받은 Bid 비교 + PDF 프리뷰. 표↔보드 토글로 칸반(진행전/협상중/결정) 전환, 카드 모달에 메모/첨부 히스토리 누적 | `InvitationStatusPanel`, `BidComparisonView`, `BidComparisonTable`, `BidViewToggle`, `BidBoard`, `BidBoardCard`, `BidDetailModal`, `ProposalPdfPreview` |
 | B5 | `/rfq/:id/award` | Bid 선택, 계약 레코드 생성, 선택/미선택 PG 통보 | `AwardFlow`, `DecisionTimeline` |
 | B6 | `/settings/profile` | 구매사 사업자 프로필과 등급 갱신 상태 | `WorkspaceProfileForm` |
@@ -84,7 +84,7 @@ Authenticated AppShell
 |---|---|---|---|
 | P1 | `/home` | 신규 RFQ, 임박 마감, 제출 완료, 수주율 | `KpiStrip`, `DeadlineWidget`, `RfqProgressWidget` |
 | P2 | `/inbox` | 받은 RFQ 함. 신규/작성중/제출완료/마감 탭 | `InboxList`, `DataTable`, `Tag` |
-| P3 | `/inbox/:rfqId` | 구매사 메타·등급·RFP 확인 + 정형 Bid 작성 | `RfqBriefPanel`, `BidForm`, `StatutoryCardFeeNotice` |
+| P3 | `/inbox/:rfqId` | 구매사 메타·등급(있으면)·RFP 확인 + 정형 Bid 작성. 사업자번호 미입력 시 안내 배너. 등급 미입력 시 일반 폴백(9개 카드사 입력) | `RfqBriefPanel`, `BidForm`, `StatutoryCardFeeNotice` |
 | P4 | `/inbox/:rfqId/submitted` | 제출 완료, 결과 대기, 수정/철회 정책 안내 | `SubmittedState` |
 | P5 | `/settings/profile` | PG 회사 정보와 도메인 검증 | `WorkspaceProfileForm` |
 | P6 | `/settings/members` | 같은 이메일 도메인 멤버 관리 | `MemberTable` |
@@ -94,13 +94,12 @@ Authenticated AppShell
 ```
 Buyer RFQ
 /rfq/new
-  ├─ bizNo 입력
-  ├─ NTS + FTC enrichment
-  ├─ NICE opt-in → grade 추정
-  ├─ buyer 등급 확인/수정
+  ├─ (선택) bizNo 입력 → NTS lookup → taxType/status 표시
+  ├─ (선택) grade 5단계 라디오 선택 → gradeSource='user_confirmed'
   ├─ memo + RFP PDF 첨부
   ├─ PG email allowlist 입력
   └─ send → Invitation + outbox email
+        └─ bizNo·grade 모두 미입력 시 bizProfile=undefined 스냅샷
 ```
 
 ```

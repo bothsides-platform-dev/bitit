@@ -97,13 +97,15 @@ export async function submitBidAction(
   if (rfq.status !== 'sent') return { ok: false, error: 'RFQ_NOT_OPEN' };
 
   // STATUTORY_CARD_FEE 서버 강제 (advisor pin 1):
-  // grade가 영세/중소1~3인 경우 cardFeesByIssuer 입력은 무시되고 null로 강제.
-  // 일반(general)에서만 클라이언트 입력을 채택. zod 통과해도 grade로 다시 분기.
-  const grade = rfq.bizProfile.grade;
-  const cardFees =
-    grade === 'general' ? (data.cardFeesByIssuer ?? null) : null;
-  const overseasCardFeePct =
-    grade === 'general' ? (data.overseasCardFeePct ?? undefined) : undefined;
+  // grade 가 영세/중소1~3 인 경우 cardFeesByIssuer 입력은 무시되고 null 로 강제.
+  // 일반(general) 또는 등급 미입력(NULL) 일 때만 클라이언트 입력 채택 — 등급 미입력
+  // RFQ 는 PG 가 일반 등급 가정으로 9개 카드사 직접 견적.
+  const grade = rfq.bizProfile?.grade ?? null;
+  const allowCardFees = grade === null || grade === 'general';
+  const cardFees = allowCardFees ? (data.cardFeesByIssuer ?? null) : null;
+  const overseasCardFeePct = allowCardFees
+    ? (data.overseasCardFeePct ?? undefined)
+    : undefined;
 
   // 호출자 invitation row 픽업 — bid.invitationId FK.
   const allInvs = await invRepo.findByRfq(data.rfqId);

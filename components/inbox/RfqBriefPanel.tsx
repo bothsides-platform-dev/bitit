@@ -8,8 +8,9 @@ import type { RFQ } from '@/lib/types/rfq';
 type Props = { rfq: RFQ };
 
 export function RfqBriefPanel({ rfq }: Props) {
-  const { bizProfile } = rfq;
-  const grade = bizProfile.grade;
+  const bizProfile = rfq.bizProfile;
+  const bizNoMissing = !bizProfile?.bizNo;
+  const grade = bizProfile?.grade;
   const cardFee = grade ? STATUTORY_CARD_FEE[grade] : NaN;
   const daysLeft = formatDeadline(rfq.deadline);
   const isUrgent = daysLeft.startsWith('D-') && parseInt(daysLeft.slice(2)) <= 3;
@@ -31,6 +32,17 @@ export function RfqBriefPanel({ rfq }: Props) {
         </div>
       </div>
 
+      {bizNoMissing && (
+        <div className="border border-[var(--color-hair)] px-4 py-3 space-y-1">
+          <div className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
+            [ 사업자번호 미입력 ]
+          </div>
+          <p className="text-[12px] leading-relaxed text-[var(--color-ink-muted)]">
+            사전 견적 또는 보완 예정 RFQ — 일반 등급 가정으로 9개 카드사별 견적을 작성하세요.
+          </p>
+        </div>
+      )}
+
       {/* Buyer biz info */}
       <div>
         <div className="flex items-center gap-3 mb-3">
@@ -40,7 +52,7 @@ export function RfqBriefPanel({ rfq }: Props) {
         <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
           {[
             ['상호명', '(주)샘플테크'],
-            ['사업자번호', bizProfile.bizNo],
+            ['사업자번호', bizProfile?.bizNo ?? '미입력'],
             ['대표자', '—'],
           ].map(([label, value]) => (
             <div key={label} className="py-2.5 flex items-baseline justify-between">
@@ -52,29 +64,38 @@ export function RfqBriefPanel({ rfq }: Props) {
       </div>
 
       {/* Grade + statutory fee */}
-      {grade && (
-        <div>
-          <div className="flex items-center gap-3 mb-3">
-            <Eyebrow>가맹점 등급</Eyebrow>
-            <div className="flex-1 h-px bg-[var(--color-hair)]" />
-          </div>
-          <div className="flex items-center justify-between py-2.5 border-t border-[var(--color-hair)] border-b border-[var(--color-hair)]">
-            <div className="flex items-center gap-3">
-              <Tag>{GRADE_LABELS[grade]}</Tag>
-              {!isNaN(cardFee) && (
-                <span className="font-mono text-[12px] tabular-nums text-[var(--color-ink-muted)]">
-                  카드 법정 {(cardFee * 100).toFixed(2)}%
-                </span>
-              )}
-              {isNaN(cardFee) && (
+      <div>
+        <div className="flex items-center gap-3 mb-3">
+          <Eyebrow>가맹점 등급</Eyebrow>
+          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+        </div>
+        <div className="flex items-center justify-between py-2.5 border-t border-[var(--color-hair)] border-b border-[var(--color-hair)]">
+          <div className="flex items-center gap-3">
+            {grade ? (
+              <>
+                <Tag>{GRADE_LABELS[grade]}</Tag>
+                {!isNaN(cardFee) && (
+                  <span className="font-mono text-[12px] tabular-nums text-[var(--color-ink-muted)]">
+                    카드 법정 {(cardFee * 100).toFixed(2)}%
+                  </span>
+                )}
+                {isNaN(cardFee) && (
+                  <span className="font-mono text-[12px] text-[var(--color-ink-muted)]">
+                    일반등급 — 카드사별 수수료 입력 필요
+                  </span>
+                )}
+              </>
+            ) : (
+              <>
+                <Tag>미정</Tag>
                 <span className="font-mono text-[12px] text-[var(--color-ink-muted)]">
-                  일반등급 — 카드사별 수수료 입력 필요
+                  등급 미입력 — 일반 가정으로 카드사별 수수료 입력 필요
                 </span>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </div>
-      )}
+      </div>
 
       {/* Memo */}
       {rfq.memo && (

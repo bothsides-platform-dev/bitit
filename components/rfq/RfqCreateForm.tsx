@@ -24,14 +24,12 @@ function SectionHeader({ num, label }: { num: string; label: string }) {
 
 type Props = {
   /**
-   * Workspace의 현재 사업자 프로필. RSC 부모(`/rfq/new`)에서 fetch 한 뒤
-   * read-only로 표시. createRfqAction이 서버에서 직접 workspace.bizProfileId
-   * 를 읽어 스냅샷을 만들기 때문에 클라가 bizNo를 보내지는 않는다.
-   *
-   * 미등록 워크스페이스는 부모 RSC 가 `/settings/profile?biz_required=1` 로
-   * 리다이렉트하므로 이 컴포넌트는 항상 등록된 bizProfile 위에서만 마운트된다.
+   * Workspace 의 현재 사업자 프로필. 미등록(undefined) 일 수 있다 —
+   * 사전 견적 모드(법인 미설립/보완 예정)는 RFQ 작성 시점에 "사업자번호 없이"
+   * 발송되는 케이스. createRfqAction 의 `bizProfileMode='inherit'` 가 자동으로
+   * `'none'` 폴백으로 동작.
    */
-  bizProfile: Pick<BizProfile, 'bizNo' | 'taxType' | 'status'>;
+  bizProfile?: Pick<BizProfile, 'bizNo' | 'taxType' | 'status'>;
   /** 회사명 (Workspace.name) — 표시용 */
   workspaceName: string;
 };
@@ -99,51 +97,71 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
     <form className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-12 lg:items-start" onSubmit={handleSubmit}>
       {/* Left column: sections 01, 02, 03 */}
       <div className="space-y-12 lg:border-r lg:border-[var(--color-hair)] lg:pr-10">
-        {/* 01 사업자 정보 — read-only (workspace 시점) */}
+        {/* 01 사업자 정보 — read-only (workspace 시점) 또는 미입력 안내 */}
         <section>
           <SectionHeader num="01" label="사업자 정보" />
-          <div className="border border-[var(--color-hair)] divide-y divide-[var(--color-hair)]">
-            <div className="px-4 py-2 flex items-center justify-between">
-              <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
-                WORKSPACE — 등록된 사업자
-              </span>
-              <span className="font-mono text-[10px] tracking-[0.1em] text-[var(--color-moss)]">
-                ✓ 확인됨
-              </span>
-            </div>
-            {[
-              ['상호명', workspaceName],
-              ['사업자번호', bizProfile.bizNo],
-              [
-                '과세 유형',
-                bizProfile.taxType === 'general'
-                  ? '일반과세'
-                  : bizProfile.taxType === 'simple'
-                    ? '간이과세'
-                    : '면세',
-              ],
-              [
-                '사업자 상태',
-                bizProfile.status === 'active'
-                  ? '정상'
-                  : bizProfile.status === 'suspended'
-                    ? '휴업'
-                    : '폐업',
-              ],
-            ].map(([label, value]) => (
-              <div key={label} className="px-4 py-2.5 flex items-baseline justify-between">
-                <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
-                  {label}
-                </span>
-                <span className="text-[13px] text-[var(--color-ink)] font-mono tabular-nums">
-                  {value}
-                </span>
+          {bizProfile ? (
+            <>
+              <div className="border border-[var(--color-hair)] divide-y divide-[var(--color-hair)]">
+                <div className="px-4 py-2 flex items-center justify-between">
+                  <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
+                    WORKSPACE — 등록된 사업자
+                  </span>
+                  <span className="font-mono text-[10px] tracking-[0.1em] text-[var(--color-moss)]">
+                    ✓ 확인됨
+                  </span>
+                </div>
+                {[
+                  ['상호명', workspaceName],
+                  ['사업자번호', bizProfile.bizNo ?? '미입력'],
+                  [
+                    '과세 유형',
+                    bizProfile.taxType === 'general'
+                      ? '일반과세'
+                      : bizProfile.taxType === 'simple'
+                        ? '간이과세'
+                        : bizProfile.taxType === 'exempt'
+                          ? '면세'
+                          : '—',
+                  ],
+                  [
+                    '사업자 상태',
+                    bizProfile.status === 'active'
+                      ? '정상'
+                      : bizProfile.status === 'suspended'
+                        ? '휴업'
+                        : bizProfile.status === 'closed'
+                          ? '폐업'
+                          : '—',
+                  ],
+                ].map(([label, value]) => (
+                  <div key={label} className="px-4 py-2.5 flex items-baseline justify-between">
+                    <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
+                      {label}
+                    </span>
+                    <span className="text-[13px] text-[var(--color-ink)] font-mono tabular-nums">
+                      {value}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <p className="mt-3 font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
-            사업자 정보 갱신은 설정 → 프로필에서 가능합니다.
-          </p>
+              <p className="mt-3 font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+                사업자 정보 갱신은 설정 → 프로필에서 가능합니다.
+              </p>
+            </>
+          ) : (
+            <div className="border border-[var(--color-hair)] px-4 py-4 space-y-2">
+              <div className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
+                [ 사업자번호 미입력 ]
+              </div>
+              <p className="text-[13px] leading-relaxed text-[var(--color-ink)]">
+                사업자번호 없이 작성 중입니다.
+              </p>
+              <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+                법인 설립 후에는 설정 → 프로필에서 사업자번호를 등록할 수 있습니다.
+              </p>
+            </div>
+          )}
         </section>
 
         {/* 02 견적 내용 */}
@@ -223,9 +241,7 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
                 role="alert"
                 className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]"
               >
-                {serverError === 'BIZ_PROFILE_REQUIRED'
-                  ? '발송 실패 — 사업자번호 등록이 필요합니다 (설정 → 프로필)'
-                  : `발송 실패 — ${serverError}`}
+                {`발송 실패 — ${serverError}`}
               </p>
             )}
 

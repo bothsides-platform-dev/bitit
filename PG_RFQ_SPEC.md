@@ -8,7 +8,7 @@
 
 ## 1. 한 줄 요약
 
-**bidit** 은 구매사가 사업자번호 한 번으로 자동 enrichment 된 RFQ 를 작성해 본인이 허용한 PG 들에게 이메일로 발송하고, PG 는 가입 강제 워크스페이스 안에서 정형 견적을 제출하며, 구매사는 6개 정형 수치 + PDF 첨부로 비교한 뒤 선택하는 **비공개 1:N RFQ 플랫폼**이다.
+**bidit** 은 구매사가 (선택) 사업자번호 자동 enrichment 와 함께 RFQ 를 작성해 본인이 허용한 PG 들에게 이메일로 발송하고, PG 는 가입 강제 워크스페이스 안에서 정형 견적을 제출하며, 구매사는 6개 정형 수치 + PDF 첨부로 비교한 뒤 선택하는 **비공개 1:N RFQ 플랫폼**이다. 사업자번호·등급은 옵셔널 — 법인 미설립 사전 견적과 마감 압박 시 보완 입력 두 시나리오를 모두 지원한다.
 
 마켓플레이스가 아니라 **이메일 기반 비공개 입찰** — 구매사가 이미 아는 PG 영업담당에게만 RFQ 가 도달하고, PG 들은 서로의 존재를 모른다.
 
@@ -31,10 +31,10 @@ v0 결재선 양측 모두 적용 X — 단일 결정자.
 |---|---|
 | 1 | 사용자 = PG영업담당 + 구매사 양면 |
 | 2 | 구조 = 1:N **비공개** 입찰 (마켓플레이스 X) |
-| 3 | RFQ 정형성 = **자유서술** + 사업자번호 자동 enrichment |
-| 4 | 사업자번호 자동 조회 시점 = RFQ 작성 진입 시 (국세청 L1·공정위 L4 무료, NICE L3 동의 시) |
+| 3 | RFQ 정형성 = **자유서술** + (선택) 사업자번호 자동 enrichment |
+| 4 | 사업자번호 자동 조회 = **선택 입력 시** RFQ 작성 중 NTS(국세청) 조회 (NICE/공정위 v0 제외). 미입력 RFQ는 사전 견적 또는 보완 예정으로 발송 가능 |
 | 5 | 가맹점 등급 = **카드 우대수수료 등급** (영세/중소1·2·3/일반) |
-| 6 | 등급 조회 = NICE 추정 매출 기반 자동 + 구매사 확인/수정 |
+| 6 | 등급 = **사용자 직접 선택, 옵셔널**. 미입력 RFQ는 PG 가 일반 등급 가정으로 9개 카드사 직접 견적 |
 | 7 | 매칭 = 구매사가 **이메일로 허용**한 PG 에게만 |
 | 8 | RFQ 별 **고유 URL + 토큰** (메일 임베드, 견적 제출용) |
 | 9 | PG 진입 = **가입 강제** (PG 워크스페이스 안에서 견적 작성) |
@@ -62,21 +62,16 @@ type Workspace = {
   createdAt: string;
 };
 
+// 슬림화: name/ceoName/ksic/mailOrderNo/estimatedRevenue/revenueYear/niceLookedUpAt 는 BACKEND_MIGRATION 에서 제거.
+// 회사명은 Workspace.name 사용. NICE/공정위는 v0 제외.
+// bizNo·grade 모두 옵셔널 — 둘 다 NULL 인 row 는 의미 없으므로 DB CHECK 로 금지(`bizNo IS NOT NULL OR grade IS NOT NULL`).
 type BizProfile = {
-  bizNo: string;                  // 123-45-67890
-  name: string;                   // (주)노온
-  ceoName: string;
-  ksic: string;                   // J62 소프트웨어 개발
-  taxType: 'general' | 'simple' | 'exempt';
-  status: 'active' | 'suspended' | 'closed';
-  mailOrderNo?: string;           // 통신판매업 신고번호 (공정위)
-  // NICE 추정 (L3, 옵션)
-  estimatedRevenue?: number;
-  revenueYear?: string;
-  niceLookedUpAt?: string;
-  // 등급 (카드 우대수수료)
+  bizNo?: string;                 // 옵셔널. NTS 조회 시 채움.
+  taxType?: 'general' | 'simple' | 'exempt';
+  status?: 'active' | 'suspended' | 'closed';
+  // 등급 (카드 우대수수료) — 옵셔널
   grade?: 'small' | 'sme1' | 'sme2' | 'sme3' | 'general';
-  gradeSource: 'auto_nice' | 'user_confirmed' | 'user_overridden';
+  gradeSource: 'user_confirmed' | 'user_overridden' | 'unset';
   gradeConfirmedBy?: string;
   gradeConfirmedAt?: string;
 };
@@ -84,7 +79,7 @@ type BizProfile = {
 type RFQ = {
   id: string;                     // RFQ-2605-0001
   buyerWsId: string;
-  bizProfile: BizProfile;         // 발송 시점 스냅샷
+  bizProfile?: BizProfile;        // 발송 시점 스냅샷. 사업자번호·등급 모두 미입력 시 undefined.
   title: string;
   memo: string;                   // 자유 서술 RFP
   rfpFiles: Attachment[];
@@ -164,6 +159,8 @@ const STATUTORY_CARD_FEE: Record<Grade, number> = {
   sme3:    0.015,   // 중소3 (10~30억)
   general: NaN,     // 일반 — PG 가 카드사별 입력
 };
+// 등급 미입력 RFQ 는 일반 등급(NaN)과 동일 분기 — PG 가 9개 카드사별 직접 입력.
+// 서버 강제: grade ∈ {'general', null} 일 때만 cardFeesByIssuer 허용.
 ```
 
 ---
@@ -185,7 +182,7 @@ const STATUTORY_CARD_FEE: Record<Grade, number> = {
 |---|---|---|
 | B1 | `/home` | 대시보드 — 진행 중 RFQ 카운트, 임박 마감, 받은 견적, 최근 활동 |
 | B2 | `/rfq` | 전체 RFQ (탭: 작성중 / 진행중 / 마감 / 계약완료) |
-| B3 | `/rfq/new` | **RFQ 작성** — ① 사업자번호 자동조회 ② NICE 등급 추정·확인 ③ 자유 메모·RFP 첨부 ④ PG 이메일 입력 ⑤ 마감일·발송 |
+| B3 | `/rfq/new` | **RFQ 작성** — ① (선택) 사업자번호 자동조회 ② (선택) 등급 선택 ③ 자유 메모·RFP 첨부 ④ PG 이메일 입력 ⑤ 마감일·발송 |
 | B4 | `/rfq/:id` | **RFQ 상세 + 받은 견적 비교** — 좌: RFQ 메타·발송 PG 상태 / 우: 6컬럼 비교표 + PDF 라이브 프리뷰. **`[ 표 ] [ 보드 ]` 토글**로 칸반(진행전/협상중/결정 3컬럼) 전환 가능 — 카드 클릭 시 상세 모달(PDF + 6수치 + 메모/첨부 히스토리). 칸반 분류는 buyer 내부 라벨링이며 award 흐름과 독립. |
 | B5 | `/rfq/:id/award` | 수주 처리 — Bid 선택 → 미선택 PG 자동 통보 |
 | B6 | `/settings/profile` | 사업자 프로필 (등급 갱신 알림) |
@@ -197,7 +194,7 @@ const STATUTORY_CARD_FEE: Record<Grade, number> = {
 |---|---|---|
 | P1 | `/home` | 대시보드 — 신규 RFQ·임박 마감·제출 완료·수주율 |
 | P2 | `/inbox` | **받은 RFQ 함** (탭: 신규 / 작성중 / 제출완료 / 마감) |
-| P3 | `/inbox/:rfqId` | **RFQ 상세 + 견적 작성** — 상단: 구매사 메타·등급·RFP. 하단: 등급별 정형 폼(영세/중소 6필드, 일반 +카드사 9개). 법정 카드수수료는 자동 표시. |
+| P3 | `/inbox/:rfqId` | **RFQ 상세 + 견적 작성** — 상단: 구매사 메타·등급·RFP. 하단: 등급별 정형 폼(영세/중소 6필드, 일반 +카드사 9개). 법정 카드수수료는 자동 표시. **사업자번호 미입력 RFQ 는 상단 배너로 안내, 등급 미입력 시 일반 폴백(9개 카드사 입력 모드).** |
 | P4 | `/inbox/:rfqId/submitted` | 제출 완료·결과 대기 |
 | P5 | `/settings/profile` | PG 회사 정보 (도메인 검증·로고) |
 | P6 | `/settings/members` | 같은 도메인 멤버 |
@@ -206,24 +203,34 @@ const STATUTORY_CARD_FEE: Record<Grade, number> = {
 
 ## 6. 핵심 사용자 시나리오 (v0 검증)
 
-### 시나리오 A — 구매사 RFQ 발송
+### 시나리오 A — 구매사 RFQ 발송 (정식)
 1. `/rfq/new` 진입
-2. 사업자번호 `123-45-67890` 입력 → 0.5초 안에 회사명·업종·통신판매업 자동 채움
-3. NICE 신용조회 동의 → 추정 연매출 8.2억 → "중소2 맞나요?" → 확인
+2. 사업자번호 `123-45-67890` 입력 → NTS 조회로 `taxType`·`status` 자동 채움
+3. 등급 선택 (5단계 라디오): "중소2" 확정 → `gradeSource='user_confirmed'`
 4. 제목 `2026 결제 인프라 견적`, 자유 메모·RFP PDF 첨부
 5. PG 이메일 입력: `sales@toss.im`, `biz@inicis.com`, `partner@nicepay.co.kr`
 6. 마감 D+7 → 발송
 7. 3개 PG 메일 발송 + RFQ 상태 → `진행중`
+
+### 시나리오 A' — 구매사 RFQ 발송 (사업자번호 미입력)
+1. `/rfq/new` 진입 (워크스페이스 bizProfile 없음 또는 RFQ별 스킵)
+2. 사업자번호 스킵, 등급 스킵
+3. 제목·자유 메모·RFP PDF 첨부
+4. PG 이메일 입력 + 마감 → 발송
+5. RFQ 는 `bizProfile=undefined` 스냅샷으로 저장. PG 수신 시 "사업자번호 미입력" 배너 노출
+6. **용도**: 법인 미설립 사전 견적 / 마감 압박 시 보완 입력 (발송 후 보완은 v1)
 
 ### 시나리오 B — PG 견적 응답
 1. 토스 영업담당 메일함: `노온 → 토스페이먼츠 RFQ #abc123` 수신
 2. [수락·견적 작성] → 토큰 검증 → `/login` (next 보존)
 3. 가입 (`sales@toss.im`) → `@toss.im` 도메인 PG 워크스페이스 자동 합류
 4. `/inbox/abc123` 자동 이동
-5. 구매사 메타 확인 (등급 중소2 자동표시) → 정형 폼:
-   - 카드 1.25% (자동, 수정 불가)
-   - 정산 D+1 / 보증금 0 / 셋업비 0 / 월최저 0 / 계좌 1.5% / 간편결제 1.8%
-6. 제안서 PDF + 메모 → [제출] → 구매사 알림
+5. 구매사 메타 확인 → 분기:
+   - 등급 있음(예: 중소2) → 카드 1.25% 자동·수정 불가
+   - **등급 미입력 RFQ → "등급 미정 — 일반 가정으로 견적" 안내 + 9개 카드사 직접 입력 모드 활성**
+   - **사업자번호 미입력 RFQ → 상단 헤어라인 배너 "사업자번호 미입력 — 사전 견적 또는 보완 예정"**
+6. 정형 폼: 정산 D+1 / 보증금 0 / 셋업비 0 / 월최저 0 / 계좌 1.5% / 간편결제 1.8%
+7. 제안서 PDF + 메모 → [제출] → 구매사 알림
 
 ### 시나리오 C — 구매사 비교·계약
 1. `/rfq/abc123` → 받은 Bid 3개 비교표
@@ -242,6 +249,7 @@ const STATUTORY_CARD_FEE: Record<Grade, number> = {
 | **토큰 유효기간** | RFQ 마감일까지. 마감 후 자동 만료. 다회 접근 가능. |
 | **토큰 1회용 여부** | 1회 인증 후 `Invitation.acceptedByUserId` 가 RFQ 접근 권한이 됨. PG 워크스페이스는 인증/소속 컨테이너이며, 같은 도메인의 다른 멤버가 자동으로 해당 RFQ를 볼 수는 없음. |
 | **RFQ 수정** | 발송 후 메모·첨부 수정 가능, PG 에 "RFQ 변경됨" 알림. 마감일 연장 가능. PG 이메일 추가만 가능 (제거 불가). |
+| **사업자번호 보완** | 발송 전(draft) 까지는 RFQ 작성 화면에서 사업자번호·등급 추가 가능. 발송 후 보완은 v1 — 현재는 새 RFQ 작성. |
 | **RFQ 취소** | 가능. 발송된 PG 에 취소 알림. 받은 Bid 는 보관. |
 | **재발송** | 동일 PG 이메일에 재발송 불가 (수정·연장으로 처리). |
 | **Bid 수정** | 제출 후 마감 전까지 1회 철회·재제출 가능. 구매사 알림. |
@@ -298,3 +306,4 @@ const STATUTORY_CARD_FEE: Record<Grade, number> = {
 - 2026-05-05 v0.1 — 일반 B2B 견적 시스템 초안.
 - 2026-05-05 v0.2 — 인증/가입 §11 추가.
 - 2026-05-05 v0.3 — **PG 특화로 피벗**. 15개 정책 확정. 본 spec 으로 분리. v0 범위 압축.
+- 2026-05-07 v0.4 — **사업자번호·등급 옵셔널화**. 정책 #3·#4·#6 완화, BizProfile 슬림화 + 모든 식별 필드 옵셔널, 시나리오 A' (사전 견적/보완 예정) 추가, P3 미입력 배너·일반 폴백 명시.

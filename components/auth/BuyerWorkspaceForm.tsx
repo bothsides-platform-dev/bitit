@@ -44,16 +44,17 @@ export function BuyerWorkspaceForm({ onSubmit, submitting, error }: Props) {
   const [wsName, setWsName] = useState('');
   const [bizProfile, setBizProfile] = useState<BizLookupResult | null>(null);
   const [grade, setGrade] = useState<MerchantGrade | null>(null);
+  const [skipBiz, setSkipBiz] = useState(false);
 
   const canSubmit =
     wsName.trim() !== '' &&
     !submitting &&
-    (bizProfile === null || grade !== null);
+    (skipBiz || bizProfile === null || grade !== null);
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
     const payload: Parameters<typeof onSubmit>[0] = { wsName: wsName.trim() };
-    if (bizProfile && grade) {
+    if (!skipBiz && bizProfile && grade) {
       payload.bizProfile = {
         bizNo: bizProfile.bizNo,
         taxType: bizProfile.taxType,
@@ -78,22 +79,47 @@ export function BuyerWorkspaceForm({ onSubmit, submitting, error }: Props) {
         />
       </div>
 
-      <BizLookupField
-        onLookup={ntsLookup}
-        onResult={(profile) => {
-          setBizProfile(profile);
-          setGrade(null);
-        }}
-        onReset={() => {
-          setBizProfile(null);
-          setGrade(null);
-        }}
-      />
-
-      {bizProfile && (
-        <GradeConfirmPanel
-          onConfirm={(g) => setGrade(g)}
+      <label className="flex items-start gap-3 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={skipBiz}
+          onChange={(e) => {
+            setSkipBiz(e.target.checked);
+            if (e.target.checked) {
+              setBizProfile(null);
+              setGrade(null);
+            }
+          }}
+          className="mt-1 h-3 w-3 accent-[var(--color-ink)]"
         />
+        <span className="text-[13px] leading-snug text-[var(--color-ink)]">
+          사업자번호·등급 나중에 입력하기
+          <span className="block mt-0.5 font-mono text-[10px] tracking-[0.08em] uppercase text-[var(--color-ink-muted)]">
+            법인 미설립 사전 견적 또는 보완 예정 케이스. 설정에서 추후 추가 가능.
+          </span>
+        </span>
+      </label>
+
+      {!skipBiz && (
+        <>
+          <BizLookupField
+            onLookup={ntsLookup}
+            onResult={(profile) => {
+              setBizProfile(profile);
+              setGrade(null);
+            }}
+            onReset={() => {
+              setBizProfile(null);
+              setGrade(null);
+            }}
+          />
+
+          {bizProfile && (
+            <GradeConfirmPanel
+              onConfirm={(g) => setGrade(g)}
+            />
+          )}
+        </>
       )}
 
       {error && (

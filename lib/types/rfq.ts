@@ -6,7 +6,7 @@ export type RfqStatus = 'draft' | 'sent' | 'closed' | 'cancelled' | 'awarded';
 export type RFQ = {
   id: string;
   buyerWsId: string;
-  bizProfile: BizProfile;
+  bizProfile?: BizProfile;
   title: string;
   memo: string;
   rfpFiles: Attachment[];
