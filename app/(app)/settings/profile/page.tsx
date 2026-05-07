@@ -5,6 +5,7 @@ import { Avatar } from '@/components/primitives/Avatar';
 import { PageEnter } from '@/components/primitives/PageEnter';
 import { WorkspaceBizProfileForm } from '@/components/settings/WorkspaceBizProfileForm';
 import { WorkspaceBizNoForm } from '@/components/settings/WorkspaceBizNoForm';
+import { WorkspaceNameForm } from '@/components/settings/WorkspaceNameForm';
 import { BizRequiredToast } from '@/components/settings/BizRequiredToast';
 import { auth } from '@/auth';
 import {
@@ -86,10 +87,6 @@ export default async function ProfilePage({ searchParams }: Props) {
             ['이메일', me.email],
             ['역할', me.role.toUpperCase()],
             ['가입일', formatDate(memberMeta?.joinedAt ?? me.joinedAt)],
-            [
-              '마지막 접속',
-              memberMeta?.lastSeenAt ? formatDate(memberMeta.lastSeenAt) : '—',
-            ],
           ].map(([k, v]) => (
             <div
               key={k}
@@ -114,8 +111,11 @@ export default async function ProfilePage({ searchParams }: Props) {
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
         <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
+          <WorkspaceNameForm
+            currentName={ws.name}
+            canEdit={me.role === 'admin'}
+          />
           {[
-            ['이름', ws.name],
             ...(biz
               ? ([
                   [
