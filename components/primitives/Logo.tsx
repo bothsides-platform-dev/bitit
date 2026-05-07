@@ -45,7 +45,7 @@ export function Logo({ variant = 'default', className }: LogoProps) {
       href="/"
       aria-label="bidit 홈"
       className={cn(
-        'group inline-flex items-center',
+        'group inline-flex items-center gap-3',
         'opacity-100 hover:opacity-70 transition-opacity duration-[140ms]',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-ink)]',
         'rounded-[var(--r-xs)]',
