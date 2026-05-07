@@ -20,7 +20,7 @@ export type TopbarProps = {
   workspaceName: string;
 };
 
-export function Topbar({ user }: TopbarProps) {
+export function Topbar({ user, workspaceType }: TopbarProps) {
   const { openNotificationDrawer, openCommandPalette } = useUIStore();
   // Step 9: unread 배지 = SSE 라이브 카운트.
   const { unreadCount } = useNotifications();
@@ -76,6 +76,9 @@ export function Topbar({ user }: TopbarProps) {
               </p>
               <p className="font-mono text-[10px] text-[var(--color-ink-soft)] mt-0.5">
                 {user.email}
+              </p>
+              <p className="font-mono text-[10px] text-[var(--color-ink-soft)] mt-1">
+                [ {workspaceType === 'buyer' ? '구매사' : 'PG'} ]
               </p>
             </div>
             <DropdownMenuSeparator className="bg-[var(--color-hair)]" />
