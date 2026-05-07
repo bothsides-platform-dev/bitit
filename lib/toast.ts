@@ -1,4 +1,6 @@
-import { createToastManager } from '@base-ui/react/toast';
+import { Toast } from '@base-ui/react';
+
+const { createToastManager } = Toast;
 
 export const toastManager = createToastManager();
 

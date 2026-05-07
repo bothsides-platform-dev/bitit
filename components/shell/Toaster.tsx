@@ -1,6 +1,8 @@
 'use client';
 
-import { Toast, useToastManager } from '@base-ui/react/toast';
+import { Toast } from '@base-ui/react';
+
+const { useToastManager } = Toast;
 import { toastManager } from '@/lib/toast';
 
 function ToastViewport() {

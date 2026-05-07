@@ -5,6 +5,7 @@ import { Avatar } from '@/components/primitives/Avatar';
 import { PageEnter } from '@/components/primitives/PageEnter';
 import { WorkspaceBizProfileForm } from '@/components/settings/WorkspaceBizProfileForm';
 import { WorkspaceBizNoForm } from '@/components/settings/WorkspaceBizNoForm';
+import { BizRequiredToast } from '@/components/settings/BizRequiredToast';
 import { auth } from '@/auth';
 import {
   getUserRepo,
@@ -157,12 +158,15 @@ export default async function ProfilePage({ searchParams }: Props) {
         {ws.type === 'buyer' && (
           <div className="mt-6 border-t border-[var(--color-hair)] pt-6 space-y-10">
             {biz_required === '1' && !biz && (
-              <p
-                role="alert"
-                className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]"
-              >
-                견적 생성을 위해 사업자번호 등록이 필요합니다.
-              </p>
+              <>
+                <BizRequiredToast />
+                <p
+                  role="alert"
+                  className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]"
+                >
+                  견적 생성을 위해 사업자번호 등록이 필요합니다.
+                </p>
+              </>
             )}
             <WorkspaceBizNoForm
               currentBizNo={biz?.bizNo ?? null}
