@@ -44,7 +44,10 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
   icons: {
-    icon: "/icon.svg",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/apple-icon.png", type: "image/png" },
+    ],
     shortcut: "/favicon.ico",
     apple: "/apple-icon.png",
   },
