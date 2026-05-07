@@ -141,7 +141,7 @@ export async function signupCompleteAction(
           .values({
             workspaceId: pgWsId,
             userId,
-            role: 'member',
+            role: 'admin',
           })
           .onConflictDoNothing({
             target: [workspaceMembers.workspaceId, workspaceMembers.userId],
@@ -215,7 +215,7 @@ export async function signupCompleteAction(
             name: parsed.data.name,
             email,
             avatarColor: 'ink',
-            role: 'member',
+            role: 'admin',
             status: 'active',
             joinedAt: new Date().toISOString(),
           },
