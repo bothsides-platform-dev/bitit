@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/primitives/Button';
 import { Eyebrow } from '@/components/primitives/Eyebrow';
 import { updateWorkspaceBizProfileAction } from '@/lib/server/actions/rfq';
-import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
 import { GRADE_LABELS, type MerchantGrade } from '@/lib/types/biz-profile';
 
 const ALL_GRADES: MerchantGrade[] = [
@@ -15,12 +14,6 @@ const ALL_GRADES: MerchantGrade[] = [
   'sme3',
   'general',
 ];
-
-function formatCardFee(grade: MerchantGrade): string {
-  const fee = STATUTORY_CARD_FEE[grade];
-  if (Number.isNaN(fee)) return '협상';
-  return `${(fee * 100).toFixed(2)}%`;
-}
 
 type Props = {
   currentGrade: MerchantGrade | undefined;
@@ -76,9 +69,6 @@ export function WorkspaceBizProfileForm({ currentGrade }: Props) {
               />
               <span className="text-[13px] text-[var(--color-ink)] font-medium min-w-[3rem]">
                 {GRADE_LABELS[g]}
-              </span>
-              <span className="font-mono text-[11px] tabular-nums text-[var(--color-ink)] ml-auto">
-                카드 {formatCardFee(g)}
               </span>
             </label>
           );
