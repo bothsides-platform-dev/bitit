@@ -21,21 +21,18 @@ export function Logo({ variant = 'default', className }: LogoProps) {
           className,
         )}
       >
-        {/* "b" mark — white on dark sidebar background */}
+        {/* "b" icon — paper background with ink mark, matches apple-icon */}
         <svg
-          viewBox="0 0 18 18"
-          width="18"
-          height="18"
+          viewBox="0 0 32 32"
+          width="32"
+          height="32"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
+          className="opacity-[0.82] group-hover:opacity-100 transition-opacity duration-[140ms]"
         >
-          <g
-            fill="white"
-            className="opacity-[0.82] group-hover:opacity-100 transition-opacity duration-[140ms]"
-          >
-            <rect x="3" y="1.5" width="2.6" height="15" rx="1.3" />
-            <circle cx="9.6" cy="12" r="4.8" />
-          </g>
+          <rect width="32" height="32" rx="6" fill="var(--color-paper)" />
+          <rect x="6" y="4" width="4.5" height="24" rx="2.25" fill="var(--color-ink)" />
+          <circle cx="16.5" cy="21" r="7" fill="var(--color-ink)" />
         </svg>
       </Link>
     )
