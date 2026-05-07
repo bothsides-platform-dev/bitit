@@ -108,7 +108,7 @@ describe('ResendSender', () => {
     await ResendSender(makeEntry());
 
     expect(sendMock).toHaveBeenCalledWith(
-      expect.objectContaining({ from: 'noreply@bidit.local' }),
+      expect.objectContaining({ from: 'send@bidit.store' }),
     );
   });
 

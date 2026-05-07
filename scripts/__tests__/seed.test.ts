@@ -27,8 +27,8 @@ describe('scripts/seed.ts', () => {
     expect(result.users).toBe(4);
     expect(result.members).toBe(4);
     expect(result.bizProfiles).toBe(2);
-    expect(result.rfqs).toBe(2);
-    expect(result.invitations).toBe(3);
+    expect(result.rfqs).toBe(3);
+    expect(result.invitations).toBe(4);
     expect(result.bids).toBe(2);
     expect(result.contracts).toBe(0);
     expect(result.notifications).toBe(0);
@@ -64,8 +64,8 @@ describe('scripts/seed.ts', () => {
     expect(await count(db, 'biz_profiles')).toBe(2);
   });
 
-  it('inserts 2 RFQs (1 sent + 1 draft)', async () => {
-    expect(await count(db, 'rfqs')).toBe(2);
+  it('inserts 3 RFQs (2 sent + 1 draft)', async () => {
+    expect(await count(db, 'rfqs')).toBe(3);
     const sent = await db.execute(
       sql`SELECT count(*)::int AS c FROM rfqs WHERE status = 'sent'`,
     );
@@ -76,12 +76,12 @@ describe('scripts/seed.ts', () => {
     const sentRows: any[] = Array.isArray(sent) ? sent : (sent as any).rows ?? [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const draftRows: any[] = Array.isArray(draft) ? draft : (draft as any).rows ?? [];
-    expect(sentRows[0].c).toBe(1);
+    expect(sentRows[0].c).toBe(2);
     expect(draftRows[0].c).toBe(1);
   });
 
-  it('inserts 3 invitations (toss/inicis accepted, kakao pending)', async () => {
-    expect(await count(db, 'rfq_invitations')).toBe(3);
+  it('inserts 4 invitations (3 accepted: toss/inicis on Q-2604, toss on Q-2605-0002; kakao pending)', async () => {
+    expect(await count(db, 'rfq_invitations')).toBe(4);
     const accepted = await db.execute(
       sql`SELECT count(*)::int AS c FROM rfq_invitations WHERE status = 'accepted'`,
     );
@@ -92,7 +92,7 @@ describe('scripts/seed.ts', () => {
     const acceptedRows: any[] = Array.isArray(accepted) ? accepted : (accepted as any).rows ?? [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pendingRows: any[] = Array.isArray(pending) ? pending : (pending as any).rows ?? [];
-    expect(acceptedRows[0].c).toBe(2);
+    expect(acceptedRows[0].c).toBe(3);
     expect(pendingRows[0].c).toBe(1);
   });
 
@@ -108,7 +108,7 @@ describe('scripts/seed.ts', () => {
     expect(await count(db, 'verification_tokens')).toBe(0);
   });
 
-  it('inserts rfq_counters with 2604=1 and 2605=1', async () => {
+  it('inserts rfq_counters with 2604=1 and 2605=2', async () => {
     const rows = await db.execute(
       sql`SELECT year_month, last_seq FROM rfq_counters ORDER BY year_month`,
     );
@@ -117,7 +117,7 @@ describe('scripts/seed.ts', () => {
     expect(arr).toHaveLength(2);
     const byMonth = Object.fromEntries(arr.map((r) => [r.year_month, r.last_seq]));
     expect(byMonth['2604']).toBe(1);
-    expect(byMonth['2605']).toBe(1);
+    expect(byMonth['2605']).toBe(2);
   });
 
   it('is idempotent — re-running TRUNCATEs and re-inserts the same counts', async () => {
@@ -127,6 +127,6 @@ describe('scripts/seed.ts', () => {
     expect(second.workspaces).toBe(4);
     expect(await count(db, 'workspaces')).toBe(4);
     expect(await count(db, 'users')).toBe(4);
-    expect(await count(db, 'rfq_invitations')).toBe(3);
+    expect(await count(db, 'rfq_invitations')).toBe(4);
   });
 });

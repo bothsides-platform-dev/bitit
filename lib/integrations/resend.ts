@@ -13,11 +13,10 @@
 //      terminal scrollback. The console line replaces the legacy
 //      `devLogVerifyLink` / `devLogRfqInviteLink` helpers (now deleted).
 //
-// `from` defaults to `noreply@bidit.local` (override with `RESEND_FROM`). For
-// production sending, `RESEND_FROM` MUST resolve to a domain verified in the
+// `from` defaults to `send@bidit.store` (override with `RESEND_FROM`). For
+// production sending, the resolved `from` MUST be on a domain verified in the
 // Resend dashboard — Resend rejects `from` addresses on unverified domains
-// with HTTP 403. The default value is intentionally non-routable so a missing
-// override surfaces immediately.
+// with HTTP 403.
 
 import * as Sentry from '@sentry/nextjs';
 import { Resend } from 'resend';

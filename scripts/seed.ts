@@ -204,7 +204,7 @@ export async function runSeed(db: AnyDb): Promise<SeedResult> {
   // inserts (we bypass nextRfqId() because it derives YYMM from `now()`).
   await db.insert(rfqCounters).values([
     { yearMonth: '2604', lastSeq: 1 },
-    { yearMonth: '2605', lastSeq: 1 },
+    { yearMonth: '2605', lastSeq: 2 },
   ]);
 
   const now = new Date();
@@ -354,8 +354,8 @@ export async function runSeed(db: AnyDb): Promise<SeedResult> {
     users: 4,
     members: 4,
     bizProfiles: 2,
-    rfqs: 2,
-    invitations: 3,
+    rfqs: 3,
+    invitations: 4,
     bids: 2,
     contracts: 0,
     notifications: 0,
