@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { AppShell } from '@/components/shell/AppShell';
 import { IconSidebar } from '@/components/shell/IconSidebar';
@@ -8,6 +9,10 @@ import { GlobalShortcuts } from '@/components/shell/GlobalShortcuts';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { auth } from '@/auth';
 import { getWorkspaceRepo } from '@/lib/server/repositories/factory';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function AppLayout({
   children,

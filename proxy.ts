@@ -19,11 +19,13 @@ export default auth((req) => {
   return NextResponse.next();
 });
 
-// Exclude `/api` (especially `/api/auth/*` for NextAuth handlers) and Next
-// internals/static assets. Pre-Auth.js this read `(?!_next|favicon|...)` —
-// `api` is added because `api/auth/*` would otherwise 302 to `/login`.
+// Exclude `/api` (especially `/api/auth/*` for NextAuth handlers), Next
+// internals/static assets, and Next.js metadata file conventions
+// (robots.txt, sitemap.xml, manifest.webmanifest, opengraph-image,
+// twitter-image, icon.svg, apple-icon) which must serve to unauth users
+// for SEO and social-card crawlers.
 export const config = {
   matcher: [
-    '/((?!monitoring|api|_next|favicon.ico|fonts|file|globe|next|vercel|window).*)',
+    '/((?!monitoring|api|_next|favicon.ico|icon.svg|apple-icon|opengraph-image|twitter-image|manifest.webmanifest|robots.txt|sitemap.xml|fonts|file|globe|next|vercel|window).*)',
   ],
 };
