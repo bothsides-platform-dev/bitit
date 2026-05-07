@@ -4,6 +4,7 @@ import { Tag } from '@/components/primitives/Tag';
 import { Avatar } from '@/components/primitives/Avatar';
 import { PageEnter } from '@/components/primitives/PageEnter';
 import { WorkspaceBizProfileForm } from '@/components/settings/WorkspaceBizProfileForm';
+import { WorkspaceBizNoForm } from '@/components/settings/WorkspaceBizNoForm';
 import { auth } from '@/auth';
 import {
   getUserRepo,
@@ -17,12 +18,15 @@ export const dynamic = 'force-dynamic';
 
 const VALID_AVATAR = ['ink', 'accent', 'lavender', 'amber', 'moss', 'terra'] as const;
 
-export default async function ProfilePage() {
+type Props = { searchParams: Promise<{ biz_required?: string }> };
+
+export default async function ProfilePage({ searchParams }: Props) {
   const session = await auth();
   if (!session?.user?.id || !session.user.workspaceId) {
     redirect('/login?next=/settings/profile');
   }
 
+  const { biz_required } = await searchParams;
   const userRepo = await getUserRepo();
   const wsRepo = await getWorkspaceRepo();
   const me = await userRepo.findById(session.user.id);
@@ -54,7 +58,7 @@ export default async function ProfilePage() {
       {/* User profile (read-only for now — name/avatar editing is M9 surface) */}
       <section>
         <div className="flex items-center gap-3 mb-4">
-          <Eyebrow>FIG. 01 — 사용자</Eyebrow>
+          <Eyebrow>사용자</Eyebrow>
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
         <div className="flex items-center gap-5 mb-4">
@@ -104,7 +108,7 @@ export default async function ProfilePage() {
       {/* Workspace + biz profile */}
       <section>
         <div className="flex items-center gap-3 mb-4">
-          <Eyebrow>FIG. 02 — 워크스페이스</Eyebrow>
+          <Eyebrow>워크스페이스</Eyebrow>
           <Tag variant="muted">{ws.type === 'buyer' ? '구매사' : 'PG'}</Tag>
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
@@ -113,7 +117,6 @@ export default async function ProfilePage() {
             ['이름', ws.name],
             ...(biz
               ? ([
-                  ['사업자번호', biz.bizNo],
                   [
                     '업태',
                     biz.taxType === 'general'
@@ -152,8 +155,20 @@ export default async function ProfilePage() {
           ))}
         </div>
         {ws.type === 'buyer' && (
-          <div className="mt-6 border-t border-[var(--color-hair)] pt-6">
-            <WorkspaceBizProfileForm currentGrade={grade} />
+          <div className="mt-6 border-t border-[var(--color-hair)] pt-6 space-y-10">
+            {biz_required === '1' && !biz && (
+              <p
+                role="alert"
+                className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]"
+              >
+                견적 생성을 위해 사업자번호 등록이 필요합니다.
+              </p>
+            )}
+            <WorkspaceBizNoForm
+              currentBizNo={biz?.bizNo ?? null}
+              returnUrl={biz_required === '1' && !biz ? '/rfq/new' : undefined}
+            />
+            {biz && <WorkspaceBizProfileForm currentGrade={grade} />}
           </div>
         )}
       </section>
