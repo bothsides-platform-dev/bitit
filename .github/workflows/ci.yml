@@ -83,7 +83,6 @@ jobs:
       NEXT_PUBLIC_BASE_URL: http://localhost:3001
       RESEND_API_KEY: ''
       NTS_SERVICE_KEY: ''
-      CRON_SECRET: e2e-cron-secret
       UPLOAD_DIR: ./uploads-e2e
     steps:
       - uses: actions/checkout@v4

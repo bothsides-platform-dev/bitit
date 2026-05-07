@@ -60,7 +60,6 @@ export default defineConfig({
       //   needs lookup, inject MockNtsClient via __setNtsClientForTest.
       RESEND_API_KEY: '',
       NTS_SERVICE_KEY: '',
-      CRON_SECRET: 'e2e-cron-secret',
       UPLOAD_DIR: './uploads-e2e',
       // Default Drizzle backend. Empty string preserves the default
       // (matches the spec's `REPO_BACKEND: ''` literal).
