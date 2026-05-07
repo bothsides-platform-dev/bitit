@@ -60,6 +60,7 @@ export default defineConfig({
             "app/(app)/**/*.{test,spec}.{ts,tsx}",
             "app/(public)/**/*.{test,spec}.{ts,tsx}",
             "lib/hooks/**/*.{test,spec}.{ts,tsx}",
+            "lib/stores/**/*.{test,spec}.{ts,tsx}",
           ],
         },
       },

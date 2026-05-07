@@ -4,7 +4,7 @@ import { Eyebrow } from '@/components/primitives/Eyebrow';
 import { Tag } from '@/components/primitives/Tag';
 import { Button } from '@/components/primitives/Button';
 import { PageEnter } from '@/components/primitives/PageEnter';
-import { BidComparisonTable } from '@/components/rfq/BidComparisonTable';
+import { BidComparisonView } from '@/components/rfq/BidComparisonView';
 import { auth } from '@/auth';
 import {
   getBidRepo,
@@ -107,17 +107,19 @@ export default async function RfqDetailPage({ params }: Props) {
       <section>
         <div className="flex items-center gap-3 mb-4">
           <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
-            FIG. 01 — 견적 비교
+            견적 비교
           </span>
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
-        <BidComparisonTable
+        <BidComparisonView
           rfqId={id}
           bids={rfqBids}
           grade={bizProfile.grade}
           rfqStatus={rfq.status}
           awardedBidId={rfq.awardedBidId}
           pgWsNameMap={pgWsNameMap}
+          authorId={session.user.id}
+          authorName={session.user.name ?? session.user.email ?? '구매사 담당자'}
         />
       </section>
 
