@@ -46,7 +46,7 @@ export function __resetResendClientForTest(): void {
 export const ResendSender: Sender = async (entry) => {
   const apiKey = process.env.RESEND_API_KEY;
 
-  if (!apiKey) {
+  if (!apiKey || process.env.NODE_ENV === 'development') {
     // Dev fallback. Format intentionally distinct from the deleted
     // `[DEV signup-verify]` / `[DEV rfq-invite]` lines so the
     // `grep -rn "[DEV " lib/server` regression gate stays at 0 hits.
