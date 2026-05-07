@@ -33,7 +33,7 @@ docker --version
 Git Bash 또는 PowerShell 에서:
 
 ```bash
-git clone https://github.com/bothsides-platform-dev/bitit.git bidit
+git clone https://github.com/bothsides-platform-dev/bidit.git bidit
 cd bidit
 ```
 

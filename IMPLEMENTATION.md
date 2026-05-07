@@ -3,6 +3,8 @@
 > 짝 문서: [SCREEN_DESIGN.md](./SCREEN_DESIGN.md) (화면·IA) · [DESIGN.md](./DESIGN.md) (디자인 시스템) · [SPEC.md](./SPEC.md) (기술 스펙)
 > 본 문서: 마일스톤, 부트스트랩 절차, 핵심 파일, 검증 체크리스트
 
+**Status (2026-05-08)**: M0~M7 완료, M8 부분 완료 (인프라 가동 — Auth.js v5 + Drizzle + Postgres + Resend + Sentry, `lib/mock/` 제거됨; 잔여는 BACKEND_MIGRATION.md 참조).
+
 ---
 
 ## 1. 마일스톤
@@ -32,115 +34,9 @@
 
 ---
 
-## 2. M0 — 부트스트랩 절차
+## 2. M0 — 부트스트랩 (완료)
 
-`SPEC.md §2`의 권장 조합을 기준으로 시작한다.
-- UI: `shadcn/ui + Radix`
-- 테이블: `@tanstack/react-table`
-- 커맨드 팔레트: `cmdk`
-
-### 2.1 프로젝트 생성
-
-```bash
-# /Users/yeonseong/project/bidit/ 의 부모 디렉토리에서 임시 scaffold 생성
-cd /Users/yeonseong/project
-pnpm create next-app@latest bidit-next-tmp \
-  --typescript --tailwind --eslint --app \
-  --src-dir=false --import-alias="@/*" --turbopack
-
-# 생성된 앱 파일만 bidit/로 복사한 뒤, 기존 md 문서는 그대로 보존한다.
-# 복사 전 bidit-next-tmp/ 내용을 검토하고, package.json/app/ 등 scaffold 파일만 이동한다.
-rsync -av --exclude='.git' bidit-next-tmp/ bidit/
-rm -rf bidit-next-tmp
-cd bidit
-```
-
-기존 문서(`PG_RFQ_SPEC.md`, `SCREEN_DESIGN.md`, `DESIGN.md`, `SPEC.md`, `IMPLEMENTATION.md`, `NOTIFICATION.md`, `CLAUDE.md`) 는 보존한다. `create-next-app` 을 root에서 직접 실행하지 않는다. 비어 있지 않은 디렉토리 동작은 버전별로 달라 M0 재현성을 해친다.
-
-### 2.2 의존성 추가
-
-```bash
-pnpm add zustand react-hook-form zod @hookform/resolvers \
-         motion @radix-ui/react-dialog @radix-ui/react-dropdown-menu \
-         @radix-ui/react-tabs @radix-ui/react-tooltip @radix-ui/react-popover \
-         @tanstack/react-table cmdk \
-         clsx tailwind-merge
-
-pnpm add -D prettier prettier-plugin-tailwindcss \
-         vitest @testing-library/react @testing-library/user-event \
-         @testing-library/jest-dom jsdom playwright
-
-pnpm dlx playwright install --with-deps chromium
-
-# shadcn/ui 초기화 (코드 소유 방식)
-pnpm dlx shadcn@latest init
-# 기본 컴포넌트 예시 (필요 컴포넌트만 점진적으로 add)
-pnpm dlx shadcn@latest add button dialog dropdown-menu tabs tooltip popover
-```
-
-### 2.3 폰트 자체 호스팅
-
-```bash
-mkdir -p public/fonts
-# Pretendard Variable woff2 → public/fonts/PretendardVariable.woff2
-# JetBrains Mono Variable woff2 → public/fonts/JetBrainsMono.woff2
-```
-
-`app/layout.tsx` 에서 `next/font/local` 로 로드:
-
-```ts
-import localFont from 'next/font/local';
-
-const pretendard = localFont({
-  src: '../public/fonts/PretendardVariable.woff2',
-  variable: '--font-sans',
-  display: 'swap',
-});
-const jetbrains = localFont({
-  src: '../public/fonts/JetBrainsMono.woff2',
-  variable: '--font-mono',
-  display: 'swap',
-});
-
-export default function RootLayout({ children }) {
-  return (
-    <html lang="ko" className={`${pretendard.variable} ${jetbrains.variable}`}>
-      <body>{children}</body>
-    </html>
-  );
-}
-```
-
-### 2.4 디자인 토큰 배선
-
-1. `styles/tokens.css` 생성 — DESIGN.md §2~4 의 토큰을 `@theme {}` 블록으로 옮긴다.
-2. `app/globals.css` 상단:
-   ```css
-   @import "tailwindcss";
-   @import "../styles/tokens.css";
-   ```
-3. `tailwind.config.ts` 의 `theme.extend.colors` 등에서 `var(--color-...)` 참조.
-
-### 2.5 next.config 설정
-
-```ts
-// next.config.ts
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
-  // experimental: { cacheComponents: true },  // 필요 시 활성화
-};
-
-export default nextConfig;
-```
-
-### 2.6 검증
-
-- `pnpm dev` → `http://localhost:3000` 진입, Pretendard 적용된 텍스트 확인
-- `pnpm build` 성공
-- `tsc --noEmit` 0 에러
-- `pnpm test` 성공 (Vitest)
-- `pnpm e2e` 성공 (Playwright smoke: `/login`, `/home` redirect)
+M0은 2026-04에 완료됐다. 부트스트랩 산출물은 `package.json`, `next.config.ts`, `app/globals.css`, `styles/tokens.css`, `public/fonts/` 에서 직접 확인 가능하다. 절차 재현이 필요하면 `git log -- package.json` 의 초기 커밋들을 참조.
 
 ---
 
@@ -280,7 +176,7 @@ export default nextConfig;
 
 ## 8. 인증/가입 (M1.5) 정책 및 시나리오
 
-화면 명세는 [SCREEN_DESIGN.md §11.5](./SCREEN_DESIGN.md), 시각 규칙은 [DESIGN.md §5.11](./DESIGN.md), 라우팅·타입·검증 스키마는 [SPEC.md §7](./SPEC.md).
+화면 명세는 [SCREEN_DESIGN.md §1](./SCREEN_DESIGN.md), 시각 규칙은 [DESIGN.md §5.11](./DESIGN.md), 라우팅·타입·검증 스키마는 [SPEC.md §7](./SPEC.md).
 
 ### 8.1 토큰/세션/Rate-limit 정책
 

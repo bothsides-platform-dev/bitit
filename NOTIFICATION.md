@@ -1,7 +1,7 @@
 # 알림 시스템 설계 (Notification System Design)
 
-**작성일**: 2026-05-05  
-**상태**: 설계 완료, 구현 대기
+**작성일**: 2026-05-05 (마지막 업데이트 2026-05-08)  
+**상태**: M7 시점 구현 가동 — outbox(`lib/server/outbox/*`), Toaster shell, activity list (Drawer + bell), Resend 이메일, Vercel `after()` flush 모두 작동. 잔여 검증: AUTH_EMAIL_VERIFY · AUTH_PASSWORD_RESET 핸들러 e2e 정합성, 중복 알림 dedup 회귀.
 
 ---
 
