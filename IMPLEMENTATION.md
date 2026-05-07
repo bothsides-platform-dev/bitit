@@ -155,6 +155,7 @@ export default nextConfig;
 | 5 | `components/rfq/RfqCreateForm.tsx` | 사업자 enrichment + allowlist 입력 중심 화면 |
 | 6 | `components/inbox/BidForm.tsx` | PG 정형 견적 입력(등급별 분기) 핵심 |
 | 7 | `lib/mock/rfq.ts` | RFQ/Invitation/Bid 시드 단일 출처 |
+| 8 | `lib/stores/bid-board.ts` | B4 칸반 stage(buyerStage) + BidNote 단일 출처. mock 단계 localStorage persist; M8에서 server action으로 컷오버 |
 
 이 7개의 품질이 나머지 80%의 인상을 결정한다. 마일스톤 안에서도 이 파일들에 가장 많은 시간을 쓴다.
 
@@ -196,7 +197,7 @@ export default nextConfig;
 - [ ] 헤어라인 1px만 사용, 그림자는 PDF 미리보기 등 1~2곳만
 - [ ] 모든 수치 mono + tabular-nums
 - [ ] 상태 태그 브래킷 `[ ]` 표기
-- [ ] 섹션 시리얼 마크(`01 / 14`, `FIG. 03`) 노출
+- [ ] 섹션 시리얼 마크(`01 / 14`) 노출
 
 ### 4.5 단축키 (M7)
 - [ ] ⌘K — 글로벌 검색 (Command Palette)
@@ -216,6 +217,12 @@ export default nextConfig;
 - [ ] 일반등급일 때만 카드사 9개 수수료 컬럼 노출
 - [ ] 선택한 Bid의 제안서 PDF 프리뷰 즉시 전환
 - [ ] 카드 우대수수료(영세/중소1~3) 값 수정 UI가 노출되지 않음
+- [ ] `[ 표 ] [ 보드 ]` 토글로 BidComparisonTable ↔ BidBoard 전환, 토글 후 데이터 보존
+- [ ] 보드 카드 DnD가 키보드(Tab → Space → ↑/↓ → Space)로도 작동
+- [ ] 카드 ⋯ 메뉴로 진행전/협상중/결정 stage 전환 가능
+- [ ] 카드 클릭 시 BidDetailModal 열림 — PDF iframe + 6수치 grid + 히스토리 노출
+- [ ] 모달 메모 폼: textarea 2000자, image/pdf 첨부 chip, `[기록]` 후 № 정순 시리얼 + 시간 역순
+- [ ] awarded 카드는 `결정` 컬럼 강제 + DnD/⋯ stage 전환 잠금
 
 ---
 

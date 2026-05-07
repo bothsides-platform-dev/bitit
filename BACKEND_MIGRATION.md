@@ -433,6 +433,13 @@ DATABASE_URL=$DATABASE_URL_TEST pnpm e2e   # Playwright A/B/C
 - NICE/공정위 재추가 — `BizProfile` 슬림화 상태에서 컬럼 추가 마이그레이션 1회
 - 5회 실패 캡차/10회 락 (`login_attempts` 테이블)
 - Auth.js v5 ↔ Next 16 호환성 이슈 발생 시 `next-auth@5.0.0-beta` pin
+- **B4 칸반 보드 store 컷오버** — 현재 `lib/stores/bid-board.ts` (Zustand + localStorage persist)가 buyerStage/BidNote 단일 출처. 다음 작업이 묶여서 한 PR로 처리:
+  - `bids.buyer_stage` 컬럼 추가 (enum: `pending|negotiating|decided`, default `'pending'`)
+  - `bid_notes` 테이블 신설 (`id`, `bid_id` fk, `author_id` fk users, `body` text, `created_at`)
+  - `attachments.owner_kind` enum에 `'bid_note'` 추가 + 업로드 라우트 권한 분기
+  - 서버 액션: `updateBuyerStageAction(bidId, to)` (auth: rfq.buyerWsId === session.workspaceId), `addBidNoteAction(bidId, body, attachmentIds[])`, `removeBidNoteAction(noteId)` — 모두 author 검증
+  - Repo: `BidRepo.updateBuyerStage`, `BidNoteRepo.{save,findByBid,delete}`
+  - 클라이언트: `lib/stores/bid-board.ts` 폐기 후 server-component fetch + optimistic mutation으로 교체. 기존 localStorage 데이터는 의도적 폐기 (v0 데모용)
 
 ---
 

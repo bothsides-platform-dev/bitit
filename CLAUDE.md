@@ -98,7 +98,7 @@ These are non-negotiable visual decisions enforced across all screens. Violating
 - **No** glassmorphism, neon accents, fill-color status badges.
 - **All** numerics (₩, qty, dates, RFQ numbers like `Q-2605-0042`) use `font-mono` + `tabular-nums`.
 - **Status tags** are bracketed text-color only: `[ 결재중 ]` — never filled pills.
-- **Editorial markings** on every screen: section serials (`01 / 14`), figure numbers (`FIG. 03`), issue numbers (`№ 042`).
+- **Editorial markings** on every screen: section serials (`01 / 14`), issue numbers (`№ 042`).
 
 If frontend code looks "generic SaaS", check DESIGN.md §9 (clichés to avoid) before defending it.
 

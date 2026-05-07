@@ -73,7 +73,7 @@ Authenticated AppShell
 | B1 | `/home` | 진행 중 RFQ, 임박 마감, 받은 Bid, 최근 활동 | `KpiStrip`, `DeadlineWidget`, `RfqProgressWidget`, `NotificationWidget` |
 | B2 | `/rfq` | RFQ 목록. 작성중/진행중/마감/계약완료 탭 | `RfqList`, `DataTable`, `Tag` |
 | B3 | `/rfq/new` | 사업자 조회, 등급 확인, RFP 첨부, PG 이메일 allowlist, 발송 | `BizLookupField`, `GradeConfirmPanel`, `PgEmailAllowlist`, `RfpAttachmentDropzone` |
-| B4 | `/rfq/:id` | RFQ 상세 + 받은 Bid 비교 + PDF 프리뷰 | `InvitationStatusPanel`, `BidComparisonTable`, `ProposalPdfPreview` |
+| B4 | `/rfq/:id` | RFQ 상세 + 받은 Bid 비교 + PDF 프리뷰. 표↔보드 토글로 칸반(진행전/협상중/결정) 전환, 카드 모달에 메모/첨부 히스토리 누적 | `InvitationStatusPanel`, `BidComparisonView`, `BidComparisonTable`, `BidViewToggle`, `BidBoard`, `BidBoardCard`, `BidDetailModal`, `ProposalPdfPreview` |
 | B5 | `/rfq/:id/award` | Bid 선택, 계약 레코드 생성, 선택/미선택 PG 통보 | `AwardFlow`, `DecisionTimeline` |
 | B6 | `/settings/profile` | 구매사 사업자 프로필과 등급 갱신 상태 | `WorkspaceProfileForm` |
 | B7 | `/settings/members` | buyer 워크스페이스 멤버 관리 | `MemberTable` |
@@ -115,7 +115,10 @@ email unique URL
 ```
 Award
 /rfq/:id
-  ├─ BidComparisonTable 정렬
+  ├─ [ 표 ] BidComparisonTable 정렬
+  ├─ [ 보드 ] BidBoard (kanban: 진행전/협상중/결정)
+  │     ├─ 카드 DnD 또는 ⋯ 메뉴로 stage 이동
+  │     └─ 카드 클릭 → BidDetailModal (PDF + 6수치 + 메모/첨부 히스토리)
   ├─ ProposalPdfPreview 확인
   ├─ /rfq/:id/award
   ├─ Contract 생성

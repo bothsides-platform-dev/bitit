@@ -127,9 +127,22 @@ type Bid = {
   overseasCardFeePct?: number;
   proposalPdf: Attachment;
   memo?: string;
-  status: 'draft' | 'submitted' | 'withdrawn';
+  status: 'draft' | 'submitted' | 'withdrawn';     // PG 라이프사이클
   submittedBy: string;
   submittedAt?: string;
+  // 구매사 칸반 분류. status 와 독립 — 자동 전이/award 흐름 무관.
+  buyerStage?: 'pending' | 'negotiating' | 'decided';
+};
+
+// Bid 별 구매사 협상 메모. 수동 입력 only — Bid 변경 자동 diff/stage 자동 로그
+// 절대 생성하지 않음 (§7).
+type BidNote = {
+  id: string;
+  bidId: string;
+  authorId: string;                 // buyer ws member
+  body: string;                     // 0~2000 chars
+  attachments: Attachment[];        // image/* | application/pdf
+  createdAt: string;
 };
 
 type Contract = {
@@ -173,7 +186,7 @@ const STATUTORY_CARD_FEE: Record<Grade, number> = {
 | B1 | `/home` | 대시보드 — 진행 중 RFQ 카운트, 임박 마감, 받은 견적, 최근 활동 |
 | B2 | `/rfq` | 전체 RFQ (탭: 작성중 / 진행중 / 마감 / 계약완료) |
 | B3 | `/rfq/new` | **RFQ 작성** — ① 사업자번호 자동조회 ② NICE 등급 추정·확인 ③ 자유 메모·RFP 첨부 ④ PG 이메일 입력 ⑤ 마감일·발송 |
-| B4 | `/rfq/:id` | **RFQ 상세 + 받은 견적 비교** — 좌: RFQ 메타·발송 PG 상태 / 우: 6컬럼 비교표 + PDF 라이브 프리뷰 |
+| B4 | `/rfq/:id` | **RFQ 상세 + 받은 견적 비교** — 좌: RFQ 메타·발송 PG 상태 / 우: 6컬럼 비교표 + PDF 라이브 프리뷰. **`[ 표 ] [ 보드 ]` 토글**로 칸반(진행전/협상중/결정 3컬럼) 전환 가능 — 카드 클릭 시 상세 모달(PDF + 6수치 + 메모/첨부 히스토리). 칸반 분류는 buyer 내부 라벨링이며 award 흐름과 독립. |
 | B5 | `/rfq/:id/award` | 수주 처리 — Bid 선택 → 미선택 PG 자동 통보 |
 | B6 | `/settings/profile` | 사업자 프로필 (등급 갱신 알림) |
 | B7 | `/settings/members` | 워크스페이스 멤버 |
@@ -215,9 +228,10 @@ const STATUTORY_CARD_FEE: Record<Grade, number> = {
 ### 시나리오 C — 구매사 비교·계약
 1. `/rfq/abc123` → 받은 Bid 3개 비교표
 2. 6컬럼 정렬 (정산↑) + 각 행 PDF 라이브 프리뷰
-3. 토스 Bid 선택 → [수주 처리]
-4. 토스에 "수주 확정" 메일, 미선택 2곳에 "이번엔 다른 PG 선택" 메일
-5. RFQ 상태 → `계약완료`, Contract 레코드 생성
+3. (옵션) `[ 보드 ]` 토글 → 칸반 뷰. 카드 드래그 또는 ⋯ 메뉴로 토스를 `협상중` → `결정`으로 이동. 카드 클릭으로 상세 모달 열어 협상 메모·스크린샷 누적.
+4. 토스 Bid 선택 → [수주 처리]
+5. 토스에 "수주 확정" 메일, 미선택 2곳에 "이번엔 다른 PG 선택" 메일
+6. RFQ 상태 → `계약완료`, Contract 레코드 생성. 보드 재진입 시 awarded 카드는 `결정` 컬럼으로 자동 잠금.
 
 ---
 
@@ -235,6 +249,8 @@ const STATUTORY_CARD_FEE: Record<Grade, number> = {
 | **계약서 서명** | v0 미지원 — 단순 "수주 마킹". 실 계약은 오프라인. |
 | **수익 모델** | v0 미정. 데이터 모델은 향후 PG 구독·성사 수수료 모두 수용 가능하게 설계. |
 | **권한** | 워크스페이스 관리자(첫 가입자) / 멤버. v0 두 단계만. |
+| **Bid 칸반 stage** | buyer 워크스페이스 내부 라벨링 (진행전/협상중/결정). 자동 전이·알림 없음. RFQ award 흐름과 독립이며, awarded 후에는 `결정` 컬럼으로 강제 잠금. |
+| **Bid 메모/히스토리** | buyer 수동 메모 + 이미지/PDF 첨부만. Bid 변경 자동 diff·stage 전이 자동 로그·시스템 이벤트 기록은 §9 v0 범위 외. |
 
 ---
 
@@ -263,6 +279,8 @@ const STATUTORY_CARD_FEE: Record<Grade, number> = {
 - PG 의 응답 자동 채움 (이전 견적 복제 등)
 - 구매사의 입찰 자동 연장·재공고
 - 마켓플레이스 발견성·평가·리뷰
+- Bid 변경 자동 diff 타임라인 (PG가 가격 재제출 시 자동 기록)
+- 칸반 stage 전이 자동 로그·자동 알림
 
 ---
 
