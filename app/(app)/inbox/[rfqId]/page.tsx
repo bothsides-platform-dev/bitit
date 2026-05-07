@@ -76,7 +76,7 @@ export default async function InboxDetailPage({ params }: Props) {
       <div>
         <div className="mb-8">
           <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
-            FIG. 01 — 정형 견적 입력
+            정형 견적 입력
           </span>
           <h2 className="text-[22px] font-[700] tracking-[-0.02em] text-[var(--color-ink)] mt-1">
             견적 작성

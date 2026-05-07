@@ -40,7 +40,7 @@ export function Mono({ children }: { children: React.ReactNode }): React.JSX.Ele
   );
 }
 
-// Editorial section serial — `01 / 14`, `FIG. 03`, `№ 042` style.
+// Editorial section serial — `01 / 14`, `№ 042` style.
 export function Marker({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
     <span

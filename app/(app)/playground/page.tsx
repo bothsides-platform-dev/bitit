@@ -142,7 +142,7 @@ export default function PlaygroundPage() {
           <br />
           <Serial current={1} total={4} />
           <br />
-          <Eyebrow>FIG. 03 — 비교 테이블</Eyebrow>
+          <Eyebrow>비교 테이블</Eyebrow>
           <br />
         </div>
       </Section>

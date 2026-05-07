@@ -151,7 +151,7 @@ export function AwardConfirm(props: Props) {
       {/* Selected bid */}
       <section>
         <div className="flex items-center gap-3 mb-3">
-          <Eyebrow>FIG. 01 — 선택 견적</Eyebrow>
+          <Eyebrow>선택 견적</Eyebrow>
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
         <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
@@ -195,7 +195,7 @@ export function AwardConfirm(props: Props) {
       {/* Buyer / RFQ context */}
       <section>
         <div className="flex items-center gap-3 mb-3">
-          <Eyebrow>FIG. 02 — 계약 조건</Eyebrow>
+          <Eyebrow>계약 조건</Eyebrow>
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
         <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
