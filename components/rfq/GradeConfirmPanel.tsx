@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/primitives/Button';
 import { Tag } from '@/components/primitives/Tag';
-import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
 import { GRADE_LABELS, type MerchantGrade } from '@/lib/types/biz-profile';
 
 type Source = 'user_confirmed' | 'user_overridden';
@@ -27,12 +26,6 @@ const REVENUE_HINT: Record<MerchantGrade, string> = {
   general: '연매출 30억 원 초과',
 };
 
-function formatCardFee(grade: MerchantGrade): string {
-  const fee = STATUTORY_CARD_FEE[grade];
-  if (Number.isNaN(fee)) return '협상';
-  return `${(fee * 100).toFixed(2)}%`;
-}
-
 export function GradeConfirmPanel({ onConfirm }: Props) {
   const [grade, setGrade] = useState<MerchantGrade>('sme1');
   const [confirmed, setConfirmed] = useState(false);
@@ -44,9 +37,6 @@ export function GradeConfirmPanel({ onConfirm }: Props) {
           등급 확정
         </span>
         <Tag variant="default">{GRADE_LABELS[grade]}</Tag>
-        <span className="font-mono text-[11px] text-[var(--color-ink-soft)] tabular-nums">
-          카드 {formatCardFee(grade)}
-        </span>
         <button
           type="button"
           onClick={() => setConfirmed(false)}
@@ -86,9 +76,6 @@ export function GradeConfirmPanel({ onConfirm }: Props) {
               </span>
               <span className="font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)] flex-1">
                 {REVENUE_HINT[g]}
-              </span>
-              <span className="font-mono text-[11px] tabular-nums text-[var(--color-ink)]">
-                카드 {formatCardFee(g)}
               </span>
             </label>
           );

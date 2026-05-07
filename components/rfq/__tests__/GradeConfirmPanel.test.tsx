@@ -14,15 +14,10 @@ describe('GradeConfirmPanel', () => {
     expect(screen.getByLabelText(/일반/)).toBeInTheDocument();
   });
 
-  it('shows statutory card fee for fixed grades and "협상" for general', () => {
+  it('shows revenue hint for each grade', () => {
     render(<GradeConfirmPanel onConfirm={() => {}} />);
-    // Fixed-fee grades render percentage strings.
-    expect(screen.getByText('카드 0.50%')).toBeInTheDocument();
-    expect(screen.getByText('카드 1.10%')).toBeInTheDocument();
-    expect(screen.getByText('카드 1.25%')).toBeInTheDocument();
-    expect(screen.getByText('카드 1.50%')).toBeInTheDocument();
-    // General row uses negotiation copy because STATUTORY_CARD_FEE.general is NaN.
-    expect(screen.getByText('카드 협상')).toBeInTheDocument();
+    expect(screen.getByText('연매출 3억 원 이하')).toBeInTheDocument();
+    expect(screen.getByText('연매출 30억 원 초과')).toBeInTheDocument();
   });
 
   it('emits the selected grade with source=user_confirmed on 확인', async () => {
