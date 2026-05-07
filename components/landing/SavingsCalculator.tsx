@@ -5,6 +5,7 @@ import { Slider } from '@/components/ui/slider';
 import { Serial } from '@/components/primitives/Serial';
 import { KpiCell } from '@/components/primitives/KpiCell';
 import { Tag } from '@/components/primitives/Tag';
+import { CostComparisonChart } from '@/components/landing/CostComparisonChart';
 import { formatKRW } from '@/lib/format';
 import { GRADE_LABELS } from '@/lib/types/biz-profile';
 import {
@@ -48,6 +49,8 @@ export function SavingsCalculator() {
   const grade = gradeFromVolume(volume);
   const biditRate = BIDIT_RATE[grade];
   const savings = annualMaxSavings(volume, currentRate);
+  const currentCost = Math.round(currentRate * volume);
+  const biditCost = Math.round(biditRate * volume);
 
   const baselineNote =
     grade === 'general'
@@ -106,7 +109,6 @@ export function SavingsCalculator() {
         <div className="flex flex-col gap-[var(--s-3)] md:items-end md:text-right md:min-w-[360px]">
           <KpiCell
             label="EST. ANNUAL SAVINGS"
-            serial="FIG. 01"
             value={formatKRW(savings)}
           />
           <div className="flex items-center gap-3 md:justify-end">
@@ -119,6 +121,15 @@ export function SavingsCalculator() {
             {baselineNote}
           </span>
         </div>
+      </div>
+
+      <div className="mt-[var(--s-9)] pt-[var(--s-7)] border-t border-[var(--color-hair)]">
+        <CostComparisonChart
+          currentCost={currentCost}
+          biditCost={biditCost}
+          currentRatePct={currentRate * 100}
+          biditRatePct={biditRate * 100}
+        />
       </div>
 
       <p className="mt-[var(--s-7)] font-mono text-[var(--text-2xs)] tracking-[0.06em] text-[var(--color-ink-soft)] leading-relaxed">

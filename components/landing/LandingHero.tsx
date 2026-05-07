@@ -8,25 +8,17 @@ export function LandingHero() {
     <div className="min-h-screen bg-[var(--color-paper)] flex flex-col">
       <header className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-8 h-[var(--shell-topbar)] border-b border-[var(--color-hair)] bg-[var(--color-paper)]">
         <Logo />
-        <div className="flex items-center gap-6">
-          <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
-            EDITION 01 · v0
-          </span>
-          <Link
-            href="/login"
-            className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
-          >
-            Sign in →
-          </Link>
-        </div>
+        <Link
+          href="/login"
+          className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+        >
+          Sign in →
+        </Link>
       </header>
 
       <main className="flex-1 pt-[calc(var(--shell-topbar)+var(--s-10))] pb-[var(--s-11)] px-8">
         <div className="mx-auto w-full max-w-[1080px] flex flex-col gap-[var(--s-9)]">
           <div className="flex flex-col gap-[var(--s-5)]">
-            <span className="font-mono text-[var(--text-2xs)] tracking-[0.18em] uppercase text-[var(--color-ink-soft)]">
-              № 042 · CALCULATOR — 예상 절감 시뮬레이터
-            </span>
             <h1 className="text-[clamp(28px,4vw,52px)] leading-[1.05] tracking-[-0.022em] text-[var(--color-ink)] font-medium">
               0.5%의 차이가,
               <br />

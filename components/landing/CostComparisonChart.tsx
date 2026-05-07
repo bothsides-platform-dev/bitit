@@ -1,0 +1,113 @@
+'use client';
+
+import { motion } from 'motion/react';
+import { formatKRW } from '@/lib/format';
+
+type CostComparisonChartProps = {
+  currentCost: number;
+  biditCost: number;
+  currentRatePct: number;
+  biditRatePct: number;
+};
+
+export function CostComparisonChart({
+  currentCost,
+  biditCost,
+  currentRatePct,
+  biditRatePct,
+}: CostComparisonChartProps) {
+  const max = Math.max(currentCost, biditCost, 1);
+  const currentRatio = currentCost / max;
+  const biditRatio = biditCost / max;
+  const savings = Math.max(0, currentCost - biditCost);
+  const savingsPct = currentCost > 0 ? (savings / currentCost) * 100 : 0;
+
+  return (
+    <div className="flex flex-col gap-[var(--s-5)]">
+      <div className="flex items-baseline justify-between">
+        <span className="font-mono text-[var(--text-2xs)] tracking-[0.18em] uppercase text-[var(--color-ink-soft)]">
+          ANNUAL PG COST
+        </span>
+        <span className="font-mono text-[var(--text-2xs)] tracking-[0.1em] text-[var(--color-ink-faint)]">
+          단위 ₩ / 연
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-[var(--s-4)]">
+        <BarRow
+          label="현재"
+          rateNote={`${currentRatePct.toFixed(2)}%`}
+          ratio={currentRatio}
+          cost={currentCost}
+          variant="current"
+        />
+        <BarRow
+          label="bidit"
+          rateNote={`${biditRatePct.toFixed(2)}%`}
+          ratio={biditRatio}
+          cost={biditCost}
+          variant="bidit"
+        />
+      </div>
+
+      <div className="flex items-baseline justify-between border-t border-[var(--color-hair)] pt-[var(--s-4)]">
+        <span className="font-mono text-[var(--text-2xs)] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+          연간 절감
+        </span>
+        <div className="flex items-baseline gap-3">
+          <span className="font-mono tabular-nums text-[var(--text-2xl)] tracking-[-0.02em] text-[var(--color-moss)] font-light">
+            {formatKRW(savings)}
+          </span>
+          {currentCost > 0 && (
+            <span className="font-mono tabular-nums text-[var(--text-xs)] tracking-[0.06em] text-[var(--color-ink-soft)]">
+              ▾ {savingsPct.toFixed(1)}%
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+type BarRowProps = {
+  label: string;
+  rateNote: string;
+  ratio: number;
+  cost: number;
+  variant: 'current' | 'bidit';
+};
+
+function BarRow({ label, rateNote, ratio, cost, variant }: BarRowProps) {
+  const fillClass =
+    variant === 'current'
+      ? 'bg-[var(--color-ink-faint)]'
+      : 'bg-[var(--color-ink)]';
+  const labelClass =
+    variant === 'current'
+      ? 'text-[var(--color-ink-soft)]'
+      : 'text-[var(--color-ink)]';
+
+  return (
+    <div className="flex flex-col gap-[var(--s-2)]">
+      <div className="flex items-baseline justify-between">
+        <span
+          className={`font-mono text-[var(--text-xs)] tracking-[0.16em] uppercase ${labelClass}`}
+        >
+          {label}{' '}
+          <span className="opacity-60">@ {rateNote}</span>
+        </span>
+        <span className="font-mono tabular-nums text-[var(--text-base)] tracking-[0.02em] text-[var(--color-ink)]">
+          {formatKRW(cost)}
+        </span>
+      </div>
+      <div className="relative h-[14px] border border-[var(--color-hair-strong)] bg-[var(--color-paper)]">
+        <motion.div
+          className={`absolute inset-y-0 left-0 ${fillClass}`}
+          initial={false}
+          animate={{ width: `${Math.max(0, Math.min(1, ratio)) * 100}%` }}
+          transition={{ duration: 0.36, ease: [0.16, 1, 0.3, 1] }}
+        />
+      </div>
+    </div>
+  );
+}
