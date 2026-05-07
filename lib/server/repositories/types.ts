@@ -12,7 +12,7 @@ import type { User } from '@/lib/types/user';
 import type { BizProfile } from '@/lib/types/biz-profile';
 import type { Bid } from '@/lib/types/bid';
 import type { Contract } from '@/lib/types/contract';
-import type { Notification } from '@/lib/types/notification';
+import type { Notification, NotificationChannel } from '@/lib/types/notification';
 import type { Attachment } from '@/lib/types/common';
 import type { VerificationToken } from '@/lib/types/auth';
 import type { OutboxEntry, OutboxEvent, Sender } from '../outbox/types';
@@ -108,8 +108,13 @@ export interface BidRepo {
 export interface NotificationRepo {
   /** 인앱/이메일 알림 저장. */
   save(n: Notification, tx?: Tx): Promise<void>;
-  /** 사용자 최근 알림(생성 역순) — limit 제한. */
-  findRecentForUser(userId: string, limit: number, tx?: Tx): Promise<Notification[]>;
+  /** 사용자 최근 알림(생성 역순) — limit 제한. `channel` 지정 시 SQL에서 필터. */
+  findRecentForUser(
+    userId: string,
+    limit: number,
+    channel?: NotificationChannel,
+    tx?: Tx,
+  ): Promise<Notification[]>;
   /** 단건 읽음 처리. */
   markRead(id: string, tx?: Tx): Promise<void>;
   /** 사용자 전부 읽음 처리. */

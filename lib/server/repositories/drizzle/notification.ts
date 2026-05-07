@@ -79,13 +79,20 @@ export class DrizzleNotificationRepository implements NotificationRepo {
   async findRecentForUser(
     userId: string,
     limit: number,
+    channel?: NotificationChannel,
     tx?: Tx,
   ): Promise<Notification[]> {
     const db = this.h(tx);
+    const where = channel
+      ? and(
+          eq(notifications.userId, userId),
+          eq(notifications.channel, uiChannel(channel)),
+        )
+      : eq(notifications.userId, userId);
     const rows = await db
       .select()
       .from(notifications)
-      .where(eq(notifications.userId, userId))
+      .where(where)
       .orderBy(desc(notifications.createdAt))
       .limit(limit);
     return rows.map(rowToNotification);
