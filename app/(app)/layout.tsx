@@ -34,7 +34,7 @@ export default async function AppLayout({
       className="contents"
     >
       <AppShell>
-        <IconSidebar />
+        <IconSidebar workspaceType={session.user.workspaceType} />
         <Topbar
           user={{
             id: session.user.id,

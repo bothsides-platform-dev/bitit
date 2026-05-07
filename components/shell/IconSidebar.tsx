@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { HomeIcon, FileTextIcon, InboxIcon, SettingsIcon } from '@/components/icons';
+import { HomeIcon, FileTextIcon, SettingsIcon } from '@/components/icons';
 import { Logo } from '@/components/primitives/Logo';
 import {
   Sidebar,
@@ -21,15 +21,20 @@ type NavItem = {
   label: string;
 };
 
-const navItems: NavItem[] = [
-  { href: '/home', icon: <HomeIcon />, label: '홈' },
-  { href: '/rfq', icon: <FileTextIcon />, label: '견적' },
-  { href: '/inbox', icon: <InboxIcon />, label: '수신함' },
-  { href: '/settings/profile', icon: <SettingsIcon />, label: '설정' },
-];
+type Props = {
+  workspaceType: 'buyer' | 'pg';
+};
 
-export function IconSidebar() {
+export function IconSidebar({ workspaceType }: Props) {
   const pathname = usePathname();
+
+  const navItems: NavItem[] = [
+    { href: '/home', icon: <HomeIcon />, label: '홈' },
+    workspaceType === 'buyer'
+      ? { href: '/rfq', icon: <FileTextIcon />, label: '견적' }
+      : { href: '/inbox', icon: <FileTextIcon />, label: '견적' },
+    { href: '/settings/profile', icon: <SettingsIcon />, label: '설정' },
+  ];
 
   return (
     <Sidebar
