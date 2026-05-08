@@ -28,8 +28,8 @@ export function computePgHomeData(
     );
 
   const recentBids = bids
-    .filter((b) => b.status === 'submitted')
-    .sort((a, b) => new Date(b.submittedAt ?? '').getTime() - new Date(a.submittedAt ?? '').getTime())
+    .filter((b) => b.status === 'submitted' && b.submittedAt)
+    .sort((a, b) => new Date(b.submittedAt!).getTime() - new Date(a.submittedAt!).getTime())
     .slice(0, 3)
     .map((bid) => {
       const rfq = rfqMap.get(bid.rfqId);
