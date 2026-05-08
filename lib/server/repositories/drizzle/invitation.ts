@@ -48,6 +48,7 @@ function rowToRfq(row: RfqRow, biz: BizRow | null): RFQ {
 // the closest persisted value when encountered (defensive).
 function dbStatusToUi(s: InvRow['status']): InvitationStatus {
   if (s === 'pending') return 'sent';
+  if (s === 'draft') return 'draft';
   return s as InvitationStatus;
 }
 
@@ -55,6 +56,8 @@ function dbStatusToUi(s: InvRow['status']): InvitationStatus {
 // respectively for the persisted projection.
 function uiStatusToDb(s: InvitationStatus): InvRow['status'] {
   switch (s) {
+    case 'draft':
+      return 'draft';
     case 'sent':
       return 'pending';
     case 'opened':
@@ -136,6 +139,20 @@ export class DrizzleInvitationRepository implements InvitationRepo {
       .select()
       .from(rfqInvitations)
       .where(eq(rfqInvitations.rfqId, rfqId));
+    return rows.map(rowToInvitation);
+  }
+
+  async findDraftsByRfq(rfqId: string, tx?: Tx): Promise<RfqInvitation[]> {
+    const db = this.h(tx);
+    const rows = await db
+      .select()
+      .from(rfqInvitations)
+      .where(
+        and(
+          eq(rfqInvitations.rfqId, rfqId),
+          eq(rfqInvitations.status, 'draft'),
+        ),
+      );
     return rows.map(rowToInvitation);
   }
 

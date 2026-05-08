@@ -5,12 +5,16 @@ import { Tag } from '@/components/primitives/Tag';
 import { Button } from '@/components/primitives/Button';
 import { PageEnter } from '@/components/primitives/PageEnter';
 import { BidComparisonView } from '@/components/rfq/BidComparisonView';
+import { RfqInviteManager } from '@/components/rfq/RfqInviteManager';
 import { auth } from '@/auth';
 import {
   getBidRepo,
+  getInvitationRepo,
   getRfqRepo,
   getWorkspaceRepo,
 } from '@/lib/server/repositories/factory';
+import { baseUrl } from '@/lib/server/actions/auth/_shared';
+import type { InvitationStatus } from '@/lib/types/invitation';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
 import { GRADE_LABELS } from '@/lib/types/biz-profile';
 import { formatDate } from '@/lib/format';
@@ -61,6 +65,29 @@ export default async function RfqDetailPage({ params }: Props) {
   const wsRepo = await getWorkspaceRepo();
   const ws = await wsRepo.findById(rfq.buyerWsId);
   const companyName = ws?.name ?? '—';
+
+  // Invitation status per email — `allowedPgEmails`를 source of truth로 두고
+  // 매칭되는 invitation row의 status를 매핑. addPgEmailsToRfqAction이 row를
+  // 생성하므로 미발송 PG도 'draft' 상태로 표시된다.
+  const invitations = await (await getInvitationRepo()).findByRfq(id);
+  const invByEmail = new Map<string, InvitationStatus>();
+  for (const inv of invitations) {
+    invByEmail.set(inv.pgEmail.toLowerCase(), inv.status);
+  }
+  const inviteList = rfq.allowedPgEmails.map((email) => ({
+    email,
+    status: invByEmail.get(email.toLowerCase()) ?? ('sent' as InvitationStatus),
+  }));
+
+  // RSC는 매 요청마다 재실행되므로 시계 접근이 필요하다 — purity 룰은 클라이언트
+  // 컴포넌트의 안정성을 위한 것이라 RSC에는 해당하지 않음.
+  // eslint-disable-next-line react-hooks/purity
+  const nowMs = Date.now();
+  const canEdit =
+    rfq.status === 'sent' && new Date(rfq.deadline).getTime() > nowMs;
+  const shareUrl = rfq.shareToken
+    ? `${baseUrl()}/share/rfq/${rfq.shareToken}`
+    : '';
 
   // pgWsId → name map. dedup 후 parallel fetch — RFQ 당 PG 수가 작아(≤10) 직접 N
   // 회 호출도 안전하지만, Set으로 중복 제거 + Promise.all 병렬화가 정석 형태.
@@ -162,24 +189,12 @@ export default async function RfqDetailPage({ params }: Props) {
 
         {/* PG list + memo */}
         <section className="space-y-6">
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <Eyebrow>초대 PG</Eyebrow>
-              <div className="flex-1 h-px bg-[var(--color-hair)]" />
-            </div>
-            <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
-              {rfq.allowedPgEmails.map((email, i) => (
-                <div key={email} className="py-2 flex items-center gap-3">
-                  <span className="font-mono text-[10px] tabular-nums text-[var(--color-ink-faint)]">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span className="text-[13px] text-[var(--color-ink)]">
-                    {email}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <RfqInviteManager
+            rfqId={id}
+            invitations={inviteList}
+            shareUrl={shareUrl}
+            canEdit={canEdit}
+          />
           {rfq.memo && (
             <div>
               <div className="flex items-center gap-3 mb-3">

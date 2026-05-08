@@ -153,7 +153,9 @@ export async function createRfqAction(
       // mode==='none' 또는 mode==='inherit' && workspace bizProfile 미등록
       // → snapshotId 가 null 인 채로 rfqs insert. 사전 견적 RFQ.
 
-      // 4. rfqs insert
+      // 4. rfqs insert (share_token: RFQ-scoped 영구 공유 URL 토큰. 평문 저장 —
+      //    buyer가 상세 페이지 재방문 시 동일 URL을 다시 보여주기 위해. deadline
+      //    경과 시 claim 단계에서 만료 분기로 차단되므로 별도 회수 정책 없음.)
       await tx.insert(rfqs).values({
         id: rfqId,
         buyerWsId: wsId,
@@ -162,6 +164,7 @@ export async function createRfqAction(
         memo: parsed.data.memo?.trim() ?? '',
         allowedPgEmails: parsed.data.allowedPgEmails,
         deadline: new Date(parsed.data.deadline),
+        shareToken: generateToken(),
         status: send ? 'sent' : 'draft',
         createdBy: userId,
         sentAt: send ? now : null,

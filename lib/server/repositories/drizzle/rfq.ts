@@ -39,6 +39,7 @@ function rowToRfq(row: RfqRow, biz: BizRow | null): RFQ {
     createdBy: row.createdBy,
     createdAt: new Date(row.createdAt).toISOString(),
     sentAt: toIso(row.sentAt),
+    shareToken: row.shareToken,
   };
 }
 
@@ -70,21 +71,27 @@ export class DrizzleRfqRepository implements RfqRepo {
       bizProfileId = biz.id;
     }
 
+    // shareToken 미지정 시 DB default(gen_random_uuid()::text)로 폴백 — 호출자가
+    // generateToken()으로 명시 지정해도 되고, 자동 생성도 안전.
+    type Insertable = typeof rfqs.$inferInsert;
+    const values: Insertable = {
+      id: rfq.id,
+      buyerWsId: rfq.buyerWsId,
+      bizProfileId,
+      title: rfq.title,
+      memo: rfq.memo,
+      allowedPgEmails: rfq.allowedPgEmails,
+      deadline: new Date(rfq.deadline),
+      status: rfq.status,
+      awardedBidId: rfq.awardedBidId ?? null,
+      createdBy: rfq.createdBy,
+      sentAt: rfq.sentAt ? new Date(rfq.sentAt) : null,
+    };
+    if (rfq.shareToken) values.shareToken = rfq.shareToken;
+
     await db
       .insert(rfqs)
-      .values({
-        id: rfq.id,
-        buyerWsId: rfq.buyerWsId,
-        bizProfileId,
-        title: rfq.title,
-        memo: rfq.memo,
-        allowedPgEmails: rfq.allowedPgEmails,
-        deadline: new Date(rfq.deadline),
-        status: rfq.status,
-        awardedBidId: rfq.awardedBidId ?? null,
-        createdBy: rfq.createdBy,
-        sentAt: rfq.sentAt ? new Date(rfq.sentAt) : null,
-      })
+      .values(values)
       .onConflictDoUpdate({
         target: rfqs.id,
         set: {
@@ -120,6 +127,17 @@ export class DrizzleRfqRepository implements RfqRepo {
     return rows.map((r: { rfq: RfqRow; biz: BizRow | null }) =>
       rowToRfq(r.rfq, r.biz),
     );
+  }
+
+  async findByShareToken(token: string, tx?: Tx): Promise<RFQ | undefined> {
+    const db = this.h(tx);
+    const [row] = await db
+      .select({ rfq: rfqs, biz: bizProfiles })
+      .from(rfqs)
+      .leftJoin(bizProfiles, eq(rfqs.bizProfileId, bizProfiles.id))
+      .where(eq(rfqs.shareToken, token))
+      .limit(1);
+    return row ? rowToRfq(row.rfq, row.biz) : undefined;
   }
 
   async transition(

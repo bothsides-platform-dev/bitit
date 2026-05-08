@@ -23,6 +23,12 @@ export class InMemoryRfqRepository implements RfqRepo {
       .map((r) => ({ ...r }));
   }
 
+  async findByShareToken(token: string, _tx?: Tx): Promise<RFQ | undefined> {
+    void _tx;
+    const rfq = [...this.store.values()].find((r) => r.shareToken === token);
+    return rfq ? { ...rfq } : undefined;
+  }
+
   async transition(
     id: string,
     to: RfqStatus,

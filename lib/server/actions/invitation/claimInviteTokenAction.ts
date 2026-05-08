@@ -1,15 +1,9 @@
 'use server';
 
-import { randomUUID } from 'node:crypto';
-
-import { workspaces, workspaceMembers } from '@/lib/db/schema';
 import { requireSession } from '@/lib/auth/session';
-import {
-  getInvitationRepo,
-  getWorkspaceRepo,
-} from '@/lib/server/repositories/factory';
+import { getInvitationRepo } from '@/lib/server/repositories/factory';
 import { hashToken } from '@/lib/server/token';
-import { actionDb } from '../bid/_shared';
+import { autoJoinPgWorkspace } from './_pgAutoJoin';
 
 export type ClaimInviteTokenResult =
   | { ok: true; rfqId: string }
@@ -64,51 +58,7 @@ export async function claimInviteTokenAction(
   }
 
   // 4. PG ws auto-join (or create if domain ws does not exist yet).
-  const wsRepo = await getWorkspaceRepo();
-  const domain = userEmail.split('@')[1];
-  if (domain) {
-    // user payload 형태 — autoJoinPg는 이 user 객체를 멤버 insert에 사용.
-    const userPayload = {
-      id: session.user.id,
-      name: session.user.name ?? '',
-      email: userEmail,
-      avatarColor: 'ink' as const,
-      role: 'member' as const,
-      status: 'active' as const,
-      joinedAt: new Date().toISOString(),
-    };
-
-    const joined = await wsRepo.autoJoinPg(userEmail, userPayload);
-    if (!joined) {
-      // 도메인 매칭 PG ws가 없음 — 새 PG ws 생성 + admin 멤버 insert.
-      // (autoJoinPg는 시그니처상 'create' 분기가 없어 액션 레벨에서 raw insert.)
-      const db = actionDb();
-      const wsId = randomUUID();
-      await db.transaction(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        async (tx: any) => {
-          // 이 시점엔 user는 이미 DB에 있다(requireSession이 통과했음).
-          await tx.insert(workspaces).values({
-            id: wsId,
-            type: 'pg',
-            name: domain,
-            domain,
-            bizProfileId: null,
-          });
-          await tx
-            .insert(workspaceMembers)
-            .values({
-              workspaceId: wsId,
-              userId: session.user.id,
-              role: 'admin',
-            })
-            .onConflictDoNothing({
-              target: [workspaceMembers.workspaceId, workspaceMembers.userId],
-            });
-        },
-      );
-    }
-  }
+  await autoJoinPgWorkspace(session, userEmail);
 
   return { ok: true, rfqId: claim.invitation.rfqId };
 }

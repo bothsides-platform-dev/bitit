@@ -34,6 +34,13 @@ export class InMemoryInvitationRepository implements InvitationRepo {
       .map((i) => ({ ...i }));
   }
 
+  async findDraftsByRfq(rfqId: string, _tx?: Tx): Promise<RfqInvitation[]> {
+    void _tx;
+    return [...this.store.values()]
+      .filter((i) => i.rfqId === rfqId && i.status === 'draft')
+      .map((i) => ({ ...i }));
+  }
+
   async findByTokenHash(
     tokenHash: string,
     _tx?: Tx,

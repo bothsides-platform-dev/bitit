@@ -52,12 +52,6 @@ export interface InvitationRepo {
   findByRfq(rfqId: string, tx?: Tx): Promise<RfqInvitation[]>;
   /** 한 RFQ의 draft 상태 초대만 조회 — sendDraftInvitationsAction 일괄 발송용. */
   findDraftsByRfq(rfqId: string, tx?: Tx): Promise<RfqInvitation[]>;
-  /** draft → sent 일괄 전이 + 토큰 hash 갱신. addPg 직후 추가된 row를 일괄 발송. */
-  promoteDrafts(
-    rfqId: string,
-    tokensByInvId: Record<string, string>,
-    tx?: Tx,
-  ): Promise<RfqInvitation[]>;
   /** PG 사용자가 클레임한 초대 + 해당 RFQ pair (PG 인박스용). */
   findByPgUser(
     userId: string,
