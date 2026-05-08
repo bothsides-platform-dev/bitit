@@ -1,13 +1,12 @@
 // ResendSender — concrete `Sender` (lib/server/outbox/types.ts) backed by the
 // Resend HTTP API.
 //
-// Two operating modes, decided per-call by env (so a single dev process can
-// switch behaviour by setting/clearing `RESEND_API_KEY`):
+// Two operating modes, decided by `RESEND_API_KEY`:
 //
 //   1. `RESEND_API_KEY` set:    Resend.emails.send({ from, to, subject, html })
 //      → maps API result to `{ ok: true } | { ok: false, error }`.
 //
-//   2. `RESEND_API_KEY` unset:  dev fallback. Logs `[email DEV] event=... to=...
+//   2. `RESEND_API_KEY` unset:  fallback. Logs `[email DEV] event=... to=...
 //      subject=... dedupeKey=...` and resolves `{ ok: true }`. **html is never
 //      logged** — it's verbose and contains links not safe to dump in shared
 //      terminal scrollback. The console line replaces the legacy
@@ -45,8 +44,8 @@ export function __resetResendClientForTest(): void {
 export const ResendSender: Sender = async (entry) => {
   const apiKey = process.env.RESEND_API_KEY;
 
-  if (!apiKey || process.env.NODE_ENV === 'development') {
-    // Dev fallback. Format intentionally distinct from the deleted
+  if (!apiKey) {
+    // Format intentionally distinct from the deleted
     // `[DEV signup-verify]` / `[DEV rfq-invite]` lines so the
     // `grep -rn "[DEV " lib/server` regression gate stays at 0 hits.
     // dedupeKey included per Step 10 spec, html intentionally excluded.
