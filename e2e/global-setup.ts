@@ -37,10 +37,18 @@ export default async function globalSetup(): Promise<void> {
     env: { ...process.env, DATABASE_URL: testUrl },
   });
 
-  // 2. Truncate + reseed. Imported lazily so the DATABASE_URL override
-  //    above is in effect before lib/db/client.ts initialises.
-  const { resetTestDatabase } = await import('../scripts/test-db-reset');
-  await resetTestDatabase();
+  // 2. Truncate + reseed via `tsx scripts/test-db-reset.ts` (= the
+  //    `e2e:reset` script). Run as a child process — a dynamic
+  //    `import('../scripts/test-db-reset')` from this CJS-loaded
+  //    globalSetup only works on Node 22+ (native TS strip); CI runs
+  //    Node 20 and throws "Cannot use import statement outside a
+  //    module" because Playwright's CJS pirates hook does not intercept
+  //    native ESM `import()` calls.
+  console.log('[e2e/global-setup] resetting + reseeding test DB…');
+  execFileSync('pnpm', ['e2e:reset'], {
+    stdio: 'inherit',
+    env: { ...process.env, DATABASE_URL: testUrl, DATABASE_URL_TEST: testUrl },
+  });
 
   console.log('[e2e/global-setup] test DB ready.');
 }
