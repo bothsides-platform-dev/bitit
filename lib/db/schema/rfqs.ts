@@ -30,6 +30,17 @@ export const rfqs = pgTable(
       .notNull()
       .default(sql`'{}'::text[]`),
     deadline: timestamp('deadline', { withTimezone: true }).notNull(),
+    // RFQ-scoped permanent share URL token — buyer copies and distributes
+    // to PG companies via Slack/KakaoTalk. Authenticated PG users with email
+    // domain matching `allowed_pg_emails` can claim through `/share/rfq/[token]`.
+    // Plaintext (not hashed) — RFQ owner needs to re-render the URL on revisit;
+    // auto-expires at deadline; no rotate policy. The `gen_random_uuid()::text`
+    // default exists so backfill on ALTER TABLE and test fixtures stay simple;
+    // production callers (createRfqAction) override with `generateToken()`.
+    shareToken: text('share_token')
+      .notNull()
+      .unique()
+      .default(sql`gen_random_uuid()::text`),
     status: rfqStatusEnum('status').notNull().default('draft'),
     // Circular FK with bids.rfq_id — annotated to break TS recursion.
     awardedBidId: uuid('awarded_bid_id').references((): AnyPgColumn => bids.id),

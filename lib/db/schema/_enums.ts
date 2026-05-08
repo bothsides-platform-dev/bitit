@@ -26,6 +26,7 @@ export const rfqStatusEnum = pgEnum('rfq_status', [
   'awarded',
 ]);
 export const invitationStatusEnum = pgEnum('invitation_status', [
+  'draft',
   'pending',
   'opened',
   'accepted',

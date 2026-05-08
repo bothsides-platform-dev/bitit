@@ -1,4 +1,10 @@
-export type InvitationStatus = 'sent' | 'opened' | 'accepted' | 'declined' | 'expired';
+export type InvitationStatus =
+  | 'draft'
+  | 'sent'
+  | 'opened'
+  | 'accepted'
+  | 'declined'
+  | 'expired';
 
 export type RfqInvitation = {
   id: string;
