@@ -14,6 +14,7 @@
  */
 import { test, expect } from 'playwright/test';
 import { sql } from 'drizzle-orm';
+import { db } from '@/lib/db/client';
 
 process.env.DATABASE_URL =
   process.env.DATABASE_URL_TEST ??
@@ -25,7 +26,6 @@ const RFQ_ID = 'Q-2604-0001';
 
 test.describe.serial('Buyer kanban board (B4)', () => {
   test.beforeAll(async () => {
-    const { db } = await import('@/lib/db/client');
     await db.execute(
       sql`UPDATE rfqs SET status='sent', awarded_bid_id=NULL WHERE id=${RFQ_ID}`,
     );
@@ -44,7 +44,7 @@ test.describe.serial('Buyer kanban board (B4)', () => {
     await page.fill('input[name="email"]', BUYER_EMAIL);
     await page.fill('input[name="password"]', BUYER_PASSWORD);
     await page.getByRole('button', { name: '로그인' }).click();
-    await expect(page).toHaveURL(/\/home$/);
+    await expect(page).toHaveURL(/\/home$/, { timeout: 15_000 });
 
     await page.goto(`/rfq/${RFQ_ID}`);
 

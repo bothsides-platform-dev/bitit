@@ -13,6 +13,7 @@
  */
 import { test, expect } from 'playwright/test';
 import { sql } from 'drizzle-orm';
+import { db } from '@/lib/db/client';
 
 process.env.DATABASE_URL =
   process.env.DATABASE_URL_TEST ??
@@ -26,8 +27,6 @@ test.describe.serial('Scenario C — buyer awards a bid', () => {
   test('buyer logs in, opens comparison, awards toss, confirms', async ({
     page,
   }) => {
-    const { db } = await import('@/lib/db/client');
-
     // ── Pre: ensure the RFQ is in 'sent' state (idempotent reset for ─
     // multi-run flakiness — globalSetup reseeds, but if a stale local
     // run left it 'awarded', force back to 'sent' and clear contract).

@@ -24,7 +24,10 @@
  * existing toss bid before navigating to the inbox.
  */
 import { test, expect } from 'playwright/test';
-import { sql } from 'drizzle-orm';
+import { sql, eq, and } from 'drizzle-orm';
+import { db } from '@/lib/db/client';
+import { rfqInvitations, bids } from '@/lib/db/schema';
+import { generateToken, hashToken } from '@/lib/server/token';
 
 process.env.DATABASE_URL =
   process.env.DATABASE_URL_TEST ??
@@ -38,11 +41,6 @@ test.describe.serial('Scenario B — PG submits a bid', () => {
   test('toss claims invitation, submits bid, lands on submitted page', async ({
     page,
   }) => {
-    const { db } = await import('@/lib/db/client');
-    const { rfqInvitations, bids } = await import('@/lib/db/schema');
-    const { eq, and } = await import('drizzle-orm');
-    const { generateToken, hashToken } = await import('@/lib/server/token');
-
     // ── Pre: clear toss's seeded bid so submission is permitted. ──
     // (Constraint: unique on (rfq_id, pg_ws_id).)
     await db

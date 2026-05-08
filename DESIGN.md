@@ -401,4 +401,4 @@ grep -rEn 'rounded-\[[0-9]+px\]|rounded-\[var\(--r|rounded-\[min\(|borderRadius|
 - 2026-05-05 v0.1 — 초안. Korean Editorial Modernism 방향 확정, 토큰·타이포·컴포넌트 원칙 정리.
 - 2026-05-05 v0.2 — PG 견적 비교 도메인 규칙 추가(비교·감사·결재 중심), 숫자/상태/차트/QA 운영 기준 명시.
 - 2026-05-08 v0.3 — §2 컬러 토큰 OKLCH 등가 주석 추가(Tailwind v4·shadcn 트렌드 정합), §6 모션 라이브러리 임포트 패스(`motion/react`) 명시, §9 2026-05 신규 클리셰 5종 추가(블러 3D 오브, "Build the future" 히어로, 16px 균일 라디우스, 크롬 AI 이미지, 다양성 스톡).
-- 2026-05-08 v0.4 — §5.12 Border-Radius 단일 값 통일 정책 추가. 기본을 5px → **8px(`rounded-md`)** 로 변경, Apex(modal/dialog)만 12px(`rounded-lg`), 인디케이터만 `rounded-full`. arbitrary 표기(`rounded-[Npx]`, `rounded-[var(--r*)]`, `rounded-[min(...)]`, 인라인 `borderRadius`) 전면 금지. 27개 파일 ~50건 정합 마이그레이션 동반. tooltip arrow 1건은 functional exception으로 유지. §4 토큰 코멘트와 §9 클리셰 항목 cross-ref 갱신.
+- 2026-05-08 v0.4 — §5.12 Border-Radius 단일 값 통일 정책 추가. 기본을 5px → **8px(`rounded-md`)** 로 변경, Apex(modal/dialog)만 12px(`rounded-lg`), 인디케이터만 `rounded-full`. arbitrary 표기(`rounded-[Npx]`, `rounded-[var(--r-…)]`, `rounded-[min(...)]`, 인라인 `borderRadius`) 전면 금지. 27개 파일 ~50건 정합 마이그레이션 동반. tooltip arrow 1건은 functional exception으로 유지. §4 토큰 코멘트와 §9 클리셰 항목 cross-ref 갱신.

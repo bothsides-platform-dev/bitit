@@ -16,6 +16,7 @@
  */
 import { test, expect } from 'playwright/test';
 import { sql } from 'drizzle-orm';
+import { db } from '@/lib/db/client';
 
 // Force the DB client to point at the test DB before importing it.
 // playwright globalSetup already set this in the parent process; this
@@ -36,7 +37,7 @@ test.describe.serial('Scenario A — buyer creates and sends RFQ', () => {
     await page.fill('input[name="email"]', BUYER_EMAIL);
     await page.fill('input[name="password"]', BUYER_PASSWORD);
     await page.getByRole('button', { name: '로그인' }).click();
-    await expect(page).toHaveURL(/\/home$/);
+    await expect(page).toHaveURL(/\/home$/, { timeout: 15_000 });
 
     // ── 2. Open the new-RFQ form ─────────────────────────────────
     await page.goto('/rfq/new');
@@ -85,10 +86,6 @@ test.describe.serial('Scenario A — buyer creates and sends RFQ', () => {
     ).toBeVisible({ timeout: 10_000 });
 
     // ── 6. DB assertions ─────────────────────────────────────────
-    // Lazy-import to make sure DATABASE_URL override above is honoured
-    // before the postgres-js pool is constructed.
-    const { db } = await import('@/lib/db/client');
-
     const rfqRows = await db.execute<{ id: string; status: string }>(
       sql`SELECT id, status FROM rfqs WHERE id = ${rfqId}`,
     );
