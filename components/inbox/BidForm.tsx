@@ -121,12 +121,12 @@ export function BidForm({ rfqId, grade }: Props) {
   const [deposit, setDeposit] = useState('0');
   const [setupFee, setSetupFee] = useState('0');
   const [monthlyMin, setMonthlyMin] = useState('0');
-  const [bankPct, setBankPct] = useState('');
-  const [easyPayPct, setEasyPayPct] = useState('');
+  const [bankPct, setBankPct] = useState('0.50');
+  const [easyPayPct, setEasyPayPct] = useState('1.50');
   const [cardFees, setCardFees] = useState<Record<CardIssuer, string>>({
-    BC: '', SHINHAN: '', SAMSUNG: '', HYUNDAI: '', KB: '', LOTTE: '', NH: '', HANA: '', WOORI: '',
+    BC: '1.50', SHINHAN: '1.50', SAMSUNG: '1.50', HYUNDAI: '1.50', KB: '1.50', LOTTE: '1.50', NH: '1.50', HANA: '1.50', WOORI: '1.50',
   });
-  const [overseasPct, setOverseasPct] = useState('');
+  const [overseasPct, setOverseasPct] = useState('3.00');
   const [memo, setMemo] = useState('');
 
   // Proposal PDF state — uploaded eagerly to /api/files/upload (Step 11)
