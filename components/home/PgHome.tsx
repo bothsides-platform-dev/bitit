@@ -28,9 +28,10 @@ export async function PgHome({
   userId: string;
   workspaceId: string;
 }) {
+  const [invRepo, bidRepo] = await Promise.all([getInvitationRepo(), getBidRepo()]);
   const [pairs, bids] = await Promise.all([
-    (await getInvitationRepo()).findByPgUser(userId),
-    (await getBidRepo()).findByPgWs(workspaceId),
+    invRepo.findByPgUser(userId),
+    bidRepo.findByPgWs(workspaceId),
   ]);
 
   const { kpi, pendingPairs, recentBids } = computePgHomeData(pairs, bids);
@@ -66,7 +67,8 @@ export async function PgHome({
               {pendingPairs.map((p) => {
                 const dday = formatDeadline(p.rfq.deadline);
                 const urgent =
-                  dday.startsWith('D-') && parseInt(dday.slice(2)) <= 3;
+                  dday === '마감' ||
+                  (dday.startsWith('D-') && parseInt(dday.slice(2), 10) <= 3);
                 const grade = p.rfq.bizProfile?.grade
                   ? GRADE_LABELS[p.rfq.bizProfile.grade]
                   : '—';
