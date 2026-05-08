@@ -167,7 +167,7 @@ export default function PlaygroundPage() {
 
       {/* 10. EmptyState */}
       <Section title="10 · EMPTY STATE">
-        <div className="border border-[var(--color-hair)] rounded-[var(--r)]">
+        <div className="border border-[var(--color-hair)] rounded-md">
           <EmptyState
             icon={<FileTextIcon size={28} />}
             title="데이터가 없습니다."

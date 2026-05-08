@@ -12,7 +12,7 @@ type Props = {
 export function PgWorkspaceConfirm({ domain, onConfirm, submitting, error }: Props) {
   return (
     <div className="space-y-6">
-      <div className="space-y-4 border border-[var(--color-hair-strong)] p-6" style={{ borderRadius: '5px' }}>
+      <div className="space-y-4 border border-[var(--color-hair-strong)] p-6 rounded-md">
         <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
           자동 합류 워크스페이스
         </p>

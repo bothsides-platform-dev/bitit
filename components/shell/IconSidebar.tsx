@@ -55,7 +55,7 @@ export function IconSidebar({ workspaceType }: Props) {
                   isActive={active}
                   render={<Link href={item.href} aria-label={item.label} />}
                   className={cn(
-                    'relative h-auto w-12 flex-col justify-center gap-1 rounded-[var(--r)] py-2 text-center text-[10px] leading-none tracking-[0.02em]',
+                    'relative h-auto w-12 flex-col justify-center gap-1 rounded-md py-2 text-center text-[10px] leading-none tracking-[0.02em]',
                     'opacity-40 transition-opacity duration-[140ms]',
                     'hover:bg-transparent hover:text-sidebar-foreground hover:opacity-80',
                     '[&_svg]:size-5',

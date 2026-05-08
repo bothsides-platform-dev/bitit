@@ -40,7 +40,7 @@ export function RoleChooser({ onSelect }: Props) {
           onClick={() => onSelect(opt.role)}
           className={cn(
             'group relative text-left px-5 py-5 border border-[var(--color-hair)]',
-            'hover:border-[var(--color-ink)] transition-colors rounded-[5px]',
+            'hover:border-[var(--color-ink)] transition-colors rounded-md',
             'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ink)]',
           )}
         >

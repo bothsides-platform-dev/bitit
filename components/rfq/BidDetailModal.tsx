@@ -87,7 +87,7 @@ export function BidDetailModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-[960px] w-[95vw] max-h-[88vh] grid grid-cols-1 md:grid-cols-[1fr_360px] gap-0 p-0 overflow-hidden rounded-[10px]"
+        className="sm:max-w-[960px] w-[95vw] max-h-[88vh] grid grid-cols-1 md:grid-cols-[1fr_360px] gap-0 p-0 overflow-hidden rounded-lg"
         showCloseButton={false}
       >
         <DialogTitle className="sr-only">
@@ -331,7 +331,7 @@ function NoteForm({
   };
 
   return (
-    <div className="border border-[var(--color-hair)] rounded-[6px] p-3 mt-3 bg-[var(--color-paper)]">
+    <div className="border border-[var(--color-hair)] rounded-md p-3 mt-3 bg-[var(--color-paper)]">
       <textarea
         value={body}
         onChange={(e) => setBody(e.target.value.slice(0, MAX_BODY))}
@@ -453,7 +453,7 @@ function NoteAttachment({ attachment }: { attachment: Attachment }) {
 
   if (broken || !attachment.url) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-1 border border-dashed border-[var(--color-hair)] rounded-[4px] font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-ink-faint)]">
+      <span className="inline-flex items-center gap-1 px-2 py-1 border border-dashed border-[var(--color-hair)] rounded-md font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-ink-faint)]">
         {attachment.name} · 미리보기 만료
       </span>
     );
@@ -465,7 +465,7 @@ function NoteAttachment({ attachment }: { attachment: Attachment }) {
         href={attachment.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="block w-16 h-16 border border-[var(--color-hair)] rounded-[4px] overflow-hidden bg-[var(--color-paper-warm)]"
+        className="block w-16 h-16 border border-[var(--color-hair)] rounded-md overflow-hidden bg-[var(--color-paper-warm)]"
         title={attachment.name}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -484,7 +484,7 @@ function NoteAttachment({ attachment }: { attachment: Attachment }) {
       href={attachment.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 px-2 py-1 border border-[var(--color-hair)] rounded-[4px] font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+      className="inline-flex items-center gap-1 px-2 py-1 border border-[var(--color-hair)] rounded-md font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
     >
       <FileTextIcon size={11} /> {attachment.name}
     </a>
@@ -506,10 +506,10 @@ function FileChip({
 }) {
   const isImage = mimeType?.startsWith('image/');
   return (
-    <span className="inline-flex items-center gap-2 px-2 py-1 bg-[var(--color-paper-warm)] border border-[var(--color-hair)] rounded-[4px]">
+    <span className="inline-flex items-center gap-2 px-2 py-1 bg-[var(--color-paper-warm)] border border-[var(--color-hair)] rounded-md">
       {isImage ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={url} alt="" className="w-5 h-5 object-cover rounded-[2px]" />
+        <img src={url} alt="" className="w-5 h-5 object-cover rounded-md" />
       ) : (
         <FileTextIcon size={11} />
       )}

@@ -17,7 +17,7 @@ export function Logo({ variant = 'default', className }: LogoProps) {
         className={cn(
           'group flex items-center justify-center',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-paper)]',
-          'rounded-[var(--r-xs)]',
+          'rounded-md',
           className,
         )}
       >
@@ -48,7 +48,7 @@ export function Logo({ variant = 'default', className }: LogoProps) {
         'group inline-flex items-center gap-3',
         'opacity-100 hover:opacity-70 transition-opacity duration-[140ms]',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-ink)]',
-        'rounded-[var(--r-xs)]',
+        'rounded-md',
         className,
       )}
     >

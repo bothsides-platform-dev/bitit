@@ -165,7 +165,7 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
                     key={r}
                     type="button"
                     onClick={() => setInviteRole(r)}
-                    className={`flex-1 h-10 px-3 font-mono text-[11px] tracking-[0.1em] uppercase rounded-[var(--r)] transition-colors ${
+                    className={`flex-1 h-10 px-3 font-mono text-[11px] tracking-[0.1em] uppercase rounded-md transition-colors ${
                       inviteRole === r
                         ? 'border border-[var(--color-ink)] text-[var(--color-ink)]'
                         : 'border border-[var(--color-hair)] text-[var(--color-ink-soft)] hover:border-[var(--color-hair-strong)]'

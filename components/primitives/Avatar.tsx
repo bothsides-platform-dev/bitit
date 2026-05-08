@@ -34,7 +34,7 @@ export function Avatar({ name, color = 'ink', size = 'md', className }: AvatarPr
   return (
     <span
       className={cn(
-        'inline-flex items-center justify-center rounded-[var(--r-sm)] font-mono font-medium tracking-tight select-none shrink-0',
+        'inline-flex items-center justify-center rounded-md font-mono font-medium tracking-tight select-none shrink-0',
         colorMap[color],
         sizeMap[size],
         className,

@@ -19,7 +19,7 @@ export function IconButton({
     <button
       aria-label={label}
       className={cn(
-        'inline-flex items-center justify-center rounded-[var(--r-sm)] transition-colors duration-[140ms]',
+        'inline-flex items-center justify-center rounded-md transition-colors duration-[140ms]',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-ink)]',
         'disabled:opacity-40 disabled:cursor-not-allowed',
         size === 'sm' ? 'w-7 h-7' : 'w-9 h-9',

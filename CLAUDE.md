@@ -73,7 +73,7 @@ These are non-negotiable visual decisions enforced across all screens. Violating
 
 - **No** Inter/Roboto/Arial. Pretendard Variable (KR + Latin) + JetBrains Mono only.
 - **No** purple-to-blue gradients (canonical SaaS cliché). Solid `--color-ink` for primary actions.
-- **No** rounded corners > 12px. Default radius is 5px. (특히 16px 균일 카드 라디우스 — shadcn 디폴트 — 회피.)
+- **No** rounded corners > 12px. **Default radius is 8px (`rounded-md`)**, Apex(modal/dialog)만 12px(`rounded-lg`), 인디케이터만 `rounded-full`. 단일 값 통일 정책 — `rounded-[Npx]`/`rounded-[var(--r*)]` 등 arbitrary 표기 금지. (특히 16px 균일 카드 라디우스 — shadcn 디폴트 — 회피.)
 - **No** illustrated empty states. Line SVGs (1.4 stroke) only.
 - **No** pulse/spinner loading. Use mono `LOADING…` text.
 - **No** glassmorphism, neon accents, fill-color status badges, blurred 3D orbs/blobs, chrome AI imagery.

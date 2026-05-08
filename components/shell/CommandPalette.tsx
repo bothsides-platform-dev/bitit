@@ -48,7 +48,7 @@ export function CommandPalette() {
           onClick={(e) => { if (e.target === e.currentTarget) closeCommandPalette(); }}
         >
           <div
-            className="w-[620px] bg-[var(--color-paper)] border border-[var(--color-hair)] rounded-[var(--r-md)] overflow-hidden shadow-lg"
+            className="w-[620px] bg-[var(--color-paper)] border border-[var(--color-hair)] rounded-md overflow-hidden shadow-lg"
             style={{ boxShadow: '0 2px 8px rgba(10,10,15,0.08), 0 24px 64px -8px rgba(10,10,15,0.18)' }}
           >
             <Command>

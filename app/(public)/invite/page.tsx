@@ -20,7 +20,7 @@ function InviteContent() {
         <span className="text-[var(--color-ink-muted)]">홍길동</span>님이<br />
         <strong>(주)샘플테크</strong>에 초대했습니다.
       </h2>
-      <div className="flex items-center gap-4 p-4 border border-[var(--color-hair)] rounded-[var(--r)]">
+      <div className="flex items-center gap-4 p-4 border border-[var(--color-hair)] rounded-md">
         <Avatar name="샘플테크" color="accent" size="lg" />
         <div>
           <p className="text-[14px] font-medium text-[var(--color-ink)]">(주)샘플테크</p>

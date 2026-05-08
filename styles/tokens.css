@@ -59,7 +59,8 @@
   --s-5:  20px;  --s-6:  24px;  --s-7:  32px;  --s-8:  40px;
   --s-9:  56px;  --s-10: 80px;  --s-11: 120px;
 
-  /* Radius — max 12px */
+  /* Radius — 5단계 토큰. border-radius는 단일 값 통일 정책(DESIGN.md §5.12).
+     실사용: rounded-md(8px) 기본, rounded-lg(12px) Apex(modal), rounded-full 인디케이터 */
   --r-xs: 2px;  --r-sm: 3px;  --r: 5px;
   --r-md: 8px;  --r-lg: 12px;
 

@@ -30,7 +30,7 @@ function Checkbox({
     <label htmlFor={id} className="flex items-start gap-3 cursor-pointer group">
       <div
         className={cn(
-          'mt-0.5 w-4 h-4 border rounded-[2px] flex items-center justify-center transition-colors shrink-0',
+          'mt-0.5 w-4 h-4 border rounded-md flex items-center justify-center transition-colors shrink-0',
           checked
             ? 'border-[var(--color-ink)] bg-[var(--color-ink)]'
             : 'border-[var(--color-hair-strong)] group-hover:border-[var(--color-ink)]',

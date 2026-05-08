@@ -40,7 +40,7 @@ export function Topbar({ user, workspaceType }: TopbarProps) {
       <button
         type="button"
         onClick={openCommandPalette}
-        className="flex items-center md:gap-2 h-8 w-8 md:w-72 px-0 md:px-3 justify-center md:justify-start rounded-[var(--r-sm)] border border-[var(--color-hair)] text-[var(--color-ink-soft)] hover:border-[var(--color-hair-strong)] hover:text-[var(--color-ink)] transition-colors duration-[140ms]"
+        className="flex items-center md:gap-2 h-8 w-8 md:w-72 px-0 md:px-3 justify-center md:justify-start rounded-md border border-[var(--color-hair)] text-[var(--color-ink-soft)] hover:border-[var(--color-hair-strong)] hover:text-[var(--color-ink)] transition-colors duration-[140ms]"
         aria-label="검색 (⌘K)"
       >
         <SearchIcon size={14} />
@@ -61,14 +61,14 @@ export function Topbar({ user, workspaceType }: TopbarProps) {
 
         {/* User avatar + profile dropdown */}
         <DropdownMenu>
-          <DropdownMenuTrigger className="outline-none rounded-[var(--r-sm)]">
+          <DropdownMenuTrigger className="outline-none rounded-md">
             <Avatar name={user.name} color="ink" size="sm" className="cursor-pointer" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             side="bottom"
             align="end"
             sideOffset={8}
-            className="min-w-[180px] rounded-[var(--r)] border border-[var(--color-hair)] bg-[var(--color-paper)] p-1 shadow-sm"
+            className="min-w-[180px] rounded-md border border-[var(--color-hair)] bg-[var(--color-paper)] p-1 shadow-sm"
           >
             <div className="px-2 py-1.5">
               <p className="font-mono text-[11px] font-medium tracking-[0.04em] text-[var(--color-ink)]">
@@ -84,13 +84,13 @@ export function Topbar({ user, workspaceType }: TopbarProps) {
             <DropdownMenuSeparator className="bg-[var(--color-hair)]" />
             <DropdownMenuItem
               onClick={() => router.push('/settings/profile')}
-              className="font-mono text-[11px] tracking-[0.04em] text-[var(--color-ink)] cursor-pointer px-2 py-1.5 rounded-[var(--r-sm)] hover:bg-[var(--color-field)]"
+              className="font-mono text-[11px] tracking-[0.04em] text-[var(--color-ink)] cursor-pointer px-2 py-1.5 rounded-md hover:bg-[var(--color-field)]"
             >
               설정
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={handleLogout}
-              className="font-mono text-[11px] tracking-[0.04em] text-[var(--color-ink)] cursor-pointer px-2 py-1.5 rounded-[var(--r-sm)] hover:bg-[var(--color-field)]"
+              className="font-mono text-[11px] tracking-[0.04em] text-[var(--color-ink)] cursor-pointer px-2 py-1.5 rounded-md hover:bg-[var(--color-field)]"
             >
               로그아웃
             </DropdownMenuItem>

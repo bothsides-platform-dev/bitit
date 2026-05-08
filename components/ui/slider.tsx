@@ -41,7 +41,7 @@ export function Slider({
       <RadixSlider.Thumb
         className={cn(
           'block w-[14px] h-[14px] bg-[var(--color-paper)]',
-          'border border-[var(--color-ink)] rounded-[var(--r)]',
+          'border border-[var(--color-ink)] rounded-md',
           'transition-transform duration-[140ms]',
           'hover:scale-110',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-ink)]',

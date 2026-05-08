@@ -14,7 +14,7 @@ function ToastViewport() {
         <Toast.Root
           key={t.id}
           toast={t}
-          className="flex items-start justify-between gap-6 rounded-[var(--r)] border border-[var(--color-hair)] bg-[var(--color-ink)] px-4 py-3 shadow-sm transition-all duration-200 data-[starting-style]:translate-y-1 data-[starting-style]:opacity-0 data-[ending-style]:translate-y-1 data-[ending-style]:opacity-0"
+          className="flex items-start justify-between gap-6 rounded-md border border-[var(--color-hair)] bg-[var(--color-ink)] px-4 py-3 shadow-sm transition-all duration-200 data-[starting-style]:translate-y-1 data-[starting-style]:opacity-0 data-[ending-style]:translate-y-1 data-[ending-style]:opacity-0"
         >
           <Toast.Title className="font-mono text-[11px] tracking-[0.04em] text-[var(--color-paper)]">
             {t.title}

@@ -83,7 +83,7 @@ export function BidBoardCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group relative bg-[var(--color-paper)] border border-[var(--color-hair)] rounded-[8px]',
+        'group relative bg-[var(--color-paper)] border border-[var(--color-hair)] rounded-md',
         'transition-shadow hover:shadow-[0_2px_8px_-4px_rgba(20,18,15,0.08)]',
         'cursor-pointer',
         isAwarded &&

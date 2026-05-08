@@ -52,7 +52,7 @@ export function BidBoardColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        'flex flex-col min-h-[200px] rounded-[6px] transition-colors',
+        'flex flex-col min-h-[200px] rounded-md transition-colors',
         isOver
           ? 'bg-[var(--color-paper-warm)] outline outline-1 outline-dashed outline-[var(--color-hair-strong)]'
           : 'bg-transparent',
