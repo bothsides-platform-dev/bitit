@@ -2,6 +2,12 @@
 @import "tw-animate-css";
 @import "../styles/tokens.css";
 
+/* 마크다운 문서가 Tailwind 클래스 스캐너에 잡혀 잘못된 CSS를 생성하는 것을 차단.
+   예: CLAUDE.md / DESIGN.md 의 `rounded-[var(--r-…)]` 예시 텍스트가
+   이전에 `var(--r*)` 형태로 적혀있어 invalid CSS 를 만들었던 사례 방지. */
+@source not "../**/*.md";
+@source not "../**/*.mdx";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

@@ -94,9 +94,9 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
   };
 
   return (
-    <form className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-12 lg:items-start" onSubmit={handleSubmit}>
-      {/* Left column: sections 01, 02, 03 */}
-      <div className="space-y-12 lg:border-r lg:border-[var(--color-hair)] lg:pr-10">
+    <form className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-12 lg:h-full" onSubmit={handleSubmit}>
+      {/* Left column: sections 01, 02, 03 — independent scroll on lg+ */}
+      <div className="space-y-12 lg:border-r lg:border-[var(--color-hair)] lg:pr-10 lg:overflow-y-auto lg:min-h-0">
         {/* 01 사업자 정보 — read-only (workspace 시점) 또는 미입력 안내 */}
         <section>
           <SectionHeader num="01" label="사업자 정보" />
@@ -205,8 +205,8 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
         </section>
       </div>
 
-      {/* Right column: section 04, sticky */}
-      <div className="mt-12 lg:mt-0 lg:sticky lg:top-8">
+      {/* Right column: section 04 — fixed in place on lg+ (defensive overflow-y-auto for tall content) */}
+      <div className="mt-12 lg:mt-0 lg:overflow-y-auto lg:min-h-0">
         <section>
           <SectionHeader num="04" label="발송 조건" />
           <div className="space-y-6">

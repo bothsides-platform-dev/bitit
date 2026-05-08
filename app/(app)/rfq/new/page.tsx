@@ -24,14 +24,16 @@ export default async function RfqNewPage() {
   // RFQ 작성 폼에서 인라인으로 사업자번호·등급 추가 가능.
 
   return (
-    <div className="px-8 py-8">
-      <div className="mb-10">
+    <div className="px-8 py-8 lg:h-full lg:flex lg:flex-col lg:overflow-hidden">
+      <div className="mb-10 lg:flex-none">
         <Serial current={1} total={4} label="RFQ" className="block mb-3" />
         <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
           신규 견적 요청
         </h1>
       </div>
-      <RfqCreateForm bizProfile={ws.bizProfile} workspaceName={ws.name} />
+      <div className="lg:flex-1 lg:min-h-0">
+        <RfqCreateForm bizProfile={ws.bizProfile} workspaceName={ws.name} />
+      </div>
     </div>
   );
 }

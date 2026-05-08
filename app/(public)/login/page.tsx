@@ -32,7 +32,7 @@ function LoginContent() {
     }
     // Auth.js v5 sets the cookie inside the server action's signIn() call;
     // a router.push is enough to land on the protected route.
-    router.push(next);
+    router.push(r.workspaceType === 'pg' ? '/inbox' : next);
     router.refresh();
   }
 

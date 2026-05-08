@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { signIn } from '@/auth';
+import { signIn, auth } from '@/auth';
 import { normalizeEmail, type AuthActionResult } from './_shared';
 
 const Input = z.object({
@@ -10,7 +10,7 @@ const Input = z.object({
 });
 
 export type LoginInput = z.infer<typeof Input>;
-export type LoginResult = AuthActionResult<{ email: string }>;
+export type LoginResult = AuthActionResult<{ email: string; workspaceType?: string }>;
 
 /**
  * P1 — wrap Auth.js v5 signIn('credentials', { redirect: false }).
@@ -30,7 +30,8 @@ export async function loginAction(input: LoginInput): Promise<LoginResult> {
       password: parsed.data.password,
       redirect: false,
     });
-    return { ok: true, email };
+    const session = await auth();
+    return { ok: true, email, workspaceType: session?.user?.workspaceType };
   } catch (e) {
     // Auth.js throws CredentialsSignin / AccessDenied for bad creds. Surface
     // a single generic error to avoid leaking which half of the pair was
