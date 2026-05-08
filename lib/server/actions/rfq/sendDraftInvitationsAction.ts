@@ -1,14 +1,26 @@
 'use server';
 
+import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 
 import { requireBuyerSession } from '@/lib/auth/session';
-import { rfqInvitations, rfqs, workspaces } from '@/lib/db/schema';
+import {
+  rfqInvitations,
+  rfqs,
+  workspaceMembers,
+  workspaces,
+} from '@/lib/db/schema';
 import { getOutboxRepo } from '@/lib/server/repositories/factory';
 import { generateToken, hashToken } from '@/lib/server/token';
 import { renderRfqInvited } from '@/lib/server/outbox/templates/rfqInvited';
 import { flushAfterCommit } from '@/lib/server/outbox/post-commit';
+import {
+  dispatchNotification,
+  emitAfterCommit,
+} from '@/lib/server/notifications/dispatch';
+import type { Notification } from '@/lib/types/notification';
+import { emailDomain } from '@/lib/server/actions/auth/_shared';
 import {
   actionDb,
   baseUrl,
@@ -52,6 +64,8 @@ export async function sendDraftInvitationsAction(
 
   const wsId = session.user.workspaceId;
   const db = actionDb();
+
+  const pendingEmits: Notification[] = [];
 
   const result = await db.transaction(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,6 +113,54 @@ export async function sendDraftInvitationsAction(
         .slice(0, 16);
       const outbox = await getOutboxRepo();
 
+      const now = new Date();
+      const draftEmails = (drafts as { pgEmail: string }[]).map(
+        (d) => d.pgEmail,
+      );
+      const pgDomains = Array.from(
+        new Set(
+          draftEmails
+            .map((e) => emailDomain(e))
+            .filter((d): d is string => d !== null),
+        ),
+      );
+      const pgWsRows =
+        pgDomains.length > 0
+          ? ((await tx
+              .select({ id: workspaces.id })
+              .from(workspaces)
+              .where(
+                and(
+                  eq(workspaces.type, 'pg'),
+                  inArray(workspaces.domain, pgDomains),
+                ),
+              )) as { id: string }[])
+          : [];
+      for (const ws of pgWsRows) {
+        const members = (await tx
+          .select({ userId: workspaceMembers.userId })
+          .from(workspaceMembers)
+          .where(eq(workspaceMembers.workspaceId, ws.id))) as {
+          userId: string;
+        }[];
+        for (const m of members) {
+          const notif: Notification = {
+            id: randomUUID(),
+            userId: m.userId,
+            workspaceId: ws.id,
+            type: 'rfq.invited',
+            title: `[${rfqRow.id}] 견적 요청 도착`,
+            body: `${buyerName}가 견적을 요청했습니다.`,
+            channel: 'inapp',
+            status: 'pending',
+            linkUrl: `/inbox/${rfqRow.id}`,
+            createdAt: now.toISOString(),
+          };
+          await dispatchNotification(tx, notif);
+          pendingEmits.push(notif);
+        }
+      }
+
       let sentCount = 0;
       for (const draft of drafts) {
         const rawToken = generateToken();
@@ -136,6 +198,9 @@ export async function sendDraftInvitationsAction(
     },
   );
 
-  if (result.ok) flushAfterCommit();
+  if (result.ok) {
+    emitAfterCommit(pendingEmits);
+    flushAfterCommit();
+  }
   return result;
 }

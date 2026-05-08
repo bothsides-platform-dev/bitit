@@ -10,6 +10,7 @@ import {
   bizProfiles,
   rfqInvitations,
   rfqs,
+  workspaceMembers,
   workspaces,
 } from '@/lib/db/schema';
 import {
@@ -21,7 +22,13 @@ import { addMinutes, generateToken } from '@/lib/server/token';
 import { renderRfqInvited } from '@/lib/server/outbox/templates/rfqInvited';
 import { renderRfqSent } from '@/lib/server/outbox/templates/rfqSent';
 import { flushAfterCommit } from '@/lib/server/outbox/post-commit';
+import {
+  dispatchNotification,
+  emitAfterCommit,
+} from '@/lib/server/notifications/dispatch';
+import type { Notification } from '@/lib/types/notification';
 import { DRAFT_OWNER_ID } from '@/lib/server/storage/path';
+import { emailDomain } from '@/lib/server/actions/auth/_shared';
 import {
   actionDb,
   baseUrl,
@@ -84,6 +91,8 @@ export async function createRfqAction(
   const userId = session.user.id;
   const send = parsed.data.send;
   const db = actionDb();
+
+  const pendingEmits: Notification[] = [];
 
   const result = await db.transaction(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -238,7 +247,53 @@ export async function createRfqAction(
           );
         }
 
-        // buyer 본인 발송 알림 (in-app은 Step 9 SSE 시점에 추가, 지금은 outbox만).
+        // PG 워크스페이스가 도메인으로 가입돼 있으면 멤버 전원에게 인앱 알림.
+        // 미가입 도메인은 outbox 메일만으로 충분 — workspaces 조회 결과 없음.
+        const pgDomains = Array.from(
+          new Set(
+            parsed.data.allowedPgEmails
+              .map((e) => emailDomain(e))
+              .filter((d): d is string => d !== null),
+          ),
+        );
+        const pgWsRows =
+          pgDomains.length > 0
+            ? ((await tx
+                .select({ id: workspaces.id })
+                .from(workspaces)
+                .where(
+                  and(
+                    eq(workspaces.type, 'pg'),
+                    inArray(workspaces.domain, pgDomains),
+                  ),
+                )) as { id: string }[])
+            : [];
+        for (const ws of pgWsRows) {
+          const members = (await tx
+            .select({ userId: workspaceMembers.userId })
+            .from(workspaceMembers)
+            .where(eq(workspaceMembers.workspaceId, ws.id))) as {
+            userId: string;
+          }[];
+          for (const m of members) {
+            const notif: Notification = {
+              id: randomUUID(),
+              userId: m.userId,
+              workspaceId: ws.id,
+              type: 'rfq.invited',
+              title: `[${rfqId}] 견적 요청 도착`,
+              body: `${buyerName}가 견적을 요청했습니다.`,
+              channel: 'inapp',
+              status: 'pending',
+              linkUrl: `/inbox/${rfqId}`,
+              createdAt: now.toISOString(),
+            };
+            await dispatchNotification(tx, notif);
+            pendingEmits.push(notif);
+          }
+        }
+
+        // buyer 본인 발송 알림 (메일 outbox).
         const sentHtml = await renderRfqSent({
           rfqId,
           rfqTitle: parsed.data.title.trim(),
@@ -267,6 +322,9 @@ export async function createRfqAction(
   // Post-commit fire-and-forget flush — drains the rfq.invited / rfq.sent
   // entries we just enqueued. cron is the safety net if this drops on the
   // floor (process killed mid-flight). Never blocks the action response.
-  if (result.ok && send) flushAfterCommit();
+  if (result.ok && send) {
+    emitAfterCommit(pendingEmits);
+    flushAfterCommit();
+  }
   return result;
 }
