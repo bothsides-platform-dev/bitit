@@ -2,79 +2,86 @@
 @import "tw-animate-css";
 @import "../styles/tokens.css";
 
-/* 마크다운 문서가 Tailwind 클래스 스캐너에 잡혀 잘못된 CSS를 생성하는 것을 차단.
-   예: CLAUDE.md / DESIGN.md 의 `rounded-[var(--r-…)]` 예시 텍스트가
-   이전에 `var(--r*)` 형태로 적혀있어 invalid CSS 를 만들었던 사례 방지. */
 @source not "../**/*.md";
 @source not "../**/*.mdx";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* Remap shadcn semantic vars → bidit tokens */
-  --color-background:         var(--color-paper);
-  --color-foreground:         var(--color-ink);
+  /* ── Shadcn semantic vars → MD3 system tokens ─────── */
+  --color-background:         var(--md-sys-color-background);
+  --color-foreground:         var(--md-sys-color-on-background);
 
-  --color-card:               var(--color-paper-pure);
-  --color-card-foreground:    var(--color-ink);
+  --color-card:               var(--md-sys-color-surface-container-low);
+  --color-card-foreground:    var(--md-sys-color-on-surface);
 
-  --color-popover:            var(--color-paper-pure);
-  --color-popover-foreground: var(--color-ink);
+  --color-popover:            var(--md-sys-color-surface-container-lowest);
+  --color-popover-foreground: var(--md-sys-color-on-surface);
 
-  --color-primary:            var(--color-ink);
-  --color-primary-foreground: var(--color-paper);
+  --color-primary:            var(--md-sys-color-primary);
+  --color-primary-foreground: var(--md-sys-color-on-primary);
 
-  --color-secondary:          var(--color-paper-warm);
-  --color-secondary-foreground: var(--color-ink);
+  --color-secondary:          var(--md-sys-color-secondary-container);
+  --color-secondary-foreground: var(--md-sys-color-on-secondary-container);
 
-  --color-muted:              var(--color-paper-warm);
-  --color-muted-foreground:   var(--color-ink-muted);
+  --color-muted:              var(--md-sys-color-surface-container);
+  --color-muted-foreground:   var(--md-sys-color-on-surface-variant);
 
-  --color-accent:             var(--color-accent-tint);
-  --color-accent-foreground:  var(--color-accent);
+  --color-accent:             var(--md-sys-color-primary-container);
+  --color-accent-foreground:  var(--md-sys-color-on-primary-container);
 
-  --color-destructive:        var(--color-terracotta);
+  --color-destructive:        var(--md-sys-color-error);
+  --color-destructive-foreground: var(--md-sys-color-on-error);
 
-  --color-border:             var(--color-hair);
-  --color-input:              var(--color-hair-strong);
-  --color-ring:               var(--color-ink);
+  --color-border:             var(--md-sys-color-outline-variant);
+  --color-input:              var(--md-sys-color-outline);
+  --color-ring:               var(--md-sys-color-primary);
 
-  /* Sidebar (shadcn) → bidit night palette */
-  --color-sidebar:                    var(--color-night);
-  --color-sidebar-foreground:         var(--color-paper);
-  --color-sidebar-border:             var(--color-night-2);
-  --color-sidebar-accent:             var(--color-night-2);
-  --color-sidebar-accent-foreground:  var(--color-paper);
-  --color-sidebar-primary:            var(--color-amber);
-  --color-sidebar-primary-foreground: var(--color-night);
-  --color-sidebar-ring:               var(--color-amber);
+  /* Navigation Rail = dark inverse surface */
+  --color-sidebar:                   var(--md-sys-color-inverse-surface);
+  --color-sidebar-foreground:        var(--md-sys-color-inverse-on-surface);
+  --color-sidebar-border:            transparent;
+  --color-sidebar-accent:            color-mix(in srgb, var(--md-sys-color-inverse-primary) 16%, var(--md-sys-color-inverse-surface));
+  --color-sidebar-accent-foreground: var(--md-sys-color-inverse-primary);
+  --color-sidebar-primary:           var(--md-sys-color-inverse-primary);
+  --color-sidebar-primary-foreground: var(--md-sys-color-inverse-surface);
+  --color-sidebar-ring:              var(--md-sys-color-inverse-primary);
 
-  /* Font aliases */
   --font-sans:    var(--font-sans);
   --font-mono:    var(--font-mono);
   --font-heading: var(--font-sans);
 
-  /* Radius */
-  --radius-sm: var(--r-sm);
-  --radius-md: var(--r-md);
-  --radius-lg: var(--r-lg);
-  --radius-xl: var(--r-lg);
-}
-
-:root {
-  --radius: var(--r);
+  /* Shape → Tailwind radius aliases */
+  --radius-sm: var(--md-sys-shape-extra-small);
+  --radius-md: var(--md-sys-shape-small);
+  --radius-lg: var(--md-sys-shape-medium);
+  --radius-xl: var(--md-sys-shape-large);
+  --radius:    var(--md-sys-shape-small);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
   }
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
-    letter-spacing: -0.006em;
+    font-size: var(--md-typescale-body-large-size);
+    font-weight: var(--md-typescale-body-large-weight);
+    line-height: var(--md-typescale-body-large-line-height);
+    letter-spacing: var(--md-typescale-body-large-tracking);
   }
-  html {
-    @apply font-sans;
+
+  /*
+    .md-numeric — Financial column alignment carve-out.
+    Apply to <td>, <span> containing ₩ amounts, %, counts.
+    Preserves tabular-nums + JetBrains Mono for data integrity in
+    bid comparison tables.
+  */
+  .md-numeric {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
   }
 }
