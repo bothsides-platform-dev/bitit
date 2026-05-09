@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import {
   workspaces,
   workspaceMembers,
@@ -91,7 +91,6 @@ export class DrizzleWorkspaceRepository implements WorkspaceRepo {
       id: ws.id,
       type: ws.type,
       name: ws.name,
-      domain: ws.domain ?? undefined,
       bizProfile,
       members,
       createdAt: new Date(ws.createdAt).toISOString(),
@@ -106,12 +105,11 @@ export class DrizzleWorkspaceRepository implements WorkspaceRepo {
         id: ws.id,
         type: ws.type,
         name: ws.name,
-        domain: ws.domain ?? null,
         bizProfileId: null, // workspace.bizProfile is read-only hydration; updates go through BizProfileRepo + workspaces.bizProfileId
       })
       .onConflictDoUpdate({
         target: workspaces.id,
-        set: { name: ws.name, domain: ws.domain ?? null },
+        set: { name: ws.name },
       });
 
     // Sync members table — additive (we don't remove members here).
@@ -141,46 +139,4 @@ export class DrizzleWorkspaceRepository implements WorkspaceRepo {
     return row ? this.hydrate(db, row) : undefined;
   }
 
-  async findByDomain(domain: string, tx?: Tx): Promise<Workspace | undefined> {
-    const db = this.h(tx);
-    const [row] = await db
-      .select()
-      .from(workspaces)
-      .where(eq(workspaces.domain, domain))
-      .limit(1);
-    return row ? this.hydrate(db, row) : undefined;
-  }
-
-  async autoJoinPg(
-    userEmail: string,
-    user: User,
-    tx?: Tx,
-  ): Promise<Workspace | null> {
-    const db = this.h(tx);
-    const domain = userEmail.split('@')[1];
-    if (!domain) return null;
-
-    const [ws] = await db
-      .select()
-      .from(workspaces)
-      .where(and(eq(workspaces.domain, domain), eq(workspaces.type, 'pg')))
-      .limit(1);
-    if (!ws) return null;
-
-    // Idempotent insert — if already a member, do nothing.
-    await db
-      .insert(workspaceMembers)
-      .values({
-        workspaceId: ws.id,
-        userId: user.id,
-        role: user.role,
-        joinedAt: new Date(user.joinedAt),
-        lastSeenAt: user.lastSeenAt ? new Date(user.lastSeenAt) : null,
-      })
-      .onConflictDoNothing({
-        target: [workspaceMembers.workspaceId, workspaceMembers.userId],
-      });
-
-    return this.hydrate(db, ws);
-  }
 }

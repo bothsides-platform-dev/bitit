@@ -195,11 +195,11 @@ export async function submitBidAction(
 
       // PG ws name (이메일 본문에 표시).
       const [pgWsRow] = (await tx
-        .select({ name: workspaces.name, domain: workspaces.domain })
+        .select({ name: workspaces.name })
         .from(workspaces)
         .where(eq(workspaces.id, pgWsId))
-        .limit(1)) as { name: string; domain: string | null }[];
-      const pgWsLabel = pgWsRow?.name ?? pgWsRow?.domain ?? 'PG';
+        .limit(1)) as { name: string }[];
+      const pgWsLabel = pgWsRow?.name ?? 'PG';
 
       const outbox = await getOutboxRepo();
 

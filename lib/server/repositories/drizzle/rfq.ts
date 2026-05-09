@@ -32,7 +32,7 @@ function rowToRfq(row: RfqRow, biz: BizRow | null): RFQ {
     title: row.title,
     memo: row.memo,
     rfpFiles: [], // attachments hydrated separately when needed
-    allowedPgEmails: row.allowedPgEmails ?? [],
+    allowedPgWorkspaceIds: row.allowedPgWorkspaceIds ?? [],
     deadline: new Date(row.deadline).toISOString(),
     status: row.status,
     awardedBidId: row.awardedBidId ?? undefined,
@@ -80,7 +80,7 @@ export class DrizzleRfqRepository implements RfqRepo {
       bizProfileId,
       title: rfq.title,
       memo: rfq.memo,
-      allowedPgEmails: rfq.allowedPgEmails,
+      allowedPgWorkspaceIds: rfq.allowedPgWorkspaceIds,
       deadline: new Date(rfq.deadline),
       status: rfq.status,
       awardedBidId: rfq.awardedBidId ?? null,
@@ -97,7 +97,7 @@ export class DrizzleRfqRepository implements RfqRepo {
         set: {
           title: rfq.title,
           memo: rfq.memo,
-          allowedPgEmails: rfq.allowedPgEmails,
+          allowedPgWorkspaceIds: rfq.allowedPgWorkspaceIds,
           deadline: new Date(rfq.deadline),
           status: rfq.status,
           awardedBidId: rfq.awardedBidId ?? null,
@@ -165,8 +165,8 @@ export class DrizzleRfqRepository implements RfqRepo {
       setPatch.sentAt = patch.sentAt ? new Date(patch.sentAt) : null;
     if (patch?.title !== undefined) setPatch.title = patch.title;
     if (patch?.memo !== undefined) setPatch.memo = patch.memo;
-    if (patch?.allowedPgEmails !== undefined)
-      setPatch.allowedPgEmails = patch.allowedPgEmails;
+    if (patch?.allowedPgWorkspaceIds !== undefined)
+      setPatch.allowedPgWorkspaceIds = patch.allowedPgWorkspaceIds;
     if (patch?.deadline !== undefined) setPatch.deadline = new Date(patch.deadline);
 
     const updated = await db

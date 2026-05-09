@@ -7,7 +7,6 @@ export type Workspace = {
   id: string;
   type: WorkspaceType;
   name: string;
-  domain?: string;
   bizProfile?: BizProfile;
   members: User[];
   createdAt: string;

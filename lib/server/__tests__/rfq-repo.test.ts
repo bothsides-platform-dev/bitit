@@ -15,7 +15,7 @@ function makeRfq(id: string, status: RFQ['status'] = 'draft'): RFQ {
     title: 'Test RFQ',
     memo: '',
     rfpFiles: [],
-    allowedPgEmails: [],
+    allowedPgWorkspaceIds: [],
     deadline: new Date(Date.now() + 86_400_000).toISOString(),
     status,
     createdBy: 'user-1',

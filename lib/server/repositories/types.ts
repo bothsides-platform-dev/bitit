@@ -69,10 +69,6 @@ export interface WorkspaceRepo {
   save(ws: Workspace, tx?: Tx): Promise<void>;
   /** id 조회 — 멤버/bizProfile hydration 포함. */
   findById(id: string, tx?: Tx): Promise<Workspace | undefined>;
-  /** 도메인 매칭(PG 전용 partial unique). */
-  findByDomain(domain: string, tx?: Tx): Promise<Workspace | undefined>;
-  /** 도메인 매칭 PG ws에 사용자 합류. 없으면 null(생성하지 않음). */
-  autoJoinPg(userEmail: string, user: User, tx?: Tx): Promise<Workspace | null>;
 }
 
 // ── User ──────────────────────────────────────────────────────────────

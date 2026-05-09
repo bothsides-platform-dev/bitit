@@ -11,7 +11,7 @@ function makeRfq(id: string, overrides: Partial<RFQ> = {}): RFQ {
     title: `RFQ ${id}`,
     memo: '',
     rfpFiles: [],
-    allowedPgEmails: [],
+    allowedPgWorkspaceIds: [],
     deadline: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
     status: 'sent',
     createdBy: 'user-1',
@@ -24,7 +24,7 @@ function makeInv(id: string, rfqId: string, status: RfqInvitation['status']): Rf
   return {
     id,
     rfqId,
-    pgEmail: 'pg@test.com',
+    pgWsId: 'ws-pg',
     uniqueToken: '',
     sentAt: new Date().toISOString(),
     expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),

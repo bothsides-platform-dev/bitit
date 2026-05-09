@@ -10,7 +10,7 @@ export type RFQ = {
   title: string;
   memo: string;
   rfpFiles: Attachment[];
-  allowedPgEmails: string[];
+  allowedPgWorkspaceIds: string[];
   deadline: string;
   status: RfqStatus;
   awardedBidId?: string;

@@ -8,7 +8,6 @@ function makeWorkspace(overrides?: Partial<Workspace>): Workspace {
     id: 'ws-toss',
     type: 'pg',
     name: '토스페이먼츠',
-    domain: 'toss.im',
     members: [],
     createdAt: new Date().toISOString(),
     ...overrides,
@@ -34,26 +33,23 @@ describe('InMemoryWorkspaceRepository', () => {
     repo = new InMemoryWorkspaceRepository();
   });
 
-  it('auto-joins PG user matching email domain', async () => {
-    await repo.save(makeWorkspace());
-    const joined = await repo.autoJoinPg('sales@toss.im', makeUser('u1', 'sales@toss.im'));
-    expect(joined).not.toBeNull();
-    expect(joined!.members.some((m) => m.id === 'u1')).toBe(true);
+  it('save and findById returns the workspace', async () => {
+    const ws = makeWorkspace();
+    await repo.save(ws);
+    const found = await repo.findById(ws.id);
+    expect(found).toBeDefined();
+    expect(found!.name).toBe(ws.name);
   });
 
-  it('returns null for unregistered domain', async () => {
-    expect(await repo.autoJoinPg('ceo@kakao.com', makeUser('u2', 'ceo@kakao.com'))).toBeNull();
+  it('findById returns undefined for unknown id', async () => {
+    expect(await repo.findById('unknown-id')).toBeUndefined();
   });
 
-  it('does not duplicate member on re-join', async () => {
-    await repo.save(makeWorkspace());
+  it('save with members stores members', async () => {
     const user = makeUser('u1', 'sales@toss.im');
-    await repo.autoJoinPg('sales@toss.im', user);
-    await repo.autoJoinPg('sales@toss.im', user);
-    expect((await repo.findByDomain('toss.im'))!.members.filter((m) => m.id === 'u1')).toHaveLength(1);
-  });
-
-  it('findByDomain returns undefined for unknown domain', async () => {
-    expect(await repo.findByDomain('stripe.com')).toBeUndefined();
+    const ws = makeWorkspace({ members: [user] });
+    await repo.save(ws);
+    const found = await repo.findById(ws.id);
+    expect(found!.members.some((m) => m.id === 'u1')).toBe(true);
   });
 });

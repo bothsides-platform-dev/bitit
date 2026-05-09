@@ -9,8 +9,7 @@ export type InvitationStatus =
 export type RfqInvitation = {
   id: string;
   rfqId: string;
-  pgEmail: string;
-  pgWsId?: string;
+  pgWsId: string;
   acceptedByUserId?: string;
   uniqueToken: string;
   sentAt: string;

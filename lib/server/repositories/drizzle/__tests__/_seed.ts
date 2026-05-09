@@ -51,7 +51,6 @@ export async function seedBuyerWorkspace(
     id,
     type: 'buyer',
     name: overrides?.name ?? '구매사',
-    domain: null,
     bizProfileId: overrides?.bizProfileId ?? null,
   });
   return { id };
@@ -59,15 +58,14 @@ export async function seedBuyerWorkspace(
 
 export async function seedPgWorkspace(
   db: PgliteDB,
-  domain: string,
+  name: string,
   overrides?: { name?: string },
 ): Promise<{ id: string }> {
   const id = randomUUID();
   await db.insert(workspaces).values({
     id,
     type: 'pg',
-    name: overrides?.name ?? domain,
-    domain,
+    name: overrides?.name ?? name,
   });
   return { id };
 }

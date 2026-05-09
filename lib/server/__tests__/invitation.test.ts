@@ -7,7 +7,7 @@ function makeInvitation(rawToken: string, overrides?: Partial<RfqInvitation>): R
   return {
     id: 'inv-1',
     rfqId: 'rfq-1',
-    pgEmail: 'sales@toss.im',
+    pgWsId: 'ws-toss',
     uniqueToken: rawToken,
     sentAt: new Date().toISOString(),
     expiresAt: addMinutes(new Date(), 7 * 24 * 60),

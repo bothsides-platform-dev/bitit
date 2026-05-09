@@ -32,7 +32,7 @@ function makeRfq(
     title: 'Test RFQ',
     memo: '',
     rfpFiles: [],
-    allowedPgEmails: ['sales@toss.im'],
+    allowedPgWorkspaceIds: [],
     deadline: new Date(Date.now() + 86_400_000).toISOString(),
     status,
     createdBy,

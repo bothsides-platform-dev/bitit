@@ -34,7 +34,7 @@ function rowToRfq(row: RfqRow, biz: BizRow | null): RFQ {
     title: row.title,
     memo: row.memo,
     rfpFiles: [],
-    allowedPgEmails: row.allowedPgEmails ?? [],
+    allowedPgWorkspaceIds: row.allowedPgWorkspaceIds ?? [],
     deadline: new Date(row.deadline).toISOString(),
     status: row.status,
     awardedBidId: row.awardedBidId ?? undefined,
@@ -74,8 +74,7 @@ function rowToInvitation(row: InvRow): RfqInvitation {
   return {
     id: row.id,
     rfqId: row.rfqId,
-    pgEmail: row.pgEmail,
-    pgWsId: row.pgWsId ?? undefined,
+    pgWsId: row.pgWsId,
     acceptedByUserId: row.acceptedByUserId ?? undefined,
     // Raw token never leaves the DB — return placeholder. Callers must not
     // rely on `uniqueToken` post-retrieval; it exists for construction only.
@@ -103,8 +102,7 @@ export class DrizzleInvitationRepository implements InvitationRepo {
       .values({
         id: inv.id,
         rfqId: inv.rfqId,
-        pgEmail: inv.pgEmail,
-        pgWsId: inv.pgWsId ?? null,
+        pgWsId: inv.pgWsId,
         acceptedByUserId: inv.acceptedByUserId ?? null,
         tokenHash: hashToken(rawToken),
         sentAt: new Date(inv.sentAt),
@@ -115,7 +113,7 @@ export class DrizzleInvitationRepository implements InvitationRepo {
       .onConflictDoUpdate({
         target: rfqInvitations.id,
         set: {
-          pgWsId: inv.pgWsId ?? null,
+          pgWsId: inv.pgWsId,
           acceptedByUserId: inv.acceptedByUserId ?? null,
           openedAt: inv.openedAt ? new Date(inv.openedAt) : null,
           status: uiStatusToDb(inv.status),
