@@ -1,7 +1,6 @@
 'use server';
 
 import { z } from 'zod';
-import { requireSession } from '@/lib/auth/session';
 import { getNtsClient, NtsError, type NtsLookupResult } from '@/lib/integrations/nts';
 import type { RfqActionResult } from './_shared';
 
@@ -10,8 +9,9 @@ const Input = z.string().min(8).max(20);
 export type LookupBizNoResult = RfqActionResult<NtsLookupResult>;
 
 /**
- * NTS 사업자번호 조회. 모든 회원 호출 가능. 실연동 mock 폴백 없음 — 테스트는
- * `__setNtsClientForTest(new MockNtsClient())` 로 주입한다.
+ * NTS 사업자번호 조회. 인증 불필요 — 국세청 공공 API 읽기 전용 호출이므로
+ * 가입 흐름(비인증 공개 라우트)에서도 호출 가능. 남용 방지는 in-process
+ * leaky-bucket(10 req/s)으로 충분하다.
  *
  * 반환:
  *   - ok: true  + valid:true + taxType + status        (정상 조회)
@@ -21,14 +21,6 @@ export type LookupBizNoResult = RfqActionResult<NtsLookupResult>;
 export async function lookupBizNoAction(
   bizNo: string,
 ): Promise<LookupBizNoResult> {
-  // 인증된 사용자만. PG 회원도 사업자번호 조회는 가능 (정책 — buyer-only로
-  // 좁히지 않음. PG는 자기 사업자번호 검증용으로 쓸 여지 있음).
-  try {
-    await requireSession();
-  } catch {
-    return { ok: false, error: 'UNAUTHENTICATED' };
-  }
-
   const parsed = Input.safeParse(bizNo);
   if (!parsed.success) return { ok: false, error: 'INVALID_INPUT' };
 

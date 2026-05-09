@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   __setNtsClientForTest,
@@ -8,26 +8,14 @@ import {
 import { MockNtsClient } from '@/lib/integrations/nts.mock';
 import { setupRfqActionEnv, teardownRfqActionEnv } from './_setup';
 
-const sessionRef: { value: { user: { id: string } } | null } = { value: null };
-
-vi.mock('@/lib/auth/session', () => ({
-  requireSession: () => {
-    if (!sessionRef.value) return Promise.reject(new Error('UNAUTHENTICATED'));
-    return Promise.resolve(sessionRef.value);
-  },
-  requireBuyerSession: () => Promise.reject(new Error('not used')),
-}));
-
 import { lookupBizNoAction } from '../lookupBizNoAction';
 
 describe('lookupBizNoAction', () => {
   beforeEach(async () => {
     await setupRfqActionEnv();
-    sessionRef.value = { user: { id: 'u-1' } };
   });
   afterEach(() => {
     teardownRfqActionEnv();
-    sessionRef.value = null;
   });
 
   it('returns NTS lookup result for a known bizNo', async () => {
@@ -44,14 +32,6 @@ describe('lookupBizNoAction', () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.valid).toBe(false);
-  });
-
-  it('rejects when no session', async () => {
-    sessionRef.value = null;
-    const r = await lookupBizNoAction('1234567890');
-    expect(r.ok).toBe(false);
-    if (r.ok) return;
-    expect(r.error).toBe('UNAUTHENTICATED');
   });
 
   it('rejects malformed bizNo input', async () => {
