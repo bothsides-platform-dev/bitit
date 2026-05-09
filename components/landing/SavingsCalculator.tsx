@@ -51,10 +51,8 @@ export function SavingsCalculator() {
   const currentCost = Math.round(currentRate * volume);
   const biditCost = Math.round(biditRate * volume);
 
-  const baselineNote =
-    grade === 'general'
-      ? `bidit 최저 가능 ${(GENERAL_ASSUMED_RATE * 100).toFixed(2)}% (가정)`
-      : `bidit 평균 낙찰가 ${(biditRate * 100).toFixed(2)}% (법정)`;
+  const baselineRate = grade === 'general' ? GENERAL_ASSUMED_RATE : biditRate;
+  const baselineNote = `최저가능 ${(baselineRate * 100).toFixed(2)}%`;
 
   return (
     <section className="border-t border-b border-[var(--md-sys-color-outline)] py-[var(--s-9)]">

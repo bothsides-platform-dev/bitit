@@ -107,38 +107,9 @@ export function LiveBidSimulation() {
             transition={{ duration: 0.36, ease: EASE_OUT }}
             className="text-[clamp(22px,3vw,40px)] leading-[1.1] tracking-[-0.022em] font-medium text-[var(--md-sys-color-on-surface)]"
           >
-            3개 PG사가<br />동시에 응답합니다.
+            N개 PG사가<br />동시에 응답합니다.
           </motion.h2>
         </div>
-
-        {/* RFQ summary card */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.36, ease: EASE_OUT }}
-          className="border border-[var(--md-sys-color-outline)] rounded-md p-[var(--s-5)]"
-        >
-          <div className="flex flex-wrap items-baseline gap-x-[var(--s-7)] gap-y-[var(--s-2)]">
-            <span className="font-mono text-[var(--text-2xs)] tracking-[0.18em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
-              RFQ № 042
-            </span>
-            <span className="font-mono text-[var(--text-xs)] tracking-[0.06em] text-[var(--md-sys-color-on-surface-variant)]">
-              연 거래액{' '}
-              <span className="tabular-nums text-[var(--md-sys-color-on-surface)]">100억</span>
-            </span>
-            <span className="font-mono text-[var(--text-xs)] tracking-[0.06em] text-[var(--md-sys-color-on-surface-variant)]">
-              업종 <span className="text-[var(--md-sys-color-on-surface)]">이커머스</span>
-            </span>
-            <span className="font-mono text-[var(--text-xs)] tracking-[0.06em] text-[var(--md-sys-color-on-surface-variant)]">
-              등급 <span className="text-[var(--md-sys-color-on-surface)]">일반</span>
-            </span>
-            <span className="font-mono text-[var(--text-xs)] tracking-[0.06em] text-[var(--md-sys-color-on-surface-variant)]">
-              초대 PG사{' '}
-              <span className="tabular-nums text-[var(--md-sys-color-on-surface)]">3개사</span>
-            </span>
-          </div>
-        </motion.div>
 
         {/* Bid table */}
         <div className="overflow-x-auto -mx-8 px-8 md:mx-0 md:px-0">
