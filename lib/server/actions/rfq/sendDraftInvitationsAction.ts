@@ -10,6 +10,7 @@ import {
   rfqs,
   workspaceMembers,
   workspaces,
+  users,
 } from '@/lib/db/schema';
 import { getOutboxRepo } from '@/lib/server/repositories/factory';
 import { generateToken, hashToken } from '@/lib/server/token';
@@ -20,7 +21,6 @@ import {
   emitAfterCommit,
 } from '@/lib/server/notifications/dispatch';
 import type { Notification } from '@/lib/types/notification';
-import { emailDomain } from '@/lib/server/actions/auth/_shared';
 import {
   actionDb,
   baseUrl,
@@ -37,17 +37,18 @@ export type SendDraftInvitationsInput = z.input<typeof Input>;
 export type SendDraftInvitationsResult = RfqActionResult<{ sentCount: number }>;
 
 /**
- * `addPgEmailsToRfqAction`이 누적해둔 `'draft'` invitation row 일괄 발송.
+ * `addPgWorkspacesToRfqAction`이 누적해둔 `'draft'` invitation row 일괄 발송.
  *
  * 흐름:
  *   1. 권한 + RFQ open 가드(status='sent' && deadline > now).
- *   2. draft 행 select.
- *   3. 각 행마다 fresh rawToken 발급 → tokenHash 갱신 + status='pending'(DB)
- *      → outbox enqueue. dedupeKey는 createRfqAction과 동일 패턴
- *      `rfq:{rfqId}:invite:{email}` — case-insensitive 부분 unique index가
- *      "같은 이메일 두 번 추가" race를 차단하므로 dedupe 충돌은 정상 케이스에서
- *      발생하지 않음.
- *   4. post-commit flush.
+ *   2. draft 행 select (각 행에 pgWsId 포함).
+ *   3. 고유 pgWsId들의 모든 멤버(email 포함)를 단일 배치 쿼리로 조회.
+ *   4. 각 PG 워크스페이스의 전체 멤버에게 인앱 알림 발송.
+ *   5. 각 draft마다:
+ *      - fresh rawToken 발급 → tokenHash 갱신 + status='pending'(DB).
+ *      - 해당 워크스페이스 admin 멤버 각각에게 이메일 enqueue.
+ *      - dedupeKey: `rfq:{rfqId}:invite:ws:{pgWsId}:user:{adminUserId}`.
+ *   6. post-commit flush.
  */
 export async function sendDraftInvitationsAction(
   input: SendDraftInvitationsInput,
@@ -114,40 +115,48 @@ export async function sendDraftInvitationsAction(
       const outbox = await getOutboxRepo();
 
       const now = new Date();
-      const draftEmails = (drafts as { pgEmail: string }[]).map(
-        (d) => d.pgEmail,
+
+      // Collect all unique PG workspace IDs from drafts.
+      const uniquePgWsIds = Array.from(
+        new Set((drafts as { pgWsId: string }[]).map((d) => d.pgWsId)),
       );
-      const pgDomains = Array.from(
-        new Set(
-          draftEmails
-            .map((e) => emailDomain(e))
-            .filter((d): d is string => d !== null),
-        ),
-      );
-      const pgWsRows =
-        pgDomains.length > 0
-          ? ((await tx
-              .select({ id: workspaces.id })
-              .from(workspaces)
-              .where(
-                and(
-                  eq(workspaces.type, 'pg'),
-                  inArray(workspaces.domain, pgDomains),
-                ),
-              )) as { id: string }[])
-          : [];
-      for (const ws of pgWsRows) {
-        const members = (await tx
-          .select({ userId: workspaceMembers.userId })
-          .from(workspaceMembers)
-          .where(eq(workspaceMembers.workspaceId, ws.id))) as {
-          userId: string;
-        }[];
+
+      // Batch-fetch all members (with email) for all PG workspaces in one query.
+      const allMembers = (await tx
+        .select({
+          workspaceId: workspaceMembers.workspaceId,
+          userId: workspaceMembers.userId,
+          role: workspaceMembers.role,
+          email: users.email,
+        })
+        .from(workspaceMembers)
+        .innerJoin(users, eq(workspaceMembers.userId, users.id))
+        .where(inArray(workspaceMembers.workspaceId, uniquePgWsIds))) as {
+        workspaceId: string;
+        userId: string;
+        role: string;
+        email: string;
+      }[];
+
+      // Build lookup maps: wsId → all members, wsId → admin members only.
+      const membersByWs = new Map<
+        string,
+        { workspaceId: string; userId: string; role: string; email: string }[]
+      >();
+      for (const m of allMembers) {
+        const list = membersByWs.get(m.workspaceId) ?? [];
+        list.push(m);
+        membersByWs.set(m.workspaceId, list);
+      }
+
+      // Dispatch in-app notifications to ALL members of each PG workspace.
+      for (const pgWsId of uniquePgWsIds) {
+        const members = membersByWs.get(pgWsId) ?? [];
         for (const m of members) {
           const notif: Notification = {
             id: randomUUID(),
             userId: m.userId,
-            workspaceId: ws.id,
+            workspaceId: pgWsId,
             type: 'rfq.invited',
             title: `[${rfqRow.id}] 견적 요청 도착`,
             body: `${buyerName}가 견적을 요청했습니다.`,
@@ -161,8 +170,9 @@ export async function sendDraftInvitationsAction(
         }
       }
 
+      // Process each draft invitation: generate token, update row, email admins.
       let sentCount = 0;
-      for (const draft of drafts) {
+      for (const draft of drafts as { id: string; pgWsId: string }[]) {
         const rawToken = generateToken();
         await tx
           .update(rfqInvitations)
@@ -181,16 +191,22 @@ export async function sendDraftInvitationsAction(
           deadline: deadlineDisplay,
           inviteUrl,
         });
-        await outbox.enqueue(
-          {
-            event: 'rfq.invited',
-            to: draft.pgEmail,
-            subject: `[BIDIT · ${rfqRow.id}] 견적 요청 도착`,
-            html,
-            dedupeKey: `rfq:${rfqRow.id}:invite:${draft.pgEmail}`,
-          },
-          tx,
-        );
+
+        // Send email to each admin of this workspace using the same invite URL.
+        const wsMembers = membersByWs.get(draft.pgWsId) ?? [];
+        const admins = wsMembers.filter((m) => m.role === 'admin');
+        for (const admin of admins) {
+          await outbox.enqueue(
+            {
+              event: 'rfq.invited',
+              to: admin.email,
+              subject: `[BIDIT · ${rfqRow.id}] 견적 요청 도착`,
+              html,
+              dedupeKey: `rfq:${rfqRow.id}:invite:ws:${draft.pgWsId}:user:${admin.userId}`,
+            },
+            tx,
+          );
+        }
         sentCount += 1;
       }
 
