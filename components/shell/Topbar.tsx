@@ -22,7 +22,6 @@ export type TopbarProps = {
 
 export function Topbar({ user, workspaceType }: TopbarProps) {
   const { openNotificationDrawer, openCommandPalette } = useUIStore();
-  // Step 9: unread 배지 = SSE 라이브 카운트.
   const { unreadCount } = useNotifications();
   const router = useRouter();
 
@@ -34,18 +33,18 @@ export function Topbar({ user, workspaceType }: TopbarProps) {
   return (
     <header
       style={{ gridArea: 'topbar' }}
-      className="fixed top-0 left-[var(--shell-sidebar)] right-0 z-20 h-[var(--shell-topbar)] flex items-center justify-between px-4 md:px-6 border-b border-[var(--color-hair)] bg-[var(--color-paper)]"
+      className="fixed top-0 left-[var(--shell-rail)] right-0 z-20 h-[var(--shell-topbar)] flex items-center justify-between px-4 md:px-6 border-b border-[var(--md-sys-color-outline-variant)] bg-[var(--md-sys-color-surface)]"
     >
       {/* Search shortcut */}
       <button
         type="button"
         onClick={openCommandPalette}
-        className="flex items-center md:gap-2 h-8 w-8 md:w-72 px-0 md:px-3 justify-center md:justify-start rounded-md border border-[var(--color-hair)] text-[var(--color-ink-soft)] hover:border-[var(--color-hair-strong)] hover:text-[var(--color-ink)] transition-colors duration-[140ms]"
+        className="flex items-center md:gap-2 h-8 w-8 md:w-72 px-0 md:px-3 justify-center md:justify-start rounded-[var(--md-sys-shape-extra-small)] border border-[var(--md-sys-color-outline-variant)] text-[var(--md-sys-color-on-surface-variant)] hover:border-[var(--md-sys-color-outline)] hover:text-[var(--md-sys-color-on-surface)] transition-colors duration-[140ms]"
         aria-label="검색 (⌘K)"
       >
         <SearchIcon size={14} />
-        <span className="hidden md:inline font-mono text-[11px] tracking-[0.1em]">검색</span>
-        <kbd className="hidden md:block ml-auto font-mono text-[9px] tracking-[0.1em] opacity-50">⌘K</kbd>
+        <span className="hidden md:inline text-[length:var(--md-typescale-label-large-size)]">검색</span>
+        <kbd className="hidden md:block ml-auto text-[length:var(--md-typescale-label-small-size)] opacity-50">⌘K</kbd>
       </button>
 
       <div className="flex items-center gap-2">
@@ -55,42 +54,42 @@ export function Topbar({ user, workspaceType }: TopbarProps) {
             <BellIcon size={18} />
           </IconButton>
           {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[var(--color-amber)]" />
+            <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[var(--md-sys-color-warning)]" />
           )}
         </div>
 
         {/* User avatar + profile dropdown */}
         <DropdownMenu>
-          <DropdownMenuTrigger className="outline-none rounded-md">
-            <Avatar name={user.name} color="ink" size="sm" className="cursor-pointer" />
+          <DropdownMenuTrigger className="outline-none rounded-[var(--md-sys-shape-full)]">
+            <Avatar name={user.name} color="surface" size="sm" className="cursor-pointer" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             side="bottom"
             align="end"
             sideOffset={8}
-            className="min-w-[180px] rounded-md border border-[var(--color-hair)] bg-[var(--color-paper)] p-1 shadow-sm"
+            className="min-w-[180px] rounded-[var(--md-sys-shape-extra-small)] border border-[var(--md-sys-color-outline-variant)] bg-[var(--md-sys-color-surface-container-lowest)] p-1 shadow-[var(--md-sys-elevation-2)]"
           >
             <div className="px-2 py-1.5">
-              <p className="font-mono text-[11px] font-medium tracking-[0.04em] text-[var(--color-ink)]">
+              <p className="text-[length:var(--md-typescale-label-large-size)] font-[number:var(--md-typescale-label-large-weight)] text-[var(--md-sys-color-on-surface)]">
                 {user.name}
               </p>
-              <p className="font-mono text-[10px] text-[var(--color-ink-soft)] mt-0.5">
+              <p className="text-[length:var(--md-typescale-label-small-size)] text-[var(--md-sys-color-on-surface-variant)] mt-0.5">
                 {user.email}
               </p>
-              <p className="font-mono text-[10px] text-[var(--color-ink-soft)] mt-1">
-                [ {workspaceType === 'buyer' ? '구매사' : 'PG'} ]
+              <p className="text-[length:var(--md-typescale-label-small-size)] text-[var(--md-sys-color-on-surface-variant)] mt-1">
+                {workspaceType === 'buyer' ? '구매사' : 'PG'}
               </p>
             </div>
-            <DropdownMenuSeparator className="bg-[var(--color-hair)]" />
+            <DropdownMenuSeparator className="bg-[var(--md-sys-color-outline-variant)]" />
             <DropdownMenuItem
               onClick={() => router.push('/settings/profile')}
-              className="font-mono text-[11px] tracking-[0.04em] text-[var(--color-ink)] cursor-pointer px-2 py-1.5 rounded-md hover:bg-[var(--color-field)]"
+              className="text-[length:var(--md-typescale-label-large-size)] text-[var(--md-sys-color-on-surface)] cursor-pointer px-2 py-1.5 rounded-[var(--md-sys-shape-extra-small)] hover:bg-[var(--md-sys-color-surface-container-high)]"
             >
               설정
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={handleLogout}
-              className="font-mono text-[11px] tracking-[0.04em] text-[var(--color-ink)] cursor-pointer px-2 py-1.5 rounded-md hover:bg-[var(--color-field)]"
+              className="text-[length:var(--md-typescale-label-large-size)] text-[var(--md-sys-color-on-surface)] cursor-pointer px-2 py-1.5 rounded-[var(--md-sys-shape-extra-small)] hover:bg-[var(--md-sys-color-surface-container-high)]"
             >
               로그아웃
             </DropdownMenuItem>

@@ -5,14 +5,6 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { HomeIcon, FileTextIcon, SettingsIcon } from '@/components/icons';
 import { Logo } from '@/components/primitives/Logo';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '@/components/ui/sidebar';
 
 type NavItem = {
   href: string;
@@ -36,42 +28,50 @@ export function IconSidebar({ workspaceType }: Props) {
   ];
 
   return (
-    <Sidebar
-      collapsible="none"
+    <nav
       style={{ gridArea: 'sidebar' }}
-      className="fixed inset-y-0 left-0 z-30 h-svh w-[var(--shell-sidebar)] items-center border-r border-sidebar-border py-4"
+      aria-label="기본 내비게이션"
+      className="fixed inset-y-0 left-0 z-30 h-svh w-[var(--shell-rail)] flex flex-col items-center py-4 bg-[var(--md-sys-color-inverse-surface)]"
     >
-      <SidebarHeader className="mb-8 items-center p-0">
+      <div className="mb-8">
         <Logo variant="compact" />
-      </SidebarHeader>
+      </div>
 
-      <SidebarContent>
-        <SidebarMenu className="items-center gap-1">
-          {navItems.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(item.href + '/');
-            return (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  isActive={active}
-                  render={<Link href={item.href} aria-label={item.label} />}
-                  className={cn(
-                    'relative h-auto w-12 flex-col justify-center gap-1 rounded-md py-2 text-center text-[10px] leading-none tracking-[0.02em]',
-                    'opacity-40 transition-opacity duration-[140ms]',
-                    'hover:bg-transparent hover:text-sidebar-foreground hover:opacity-80',
-                    '[&_svg]:size-5',
-                    'data-active:bg-transparent data-active:font-normal data-active:opacity-100',
-                    'data-active:before:absolute data-active:before:left-0 data-active:before:top-1/2 data-active:before:h-5 data-active:before:w-0.5 data-active:before:-translate-y-1/2 data-active:before:bg-[var(--color-amber)]',
-                  )}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            );
-          })}
-        </SidebarMenu>
-      </SidebarContent>
-
-    </Sidebar>
+      <div className="flex flex-col items-center gap-1 w-full">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
+              className="w-full flex flex-col items-center py-2 outline-none focus-visible:ring-[2px] focus-visible:ring-[var(--md-sys-color-inverse-primary)] focus-visible:ring-inset"
+            >
+              <div
+                className={cn(
+                  'w-14 h-8 flex items-center justify-center rounded-[var(--md-sys-shape-full)] transition-colors [&_svg]:size-6',
+                  isActive
+                    ? 'bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]'
+                    : 'text-[var(--md-sys-color-inverse-on-surface)] hover:bg-[color-mix(in_srgb,var(--md-sys-color-inverse-on-surface)_8%,transparent)]',
+                )}
+              >
+                {item.icon}
+              </div>
+              <span
+                className={cn(
+                  'mt-1 text-[length:var(--md-typescale-label-small-size)] tracking-[var(--md-typescale-label-small-tracking)]',
+                  isActive
+                    ? 'text-[var(--md-sys-color-inverse-on-surface)]'
+                    : 'text-[var(--md-sys-color-inverse-on-surface)] opacity-60',
+                )}
+              >
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }

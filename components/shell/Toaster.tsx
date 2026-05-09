@@ -14,14 +14,14 @@ function ToastViewport() {
         <Toast.Root
           key={t.id}
           toast={t}
-          className="flex items-start justify-between gap-6 rounded-md border border-[var(--color-hair)] bg-[var(--color-ink)] px-4 py-3 shadow-sm transition-all duration-200 data-[starting-style]:translate-y-1 data-[starting-style]:opacity-0 data-[ending-style]:translate-y-1 data-[ending-style]:opacity-0"
+          className="flex items-start justify-between gap-6 rounded-[var(--md-sys-shape-extra-small)] bg-[var(--md-sys-color-inverse-surface)] px-4 py-3 shadow-[var(--md-sys-elevation-3)] transition-all duration-200 data-[starting-style]:translate-y-1 data-[starting-style]:opacity-0 data-[ending-style]:translate-y-1 data-[ending-style]:opacity-0"
         >
-          <Toast.Title className="font-mono text-[11px] tracking-[0.04em] text-[var(--color-paper)]">
+          <Toast.Title className="text-[length:var(--md-typescale-body-medium-size)] text-[var(--md-sys-color-inverse-on-surface)]">
             {t.title}
           </Toast.Title>
           <Toast.Close
             aria-label="닫기"
-            className="font-mono text-[10px] tracking-[0.1em] text-[var(--color-paper)] opacity-50 hover:opacity-100 transition-opacity shrink-0"
+            className="text-[length:var(--md-typescale-label-medium-size)] text-[var(--md-sys-color-inverse-primary)] opacity-80 hover:opacity-100 transition-opacity shrink-0"
           >
             ×
           </Toast.Close>

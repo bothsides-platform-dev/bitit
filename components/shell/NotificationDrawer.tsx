@@ -5,15 +5,15 @@ import { useUIStore } from '@/lib/stores/ui';
 import { useNotifications } from '@/lib/hooks/useNotifications';
 import { XIcon, EnvelopeIcon } from '@/components/icons';
 import { IconButton } from '@/components/primitives/IconButton';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
-import { Tag } from '@/components/primitives/Tag';
+import { Label } from '@/components/primitives/Label';
+import { Chip, type ChipColor } from '@/components/primitives/Chip';
 import type { Notification, NotificationStatus } from '@/lib/types/notification';
 
-const statusVariant: Record<NotificationStatus, 'amber' | 'moss' | 'terracotta' | 'muted'> = {
-  pending: 'amber',
-  sent: 'moss',
-  failed: 'terracotta',
-  read: 'muted',
+const statusColor: Record<NotificationStatus, ChipColor> = {
+  pending: 'warning',
+  sent: 'tertiary',
+  failed: 'error',
+  read: 'surface',
 };
 
 const statusLabel: Record<NotificationStatus, string> = {
@@ -34,8 +34,7 @@ function timeAgo(iso: string): string {
 export function NotificationDrawer() {
   const router = useRouter();
   const { notificationDrawerOpen, closeNotificationDrawer } = useUIStore();
-  const { notifications, unreadCount, markRead, markAllRead } =
-    useNotifications();
+  const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
 
   const handleClick = (notif: Notification) => {
     void markRead(notif.id);
@@ -47,7 +46,7 @@ export function NotificationDrawer() {
     <>
       {notificationDrawerOpen && (
         <div
-          className="fixed inset-0 z-40 bg-[rgba(10,10,15,0.4)] backdrop-blur-[4px]"
+          className="fixed inset-0 z-40 bg-[var(--md-sys-color-scrim)]/40 backdrop-blur-[4px]"
           onClick={closeNotificationDrawer}
           aria-hidden
         />
@@ -56,18 +55,18 @@ export function NotificationDrawer() {
       <aside
         role="complementary"
         aria-label="알림"
-        className="fixed top-0 right-0 bottom-0 z-50 flex flex-col bg-[var(--color-paper)] border-l border-[var(--color-hair)] transition-transform duration-[420ms]"
+        className="fixed top-0 right-0 bottom-0 z-50 flex flex-col bg-[var(--md-sys-color-surface)] border-l border-[var(--md-sys-color-outline-variant)] transition-transform duration-[var(--md-sys-motion-duration-medium-4)]"
         style={{
           width: 420,
           transform: notificationDrawerOpen ? 'translateX(0)' : 'translateX(100%)',
-          transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          transitionTimingFunction: 'var(--md-sys-motion-easing-emphasized-decelerate)',
         }}
       >
-        <div className="flex items-center justify-between px-6 h-[var(--shell-topbar)] border-b border-[var(--color-hair)]">
+        <div className="flex items-center justify-between px-6 h-[var(--shell-topbar)] border-b border-[var(--md-sys-color-outline-variant)]">
           <div className="flex items-center gap-3">
-            <Eyebrow>알림</Eyebrow>
+            <Label size="md" muted={false}>알림</Label>
             {unreadCount > 0 && (
-              <span className="font-mono text-[10px] tabular-nums text-[var(--color-amber)]">
+              <span className="md-numeric text-[length:var(--md-typescale-label-small-size)] text-[var(--md-sys-color-warning)]">
                 {unreadCount}
               </span>
             )}
@@ -76,7 +75,7 @@ export function NotificationDrawer() {
             {unreadCount > 0 && (
               <button
                 onClick={() => void markAllRead()}
-                className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] hover:text-[var(--color-ink)] transition-colors"
+                className="text-[length:var(--md-typescale-label-medium-size)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
               >
                 모두 읽음
               </button>
@@ -90,8 +89,8 @@ export function NotificationDrawer() {
         <div className="flex-1 overflow-y-auto">
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center gap-4 py-16 px-8 text-center">
-              <EnvelopeIcon size={32} className="text-[var(--color-ink-faint)]" />
-              <p className="text-[13px] text-[var(--color-ink-muted)]">
+              <EnvelopeIcon size={32} className="text-[var(--md-sys-color-outline)]" />
+              <p className="text-[length:var(--md-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)]">
                 새로운 알림이 없습니다.
               </p>
             </div>
@@ -103,25 +102,27 @@ export function NotificationDrawer() {
                   key={notif.id}
                   type="button"
                   onClick={() => handleClick(notif)}
-                  className={`w-full text-left relative px-6 py-4 border-b border-[var(--color-hair)] hover:bg-[var(--color-paper-warm)] transition-colors ${
-                    isUnread ? 'bg-[var(--color-paper)]' : 'opacity-60'
+                  className={`w-full text-left relative px-6 py-4 border-b border-[var(--md-sys-color-outline-variant)] hover:bg-[var(--md-sys-color-surface-container-high)] transition-colors ${
+                    isUnread ? 'bg-[var(--md-sys-color-surface)]' : 'opacity-60'
                   }`}
                 >
                   {isUnread && (
-                    <span className="absolute left-2 top-5 w-1 h-1 rounded-full bg-[var(--color-amber)]" />
+                    <span className="absolute left-2 top-5 w-1 h-1 rounded-full bg-[var(--md-sys-color-warning)]" />
                   )}
                   <div className="flex items-start justify-between gap-3 mb-1">
-                    <p className="text-[13px] text-[var(--color-ink)] font-medium leading-snug">
+                    <p className="text-[length:var(--md-typescale-body-medium-size)] font-[number:500] text-[var(--md-sys-color-on-surface)] leading-snug">
                       {notif.title}
                     </p>
-                    <Tag variant={statusVariant[notif.status]} className="shrink-0">
-                      {statusLabel[notif.status]}
-                    </Tag>
+                    <Chip
+                      label={statusLabel[notif.status]}
+                      color={statusColor[notif.status]}
+                      className="shrink-0"
+                    />
                   </div>
-                  <p className="text-[12px] text-[var(--color-ink-muted)] mt-0.5 leading-relaxed">
+                  <p className="text-[length:var(--md-typescale-body-small-size)] text-[var(--md-sys-color-on-surface-variant)] mt-0.5 leading-relaxed">
                     {notif.body}
                   </p>
-                  <span className="font-mono text-[10px] text-[var(--color-ink-soft)] mt-2 block tabular-nums">
+                  <span className="md-numeric text-[length:var(--md-typescale-label-small-size)] text-[var(--md-sys-color-on-surface-variant)] mt-2 block">
                     {timeAgo(notif.createdAt)}
                   </span>
                 </button>

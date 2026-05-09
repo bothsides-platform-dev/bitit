@@ -9,12 +9,12 @@ export function AppShell({ children, className }: AppShellProps) {
   return (
     <div
       className={cn(
-        'min-h-svh bg-[var(--color-paper)]',
+        'min-h-svh bg-[var(--md-sys-color-background)]',
         'grid',
         className,
       )}
       style={{
-        gridTemplateColumns: 'var(--shell-sidebar) 1fr',
+        gridTemplateColumns: 'var(--shell-rail) 1fr',
         gridTemplateRows: 'var(--shell-topbar) 1fr',
         gridTemplateAreas: `
           "sidebar topbar"
