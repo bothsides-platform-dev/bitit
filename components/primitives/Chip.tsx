@@ -40,27 +40,24 @@ export function Chip({
 }: ChipProps) {
   const isFilter = variant === 'filter';
   const useTonal = !isFilter || selected;
+  const isInteractive = !!onClick;
 
-  return (
-    <button
-      type="button"
-      role="button"
-      aria-pressed={isFilter ? selected : undefined}
-      disabled={disabled}
-      onClick={onClick}
-      className={cn(
-        'inline-flex items-center gap-1.5 h-8 px-3',
-        'rounded-[var(--md-sys-shape-small)]',
-        'text-[length:var(--md-typescale-label-large-size)]',
-        'font-[number:var(--md-typescale-label-large-weight)]',
-        'tracking-[var(--md-typescale-label-large-tracking)]',
-        'border transition-all cursor-pointer select-none',
-        'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--md-sys-color-primary)]/50',
-        'disabled:opacity-[0.38] disabled:cursor-not-allowed disabled:pointer-events-none',
-        useTonal ? tonalClasses[color] : outlineClass,
-        className,
-      )}
-    >
+  const sharedClass = cn(
+    'inline-flex items-center gap-1.5 h-8 px-3',
+    'rounded-[var(--md-sys-shape-small)]',
+    'text-[length:var(--md-typescale-label-large-size)]',
+    'font-[number:var(--md-typescale-label-large-weight)]',
+    'tracking-[var(--md-typescale-label-large-tracking)]',
+    'border select-none',
+    useTonal ? tonalClasses[color] : outlineClass,
+    isInteractive
+      ? 'transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--md-sys-color-primary)]/50 disabled:opacity-[0.38] disabled:cursor-not-allowed disabled:pointer-events-none'
+      : 'cursor-default',
+    className,
+  );
+
+  const content = (
+    <>
       {icon && <span className="[&_svg]:size-[18px] shrink-0 -ml-1">{icon}</span>}
       <span>{label}</span>
       {variant === 'input' && onDelete && (
@@ -78,6 +75,23 @@ export function Chip({
           </svg>
         </span>
       )}
+    </>
+  );
+
+  if (!isInteractive) {
+    return <span className={sharedClass}>{content}</span>;
+  }
+
+  return (
+    <button
+      type="button"
+      role="button"
+      aria-pressed={isFilter ? selected : undefined}
+      disabled={disabled}
+      onClick={onClick}
+      className={sharedClass}
+    >
+      {content}
     </button>
   );
 }
