@@ -328,15 +328,6 @@ export function LandingHero() {
                   RFQ 무료로 시작하기 →
                 </button>
               </Link>
-              <span className="font-mono text-[var(--text-2xs)] tracking-[0.08em] text-[var(--color-ink-muted)]">
-                결제대행사 영업담당이신가요?{' '}
-                <Link
-                  href="/signup/pg"
-                  className="text-[var(--color-ink-soft)] hover:text-[var(--color-ink-faint)] underline-offset-4 hover:underline transition-colors duration-[140ms]"
-                >
-                  PG로 시작하기
-                </Link>
-              </span>
             </motion.div>
 
           </div>
