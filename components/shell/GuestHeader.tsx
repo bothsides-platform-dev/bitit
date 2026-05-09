@@ -7,9 +7,7 @@ export function GuestHeader() {
       className="h-[var(--shell-topbar,56px)] px-6 flex items-center justify-between border-b border-[var(--md-sys-color-outline-variant)] bg-[var(--md-sys-color-surface)]"
       style={{ gridArea: 'topbar' }}
     >
-      <Link href="/" aria-label="bidit 홈">
-        <Logo />
-      </Link>
+      <Logo />
       <nav className="flex items-center gap-3">
         <Link
           href="/login"
