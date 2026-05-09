@@ -1,9 +1,7 @@
 /**
  * GET /api/workspaces/search?q=&type=pg
  *
- * PG 워크스페이스 이름 검색 endpoint. 바이어가 RFQ 초대 대상을 추가할 때
- * 사용한다. 인증된 사용자(buyer·pg 모두)가 호출 가능.
- *
+ * PG 워크스페이스 이름 검색 endpoint. q 없이 호출하면 전체 목록 반환(최대 500건).
  * runtime='nodejs' — postgres-js는 Node-only.
  */
 import { NextRequest, NextResponse } from 'next/server';
@@ -18,21 +16,18 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const QuerySchema = z.object({
-  q: z.string().min(1).max(100),
+  q: z.string().max(100).optional(),
   type: z.enum(['buyer', 'pg']).default('pg'),
 });
 
-/** Escape ILIKE metacharacters to prevent unintentional pattern injection. */
 function escapeIlike(s: string): string {
   return s.replace(/[\\%_]/g, '\\$&');
 }
 
 export async function GET(request: NextRequest) {
-  // type=pg: open to unauthenticated callers (PG names are public business entities).
-  // type=buyer: requires auth — buyer workspace names are private.
   const { searchParams } = request.nextUrl;
   const parsed = QuerySchema.safeParse({
-    q: searchParams.get('q') ?? '',
+    q: searchParams.get('q') ?? undefined,
     type: searchParams.get('type') ?? 'pg',
   });
   if (!parsed.success) {
@@ -51,21 +46,16 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const pattern = `%${escapeIlike(q)}%`;
-
   const rows = await db
     .select({ id: workspaces.id, name: workspaces.name })
     .from(workspaces)
     .where(
-      and(
-        eq(workspaces.type, type),
-        ilike(workspaces.name, pattern),
-      ),
+      q
+        ? and(eq(workspaces.type, type), ilike(workspaces.name, `%${escapeIlike(q)}%`))
+        : eq(workspaces.type, type),
     )
-    .limit(20);
+    .limit(q ? 20 : 500);
 
-  // Disambiguate duplicate names: if a name appears multiple times in results,
-  // append the first 8 chars of the UUID as a suffix.
   const nameCount = new Map<string, number>();
   for (const row of rows) {
     nameCount.set(row.name, (nameCount.get(row.name) ?? 0) + 1);
