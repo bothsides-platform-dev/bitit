@@ -1,11 +1,15 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUIStore } from '@/lib/stores/ui';
 import { Command } from 'cmdk';
 import { XIcon } from '@/components/icons';
 import { IconButton } from '@/components/primitives/IconButton';
+import {
+  searchBidsAction,
+  type BidSearchItem,
+} from '@/lib/server/actions/search/searchBidsAction';
 
 type CommandItem = {
   group: string;
@@ -26,6 +30,8 @@ const COMMANDS: CommandItem[] = [
 export function CommandPalette() {
   const { commandPaletteOpen, closeCommandPalette } = useUIStore();
   const router = useRouter();
+  const [bidItems, setBidItems] = useState<BidSearchItem[]>([]);
+  const [bidsLoading, setBidsLoading] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -38,6 +44,18 @@ export function CommandPalette() {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
+  useEffect(() => {
+    if (!commandPaletteOpen) {
+      setBidItems([]);
+      return;
+    }
+    setBidsLoading(true);
+    searchBidsAction()
+      .then(setBidItems)
+      .catch(() => {})
+      .finally(() => setBidsLoading(false));
+  }, [commandPaletteOpen]);
+
   const groups = [...new Set(COMMANDS.map((c) => c.group))];
 
   return (
@@ -45,7 +63,9 @@ export function CommandPalette() {
       {commandPaletteOpen && (
         <div
           className="fixed inset-0 z-50 flex items-start justify-center bg-[rgba(10,10,15,0.4)] backdrop-blur-[4px] pt-[12vh]"
-          onClick={(e) => { if (e.target === e.currentTarget) closeCommandPalette(); }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) closeCommandPalette();
+          }}
         >
           <div
             className="w-[620px] bg-[var(--color-paper)] border border-[var(--color-hair)] rounded-md overflow-hidden shadow-lg"
@@ -95,6 +115,49 @@ export function CommandPalette() {
                     ))}
                   </Command.Group>
                 ))}
+                {(bidsLoading || bidItems.length > 0) && (
+                  <Command.Group
+                    heading={
+                      <span className="px-4 py-1 block font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+                        견적서
+                      </span>
+                    }
+                  >
+                    {bidsLoading ? (
+                      <Command.Loading>
+                        <span className="px-4 py-3 block font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
+                          LOADING…
+                        </span>
+                      </Command.Loading>
+                    ) : (
+                      bidItems.map((item) => (
+                        <Command.Item
+                          key={item.bidId}
+                          value={`${item.rfqTitle} ${item.pgWsName} ${item.memo ?? ''}`}
+                          onSelect={() => {
+                            router.push(item.href);
+                            closeCommandPalette();
+                          }}
+                          className="flex flex-col items-start gap-0.5 px-4 py-2.5 cursor-pointer aria-selected:bg-[var(--color-paper-warm)]"
+                        >
+                          <span className="text-[13px] text-[var(--color-ink)]">
+                            {item.rfqTitle}
+                            {item.pgWsName && (
+                              <span className="ml-2 text-[var(--color-ink-soft)]">
+                                {item.pgWsName}
+                              </span>
+                            )}
+                          </span>
+                          {item.memo && (
+                            <span className="text-[11px] font-mono text-[var(--color-ink-soft)] truncate max-w-[540px]">
+                              {item.memo.slice(0, 40)}
+                            </span>
+                          )}
+                        </Command.Item>
+                      ))
+                    )}
+                  </Command.Group>
+                )}
               </Command.List>
             </Command>
           </div>
