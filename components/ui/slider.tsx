@@ -35,16 +35,16 @@ export function Slider({
       onValueChange={(v) => onValueChange(v[0])}
       aria-label={ariaLabel}
     >
-      <RadixSlider.Track className="relative grow h-px bg-[var(--color-hair-strong)]">
-        <RadixSlider.Range className="absolute h-px bg-[var(--color-ink)]" />
+      <RadixSlider.Track className="relative grow h-px bg-[var(--md-sys-color-outline)]">
+        <RadixSlider.Range className="absolute h-px bg-[var(--md-sys-color-on-surface)]" />
       </RadixSlider.Track>
       <RadixSlider.Thumb
         className={cn(
-          'block w-[14px] h-[14px] bg-[var(--color-paper)]',
-          'border border-[var(--color-ink)] rounded-md',
+          'block w-[14px] h-[14px] bg-[var(--md-sys-color-surface)]',
+          'border border-[var(--md-sys-color-on-surface)] rounded-md',
           'transition-transform duration-[140ms]',
           'hover:scale-110',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-ink)]',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--md-sys-color-on-surface)]',
         )}
       />
     </RadixSlider.Root>
