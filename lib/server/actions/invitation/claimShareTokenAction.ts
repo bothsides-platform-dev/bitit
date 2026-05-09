@@ -8,7 +8,6 @@ import { requireSession } from '@/lib/auth/session';
 import { getRfqRepo } from '@/lib/server/repositories/factory';
 import { generateToken, hashToken } from '@/lib/server/token';
 import { actionDb } from '../bid/_shared';
-import { autoJoinPgWorkspace } from './_pgAutoJoin';
 
 export type ClaimShareTokenResult =
   | { ok: true; rfqId: string }
@@ -20,17 +19,12 @@ export type ClaimShareTokenResult =
  *
  * 흐름:
  *   1. session 필수(`UNAUTHENTICATED`).
- *   2. buyer 세션 차단(`SHARE_BUYER_NOT_ALLOWED`) — 공유 링크는 PG 측 진입
- *      전용. 우연히 buyer가 PG-매칭 도메인을 갖더라도 PG 워크스페이스에
- *      자동 합류시켜선 안 됨.
- *   3. `rfqRepo.findByShareToken(rawToken)` — 매칭 RFQ 조회. 없으면
- *      `SHARE_INVALID`.
- *   4. 만료/종료 가드: `status !== 'sent'` 또는 `deadline <= now` →
- *      `SHARE_EXPIRED`.
- *   5. 도메인 화이트리스트: `allowedPgEmails` 배열의 도메인 부분 집합과 사용자
- *      이메일 도메인 비교(case-insensitive). 불일치 → `EMAIL_DOMAIN_MISMATCH`.
- *   6. `_pgAutoJoin`으로 PG 워크스페이스 합류(또는 신규 생성).
- *   7. 같은 user가 같은 RFQ에 이미 invitation row를 가진 경우 idempotent —
+ *   2. buyer 세션 차단(`SHARE_BUYER_NOT_ALLOWED`) — 공유 링크는 PG 측 진입 전용.
+ *   3. `rfqRepo.findByShareToken(rawToken)` — 매칭 RFQ 조회. 없으면 `SHARE_INVALID`.
+ *   4. 만료/종료 가드: `status !== 'sent'` 또는 `deadline <= now` → `SHARE_EXPIRED`.
+ *   5. 워크스페이스 허용 목록 검사: `allowedPgWorkspaceIds`에 session.user.workspaceId
+ *      포함 여부 확인. 불일치 → `WORKSPACE_NOT_ALLOWED`.
+ *   6. 같은 ws가 같은 RFQ에 이미 invitation row를 가진 경우 idempotent —
  *      그렇지 않으면 audit row(`status='accepted'`, fresh tokenHash) 생성. 이
  *      row가 있어야 `findByPgUser`로 인박스에 노출되고 `canAccess`도 통과.
  */
@@ -44,15 +38,19 @@ export async function claimShareTokenAction(
     return { ok: false, error: 'UNAUTHENTICATED' };
   }
 
-  if (session.user.workspaceType === 'buyer') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userSession = session.user as any;
+
+  if (userSession.workspaceType === 'buyer') {
     return { ok: false, error: 'SHARE_BUYER_NOT_ALLOWED' };
   }
 
   if (!rawToken || typeof rawToken !== 'string') {
     return { ok: false, error: 'SHARE_INVALID' };
   }
-  const userEmail = session.user.email;
-  if (!userEmail) return { ok: false, error: 'UNAUTHENTICATED' };
+
+  const userWsId = userSession.workspaceId as string | undefined;
+  if (!userWsId) return { ok: false, error: 'UNAUTHENTICATED' };
 
   const rfqRepo = await getRfqRepo();
   const rfq = await rfqRepo.findByShareToken(rawToken);
@@ -62,22 +60,15 @@ export async function claimShareTokenAction(
     return { ok: false, error: 'SHARE_EXPIRED' };
   }
 
-  // 도메인 화이트리스트 검증
-  const allowedDomains = new Set(
-    rfq.allowedPgEmails
-      .map((e) => e.split('@')[1]?.trim().toLowerCase())
-      .filter((d): d is string => Boolean(d)),
-  );
-  const userDomain = userEmail.split('@')[1]?.trim().toLowerCase();
-  if (!userDomain || !allowedDomains.has(userDomain)) {
-    return { ok: false, error: 'EMAIL_DOMAIN_MISMATCH' };
+  // 워크스페이스 허용 목록 검증
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const allowedWsIds: string[] = (rfq as any).allowedPgWorkspaceIds ?? [];
+  if (!allowedWsIds.includes(userWsId)) {
+    return { ok: false, error: 'WORKSPACE_NOT_ALLOWED' };
   }
 
-  // 5. PG 워크스페이스 자동 합류(없으면 생성). claimInviteTokenAction과 동일.
-  await autoJoinPgWorkspace(session, userEmail);
-
-  // 6. 사용자별 audit invitation row(idempotent). `acceptedByUserId === user`인
-  //    row가 이미 있으면 새로 만들지 않는다.
+  // audit invitation row(idempotent). 같은 RFQ + 같은 PG ws의 row가 이미 있으면
+  // 새로 만들지 않는다. unique: (rfq_id, pg_ws_id).
   const db = actionDb();
   await db.transaction(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -88,7 +79,7 @@ export async function claimShareTokenAction(
         .where(
           and(
             eq(rfqInvitations.rfqId, rfq.id),
-            eq(rfqInvitations.acceptedByUserId, session.user.id),
+            eq(rfqInvitations.pgWsId, userWsId),
           ),
         )
         .limit(1);
@@ -99,7 +90,7 @@ export async function claimShareTokenAction(
         await tx.insert(rfqInvitations).values({
           id: randomUUID(),
           rfqId: rfq.id,
-          pgEmail: userEmail,
+          pgWsId: userWsId,
           acceptedByUserId: session.user.id,
           tokenHash: hashToken(auditToken),
           sentAt: new Date(),
@@ -107,9 +98,7 @@ export async function claimShareTokenAction(
           status: 'accepted',
         });
       } catch (err) {
-        // (rfq_id, lower(pg_email)) 부분 unique 위배 — 같은 도메인의 이메일 초대가
-        // 이미 진행 중인 경우. 이 케이스는 claimInviteTokenAction 흐름으로 가야
-        // 하므로 audit row 생성을 건너뛰고 통과시킴(autoJoin은 이미 됐음).
+        // (rfq_id, pg_ws_id) unique 위배 — 동시 진입 또는 레이스. 건너뛰고 통과.
         const code = (err as { code?: string }).code;
         if (code !== '23505') throw err;
       }
