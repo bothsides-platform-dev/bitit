@@ -117,7 +117,7 @@ export function BidBoardCard({
             <Chip label={BUYER_STAGE_LABEL[stage]} color={stageChipColor[stage]} />
           )}
           <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)] tabular-nums ml-auto">
-            № {String(serial).padStart(2, '0')}
+            {String(serial).padStart(2, '0')}
           </span>
         </div>
 

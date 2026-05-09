@@ -78,6 +78,7 @@ These are non-negotiable visual decisions enforced across all screens.
 - **No** pulse/spinner loading. Use `LOADING…` text (body-medium type).
 - **No** glassmorphism, neon accents, blurred 3D orbs/blobs, chrome AI imagery.
 - **No** skeuomorphic excessive shadow — most surfaces use elevation-1 or none.
+- **No** № symbol (U+2116 NUMERO SIGN) anywhere — use plain numerics or zero-padded strings.
 - **All** numerics (₩, qty, dates, RFQ numbers like `Q-2605-0042`) use `.md-numeric` class (JetBrains Mono + tabular-nums). Never on nav/labels/buttons.
 - **Status** uses Chip component — never bracketed plain text `[ 결재중 ]`.
 - **Typography** uses MD3 typescale tokens — no `font-mono uppercase tracking` on labels/nav.

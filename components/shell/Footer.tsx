@@ -126,7 +126,7 @@ export function Footer() {
               className="text-[10px] tracking-[0.15em]"
               style={{ fontFamily: 'var(--font-mono)', color: 'var(--md-sys-color-outline)', opacity: 0.6 }}
             >
-              ISSUE №&thinsp;001 · v0
+              ISSUE 001 · v0
             </span>
           </div>
         </div>

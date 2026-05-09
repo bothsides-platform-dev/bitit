@@ -415,7 +415,7 @@ function NoteTimeline({ bidId }: { bidId: string }) {
         <li key={note.id} className="border-t border-[var(--md-sys-color-outline-variant)] pt-3">
           <div className="flex items-baseline justify-between gap-3 mb-2">
             <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
-              № {String(serial).padStart(2, '0')} —{' '}
+              {String(serial).padStart(2, '0')} —{' '}
               <span className="text-[var(--md-sys-color-on-surface-variant)]">
                 {formatNoteTime(note.createdAt)} · {note.authorName}
               </span>

@@ -95,19 +95,6 @@ export function LandingHero() {
         {/* ── 01 / 05  Hero ── */}
         <section className="relative overflow-hidden px-8 py-[var(--s-11)] min-h-[calc(100svh-60px)] flex items-center border-b border-[var(--md-sys-color-outline-variant)]">
 
-          {/* Watermark */}
-          <span
-            aria-hidden
-            className="absolute right-6 bottom-8 font-mono font-black leading-none text-[var(--md-sys-color-on-surface)] select-none pointer-events-none hidden md:block"
-            style={{
-              fontSize: 'clamp(80px, 16vw, 220px)',
-              opacity: 0.030,
-              letterSpacing: '-0.03em',
-            }}
-          >
-            № 001
-          </span>
-
           <div className="mx-auto w-full max-w-[1080px] flex flex-col gap-[var(--s-8)]">
 
             <motion.div

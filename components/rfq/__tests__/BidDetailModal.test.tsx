@@ -55,7 +55,7 @@ describe('BidDetailModal', () => {
     expect(screen.getByText(/1\.10% 고정/)).toBeInTheDocument();
   });
 
-  it('records a memo and shows it newest-first with serial № 01', async () => {
+  it('records a memo and shows it newest-first with serial 01', async () => {
     const user = userEvent.setup();
     render(
       <BidDetailModal
@@ -80,8 +80,8 @@ describe('BidDetailModal', () => {
     expect(stored[0].body).toBe('셋업비 0원 컨펌');
     expect(stored[0].authorName).toBe('김구매');
 
-    // UI side: serial № 01 + body visible.
-    expect(screen.getByText(/№\s*01/)).toBeInTheDocument();
+    // UI side: serial 01 + body visible.
+    expect(screen.getByText(/\b01\b/)).toBeInTheDocument();
     expect(screen.getByText('셋업비 0원 컨펌')).toBeInTheDocument();
   });
 
@@ -107,10 +107,10 @@ describe('BidDetailModal', () => {
     await user.click(screen.getByRole('button', { name: '기록' }));
 
     const items = screen.getAllByRole('listitem');
-    // Newest (second) appears first; № 02 is its serial.
+    // Newest (second) appears first; 02 is its serial.
     expect(within(items[0]).getByText('second')).toBeInTheDocument();
-    expect(within(items[0]).getByText(/№\s*02/)).toBeInTheDocument();
+    expect(within(items[0]).getByText(/\b02\b/)).toBeInTheDocument();
     expect(within(items[1]).getByText('first')).toBeInTheDocument();
-    expect(within(items[1]).getByText(/№\s*01/)).toBeInTheDocument();
+    expect(within(items[1]).getByText(/\b01\b/)).toBeInTheDocument();
   });
 });

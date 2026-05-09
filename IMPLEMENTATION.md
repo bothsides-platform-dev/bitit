@@ -118,7 +118,7 @@ M0은 2026-04에 완료됐다. 부트스트랩 산출물은 `package.json`, `nex
 - [ ] 보드 카드 DnD가 키보드(Tab → Space → ↑/↓ → Space)로도 작동
 - [ ] 카드 ⋯ 메뉴로 진행전/협상중/결정 stage 전환 가능
 - [ ] 카드 클릭 시 BidDetailModal 열림 — PDF iframe + 6수치 grid + 히스토리 노출
-- [ ] 모달 메모 폼: textarea 2000자, image/pdf 첨부 chip, `[기록]` 후 № 정순 시리얼 + 시간 역순
+- [ ] 모달 메모 폼: textarea 2000자, image/pdf 첨부 chip, `[기록]` 후 정순 시리얼 번호 + 시간 역순
 - [ ] awarded 카드는 `결정` 컬럼 강제 + DnD/⋯ stage 전환 잠금
 
 ---

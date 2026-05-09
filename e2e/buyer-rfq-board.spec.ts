@@ -72,7 +72,7 @@ test.describe.serial('Buyer kanban board (B4)', () => {
     await page.getByRole('button', { name: '기록' }).click();
 
     await expect(page.getByText('Playwright 테스트 메모')).toBeVisible();
-    await expect(page.getByText(/№\s*0/).first()).toBeVisible();
+    await expect(page.getByText(/\b0[0-9]/).first()).toBeVisible();
 
     // Close modal.
     await page.getByRole('button', { name: '닫기' }).click();
