@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 1. **PG_RFQ_SPEC.md** — Product spec (v0). The most authoritative document. 15 policy decisions, domain model, screen IA, scenarios. **Read this first.** Result of a brainstorming pivot from generic B2B quotation system to a **PG (Korean Payment Gateway) -focused private 1:N RFQ platform**.
 2. **SCREEN_DESIGN.md** — Screens, IA, UX flows. §0 PG v0 화면 IA(B1~B7, P1~P6) + §1 인증/가입(P1~P11).
-3. **DESIGN.md** — Design system (*Korean Editorial Modernism*). Tokens, typography, color, component visual rules, motion, anti-clichés. **Single source of truth for visual decisions** — `styles/tokens.css` syncs from here unidirectionally.
+3. **DESIGN.md** — Design system (*Material Design 3*). MD3 tokens, typography, color roles, component visual rules, motion, anti-clichés. **Single source of truth for visual decisions** — `styles/tokens.css` syncs from here unidirectionally.
 4. **SPEC.md** — Tech spec. Stack, directory layout, domain TypeScript types, App Router strategy, public-vs-app route groups.
 5. **IMPLEMENTATION.md** — Milestones M0~M8 + M1.5 (auth), bootstrap commands, verification checklists, work order.
 6. **[NOTIFICATION.md](./NOTIFICATION.md)** — 알림 시스템. 이메일(Resend) + 인앱(SSE + Drawer) 채널, NotificationService 모듈 구조, 이벤트→알림 매핑.
@@ -67,21 +67,23 @@ app/
 
 Workspace type (`buyer` vs `pg`) determines which sub-tree of `(app)/*` is shown — same shell, different navigation.
 
-## Korean Editorial Modernism — Hard Rules
+## Material Design 3 — Hard Rules
 
-These are non-negotiable visual decisions enforced across all screens. Violating them produces "AI slop" aesthetic that this project actively avoids.
+These are non-negotiable visual decisions enforced across all screens.
 
 - **No** Inter/Roboto/Arial. Pretendard Variable (KR + Latin) + JetBrains Mono only.
-- **No** purple-to-blue gradients (canonical SaaS cliché). Solid `--color-ink` for primary actions.
-- **No** rounded corners > 12px. **Default radius is 8px (`rounded-md`)**, Apex(modal/dialog)만 12px(`rounded-lg`), 인디케이터만 `rounded-full`. 단일 값 통일 정책 — `rounded-[Npx]`/`rounded-[var(--r-…)]` 등 arbitrary 표기 금지. (특히 16px 균일 카드 라디우스 — shadcn 디폴트 — 회피.)
-- **No** illustrated empty states. Line SVGs (1.4 stroke) only.
-- **No** pulse/spinner loading. Use mono `LOADING…` text.
-- **No** glassmorphism, neon accents, fill-color status badges, blurred 3D orbs/blobs, chrome AI imagery.
-- **All** numerics (₩, qty, dates, RFQ numbers like `Q-2605-0042`) use `font-mono` + `tabular-nums`.
-- **Status tags** are bracketed text-color only: `[ 결재중 ]` — never filled pills.
-- **Editorial markings** on every screen: section serials (`01 / 14`), issue numbers (`№ 042`).
+- **No** purple-to-blue gradients. Use MD3 tonal color roles.
+- **No** shape > 12px except dialogs (28px) and pills (9999px). Use MD3 shape scale.
+- **No** illustrated empty states. Line SVGs (1.4–1.5 stroke) only.
+- **No** pulse/spinner loading. Use `LOADING…` text (body-medium type).
+- **No** glassmorphism, neon accents, blurred 3D orbs/blobs, chrome AI imagery.
+- **No** skeuomorphic excessive shadow — most surfaces use elevation-1 or none.
+- **All** numerics (₩, qty, dates, RFQ numbers like `Q-2605-0042`) use `.md-numeric` class (JetBrains Mono + tabular-nums). Never on nav/labels/buttons.
+- **Status** uses Chip component — never bracketed plain text `[ 결재중 ]`.
+- **Typography** uses MD3 typescale tokens — no `font-mono uppercase tracking` on labels/nav.
+- **Chip color** mapping: 성공/완료→tertiary, 실패/오류→error, 보류/신규→warning, 중립→surface, 주요→primary.
 
-If frontend code looks "generic SaaS", check DESIGN.md §9 (clichés to avoid) before defending it.
+If frontend code looks "generic SaaS", check DESIGN.md §9 (anti-patterns) before defending it.
 
 ## Work Order
 
@@ -104,7 +106,7 @@ The 7 docs cross-reference each other heavily. After any change:
 대부분의 스킬은 description 자동 매칭에 의존한다. 아래 4개만 프로젝트 특수 라우팅:
 
 - `/plan-eng-review` — M2 이후 새 기능 코딩 시작 전 (아키텍처 락인)
-- `/design-review` — 화면 시각 폴리시 (Korean Editorial Modernism 정합 검증)
+- `/design-review` — 화면 시각 폴리시 (MD3 디자인 시스템 정합 검증)
 - `/investigate` — 버그·에러·예상치 못한 동작
 - `/ship` — PR 생성·배포 단계
 

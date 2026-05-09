@@ -1,404 +1,235 @@
-# bidit — 디자인 시스템
+# bidit — 디자인 시스템 (Material Design 3)
 
 > 짝 문서: [SCREEN_DESIGN.md](./SCREEN_DESIGN.md) (화면·IA·UX) · [SPEC.md](./SPEC.md) (기술 스펙)
-> 본 문서: 미적 방향, 디자인 토큰, 타이포그래피, 컬러, 컴포넌트 시각 원칙
+> 본 문서: MD3 토큰, 타이포그래피, 컬러, 컴포넌트 시각 원칙
 
 ---
 
-## 1. 미적 방향 — *Korean Editorial Modernism*
+## 1. 미적 방향 — Material Design 3 (Material You)
 
-B2B 견적은 신뢰·정밀·정형성이 핵심. 보랏빛 SaaS 그라데이션·둥근 모달·푸른 차트 등 **AI 생성물 클리셰를 의도적으로 회피**하고, 한국 편집물(잡지·신문)의 정형 미감을 차용한다.
+B2B 결제 플랫폼에 적합한 MD3 — Google의 2021년 디자인 시스템을 채용. 신뢰·명확성·구조를 표현하는 토널 팔레트와 5단계 표면 계층이 B2B 금융 UI에 잘 맞는다.
 
 **3대 원칙**
-1. **종이 위의 잉크** — 따뜻한 오프화이트 종이톤 위에 거의 검정에 가까운 잉크. 그림자·그라데이션 최소화, 헤어라인이 구조를 만든다.
-2. **수치는 활자** — 모든 금액·수량·날짜·견적번호는 모노스페이스 + `tabular-nums`. 숫자가 정렬되는 시각이 곧 신뢰의 시각이다.
-3. **편집 마킹** — 섹션 시리얼(`01 / 14`), 이슈 번호(`№ 042`), 발행일 캡스 라인 등 **편집물의 메타 마킹**을 UI에 차용해 정보 위계를 강화한다.
+1. **톤·온·톤 표면 계층** — 5단계 surface-container 계층으로 UI 깊이를 표현. 그림자보다 색조가 주도한다.
+2. **수치는 모노** — 금융 값(₩, %, 건수, 날짜, 견적번호)은 `.md-numeric` 클래스(JetBrains Mono + tabular-nums). 수치 정렬이 신뢰의 시각이다.
+3. **MD3 상태 레이어** — 호버 8%, 프레스 12% `color-mix(in srgb, ...)` 오버레이로 일관된 상호작용 피드백.
 
-**한 가지 기억점**: 모든 화면 어딘가에 **편집물 마킹**이 보인다. KPI 라벨 끝의 `A`/`B`/`C`, 견적번호 형식 `Q-2605-0042`, 상태의 브래킷 `[ 결재중 ]`. 이 작은 마킹이 누적되어 "다른 SaaS와 다르다"는 인상을 만든다.
-
-**참고**: 시각적 영감은 *Wallpaper\* magazine* 그리드, *Financial Times* 데이터 테이블, *Werkplaats Typografie* 의 모노 사용, *나인하이어* 의 정보 밀도. 클리셰 회피 목록: 보라/파랑 그라데이션, 큰 둥근 모서리(>12px), 네온 강조, 일러스트형 빈 상태, 펄스 애니메이션, glassmorphism.
+**제거된 Korean Editorial 요소**
+- 브래킷 상태 태그 `[ 결재중 ]` → MD3 Chip으로 교체
+- 섹션 시리얼 `01 / 14` → 제거
+- 이슈 번호 `№ 042` → 제거
+- 내비게이션/라벨의 `font-mono uppercase tracking` → MD3 타입스케일로 교체
 
 ---
 
-## 2. 컬러 토큰
+## 2. 컬러 시스템
 
-```css
-@theme {
-  /* Ink — 텍스트와 거의 모든 라인 */
-  --color-ink:        #0a0a0f;   /* ≈ oklch(0.157 0.009 285) — 본문, 강조 */
-  --color-ink-muted:  #5a5560;   /* ≈ oklch(0.397 0.012 305) — 보조 텍스트 */
-  --color-ink-soft:   #8c8690;   /* ≈ oklch(0.583 0.011 311) — 메타, 캡션 */
-  --color-ink-faint:  #b8b0a4;   /* ≈ oklch(0.738 0.012 76)  — 비활성 */
+Seed colors: primary `#0061A4` (신뢰 블루), tertiary `#006D43` (계약 그린)
 
-  /* Paper — 면 */
-  --color-paper:      #faf7f0;   /* ≈ oklch(0.972 0.012 91)  — 메인 배경 (따뜻한 종이) */
-  --color-paper-pure: #fefdf9;   /* ≈ oklch(0.991 0.008 87)  — 카드/표면 (살짝 더 밝음) */
-  --color-paper-warm: #f3eddd;   /* ≈ oklch(0.940 0.024 89)  — 강조 면, 호버 배경 */
+### Primary
+| 토큰 | 값 | 용도 |
+|---|---|---|
+| `--md-sys-color-primary` | `#0061A4` | 주요 액션 버튼, 링크 |
+| `--md-sys-color-on-primary` | `#FFFFFF` | primary 위 텍스트 |
+| `--md-sys-color-primary-container` | `#D1E4FF` | 토널 버튼, 선택 상태 |
+| `--md-sys-color-on-primary-container` | `#001D36` | primary-container 위 텍스트 |
 
-  /* Night — 사이드바 등 다크 면 */
-  --color-night:      #0a0a0f;   /* ≈ oklch(0.157 0.009 285) */
-  --color-night-2:    #14141b;   /* ≈ oklch(0.184 0.014 287) */
+### Secondary
+| 토큰 | 값 | 용도 |
+|---|---|---|
+| `--md-sys-color-secondary` | `#535F70` | 보조 액션 |
+| `--md-sys-color-secondary-container` | `#D7E3F7` | Nav Rail 활성 인디케이터 |
+| `--md-sys-color-on-secondary-container` | `#101C2B` | Nav Rail 활성 아이콘 |
 
-  /* Hairline — 1px 분할선 */
-  --color-hair:        #ece5d2;  /* ≈ oklch(0.910 0.027 87) */
-  --color-hair-strong: #c8c0ac;  /* ≈ oklch(0.781 0.032 89) */
+### Tertiary — 계약/성공 그린
+| 토큰 | 값 | 용도 |
+|---|---|---|
+| `--md-sys-color-tertiary` | `#006D43` | 성공, 계약 체결 |
+| `--md-sys-color-tertiary-container` | `#8DF6BC` | Chip (완료/성공) |
+| `--md-sys-color-on-tertiary-container` | `#002113` | 위 텍스트 |
 
-  /* Accent — 1차 액션, 주요 강조 (청록 잉크) */
-  --color-accent:      #1a3a52;  /* ≈ oklch(0.342 0.046 245) */
-  --color-accent-deep: #0e2538;  /* ≈ oklch(0.247 0.042 248) */
-  --color-accent-tint: #e0e6ea;  /* ≈ oklch(0.918 0.012 233) */
+### Error + Warning
+| 토큰 | 값 | 용도 |
+|---|---|---|
+| `--md-sys-color-error` | `#BA1A1A` | 오류, 위험 액션 |
+| `--md-sys-color-error-container` | `#FFDAD6` | Chip (실패) |
+| `--md-sys-color-warning` | `#7D5700` | 보류/대기 상태 |
+| `--md-sys-color-warning-container` | `#FFDEA5` | Chip (신규/보류) |
 
-  /* Status — 자연 톤. 무지개색·네온 회피 */
-  --color-amber:      #b97a25;   /* ≈ oklch(0.604 0.124 67)  — 발송됨, 주의 */
-  --color-terracotta: #a8443a;   /* ≈ oklch(0.512 0.151 28)  — 실주, 만료, 경고 */
-  --color-moss:       #4a6f3f;   /* ≈ oklch(0.546 0.094 138) — 수주, 완료 */
-  --color-lavender:   #6b5d7a;   /* ≈ oklch(0.483 0.046 305) — 결재 진행 중 */
-}
+### Surface 계층 (5단계)
+```
+surface-container-lowest  #FFFFFF   → 카드 내부, 팝오버
+surface-container-low     #F3F4FA   → 카드 배경 (elevated), 주요 컨텐츠 면
+surface-container         #EDEDF4   → 구분 영역
+surface-container-high    #E7E8EE   → 행 호버, 선택 상태 하이라이트
+surface-container-highest #E2E2E8   → filled 카드
 ```
 
-**색공간 주**: hex가 v0의 단일 진실원이며 코드(`styles/tokens.css`)는 hex로만 컴파일된다. OKLCH 주석은 *Tailwind v4 + shadcn/ui 디폴트가 OKLCH로 표준화된 2026 트렌드와의 정합*을 위해 등가값을 보존하는 용도로만 추가했다. 향후 `oklch()` 마이그레이션 시 회귀 검증의 기준선이 된다 (정확 변환은 https://oklch.com 또는 culori로 검증 권장).
-
-**사용 규칙**
-- 1차 액션 버튼: 검정(`--color-ink`) 채움. 강조가 더 필요할 때만 `--color-accent`.
-- 상태 색은 **텍스트 컬러로만** 사용 (브래킷 태그). 풀 배경은 KPI 칩·드로어 카드 등 1~2 곳에만.
-- 그라데이션 사용 금지. 단, 견적 작성 화면 우측 PDF 미리보기 패널 배경에 **2점 라디얼 그라데이션 5% 투명도**로 종이의 미세한 톤 변화만 허용.
+### 역방향 (Navigation Rail)
+| 토큰 | 용도 |
+|---|---|
+| `--md-sys-color-inverse-surface` `#2F3033` | Nav Rail 배경 (다크) |
+| `--md-sys-color-inverse-on-surface` `#F1F0F4` | Rail 아이콘/텍스트 |
+| `--md-sys-color-inverse-primary` `#9ECAFF` | Rail 활성 액션 |
 
 ---
 
 ## 3. 타이포그래피
 
-| 역할 | 폰트 | 비고 |
-|---|---|---|
-| 본문 | **Pretendard Variable** | 100~900 가변, 한글 가독성 + 라틴 일관성 |
-| 디스플레이 | **Pretendard Variable Black (800~900)** + `letter-spacing: -0.034em` | 별도 디스플레이 폰트 없이 극단 웨이트 대비로 편집 느낌 |
-| 수치/라벨 | **JetBrains Mono Variable** | 모든 숫자, 시리얼 마크, 시간 표기 |
+폰트: **Pretendard Variable** (KR + Latin) + **JetBrains Mono Variable** (숫자 전용)
 
-**자체 호스팅** (`public/fonts/`) — `next/font/local` 로 로드, 외부 CDN 의존성 제거.
+### MD3 15개 타입 롤
+
+| 롤 | 크기 | 굵기 | 용도 |
+|---|---|---|---|
+| Display Large | 57px / 3.5625rem | 400 | 랜딩 히어로 |
+| Display Medium | 45px / 2.8125rem | 400 | 대형 KPI |
+| Display Small | 36px / 2.25rem | 400 | KPI 값 |
+| Headline Large | 32px / 2rem | 400 | 페이지 제목 |
+| Headline Medium | 28px / 1.75rem | 400 | 섹션 제목 |
+| Headline Small | 24px / 1.5rem | 400 | 카드 제목 |
+| Title Large | 22px / 1.375rem | 400 | 탭 헤더 |
+| Title Medium | 16px / 1rem | 500 | 강조 라벨 |
+| Title Small | 14px / 0.875rem | 500 | 탭, 소제목 |
+| Body Large | 16px / 1rem | 400 | 기본 본문 (`<body>` 기본값) |
+| Body Medium | 14px / 0.875rem | 400 | 테이블 셀, 설명문 |
+| Body Small | 12px / 0.75rem | 400 | 캡션 |
+| Label Large | 14px / 0.875rem | 500 | 버튼, Chip |
+| Label Medium | 12px / 0.75rem | 500 | 태그, 보조 라벨 |
+| Label Small | 11px / 0.6875rem | 500 | Nav Rail 라벨 |
+
+### 금융 데이터 카브아웃 — `.md-numeric`
 
 ```css
-@theme {
-  --font-sans: 'Pretendard Variable', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+.md-numeric {
+  font-family: var(--font-mono);          /* JetBrains Mono */
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 ```
 
-**스케일** (px)
-
-| 토큰 | 크기 | 용도 |
-|---|---|---|
-| `text-2xs` | 10 | 시리얼 마크, 캡션 |
-| `text-xs` | 11 | 모노 라벨, 메타 |
-| `text-sm` | 12 | 보조 텍스트 |
-| `text-base` | 13 | 본문 (밀도 우선 영역) |
-| `text-md` | 14 | 본문 표준 |
-| `text-lg` | 16 | 카드 제목 |
-| `text-xl` | 20 | 섹션 제목 |
-| `text-2xl` | 26 | 페이지 부제 |
-| `text-3xl` | 36 | 페이지 제목 |
-| `text-4xl` | 52 | 인사말 (홈) |
-| `text-display` | 84 | KPI 거대 숫자 |
-
-**위계 패턴**
-- 페이지 제목: 36px / 800 / `tracking: -0.034em`
-- 인사말: 52px / 800 / 줄바꿈으로 두 줄 유도, 두번째 줄 일부에 `font-weight: 200`로 약화 → "안녕하세요, **이성연** _—_ 님."
-- 섹션 시리얼: 11px 모노 / `letter-spacing: 0.18em` / `text-transform: uppercase` / `--color-ink-soft`
-- KPI 숫자: 84px / **300 weight** / `letter-spacing: -0.04em` (가는 거대 숫자가 잡지 풀 인용구 느낌)
-- 모노 라벨: 모든 모노 텍스트는 **항상** `letter-spacing: 0.16em` / `uppercase`
-- 본문 한국어: `letter-spacing: -0.006em` (Pretendard 가독 최적)
+적용 대상: ₩ 금액 셀, % 수수료 값, 건수 카운터, 견적번호(`Q-2605-0042`), 날짜. **내비게이션·라벨·버튼 텍스트에는 절대 적용하지 않는다.**
 
 ---
 
-## 4. 레이아웃 토큰
+## 4. 형태(Shape) 스케일
 
-```css
-@theme {
-  /* Shell */
-  --shell-sidebar: 68px;
-  --shell-subnav:  244px;
-  --shell-topbar:  60px;
-  --content-max:   1440px;
-
-  /* Spacing scale */
-  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
-  --s-5: 20px; --s-6: 24px; --s-7: 32px; --s-8: 40px;
-  --s-9: 56px; --s-10: 80px; --s-11: 120px;
-
-  /* Radius — 5단계 토큰. border-radius는 단일 값 통일 정책(§5.12 참조) */
-  --r-xs: 2px;  --r-sm: 3px;  --r: 5px;
-  --r-md:  8px; --r-lg: 12px;
-
-  /* Motion */
-  --ease:     cubic-bezier(0.22, 0.72, 0.18, 1);
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --d-fast:   140ms;
-  --d:        240ms;
-  --d-slow:   420ms;
-}
-```
-
-**그리드**: `sidebar(68) / subnav(244) / main` 3열, 상단 topbar(60) 고정. 홈은 subnav 없는 변형.
-
-**Breakpoint**
-- ≥ 1280px — 풀 그리드 (기본)
-- 1024–1279 — Subnav collapse (햄버거)
-- < 1024 — 작성·편집 화면은 데스크톱 권장 안내, 읽기 위주만 동작
+| 토큰 | 크기 | 적용 |
+|---|---|---|
+| `--md-sys-shape-none` | 0px | 분할선 |
+| `--md-sys-shape-extra-small` | 4px | 인풋, 툴팁, 드롭다운 |
+| `--md-sys-shape-small` | 8px | Chip, 스낵바 |
+| `--md-sys-shape-medium` | 12px | 카드(elevated/filled), 메뉴 |
+| `--md-sys-shape-large` | 16px | 상단 시트, 내비게이션 드로어 |
+| `--md-sys-shape-extra-large` | 28px | 다이얼로그, 하단 시트 |
+| `--md-sys-shape-full` | 9999px | 버튼, Chip(filter), Avatar, 알약 인디케이터 |
 
 ---
 
-## 5. 컴포넌트 시각 원칙
+## 5. 고도(Elevation) — 5단계
 
-### 5.1 Tag (상태 표시)
-브래킷 + 모노 + uppercase + 컬러 텍스트(풀 배경 X).
 ```
-[ 결재중 ]   [ 발송됨 ]   [ 수주 ]
+Elevation 0: none
+Elevation 1: 0px 1px 2px rgba(0,0,0,.30), 0px 1px 3px 1px rgba(0,0,0,.15)  ← Elevated 카드, 버튼 호버
+Elevation 2: 0px 1px 2px rgba(0,0,0,.30), 0px 2px 6px 2px rgba(0,0,0,.15)  ← 카드 호버
+Elevation 3: 0px 1px 3px rgba(0,0,0,.30), 0px 4px 8px 3px rgba(0,0,0,.15)  ← 토스트/스낵바
+Elevation 4: 0px 2px 3px rgba(0,0,0,.30), 0px 6px 10px 4px rgba(0,0,0,.15) ← (예약)
+Elevation 5: 0px 4px 4px rgba(0,0,0,.30), 0px 8px 12px 6px rgba(0,0,0,.15) ← 팝오버, 드롭다운
 ```
-- 폰트: mono / 11px / `letter-spacing: 0.1em`
-- 브래킷 `[ ]`: `opacity: 0.5`로 약화
-
-### 5.2 DataTable (헤어라인 테이블)
-- 행 사이 1px 헤어라인, 행 배경 X
-- 호버 시 `--color-paper-warm` 배경 + **첫 셀 좌측에 8px 검정 마커** 등장 (편집물의 마진 마킹 차용)
-- 헤더: mono / uppercase / 11px / `--color-ink-soft`
-- 숫자 셀: mono / `tabular-nums` / 우정렬
-
-### 5.3 KPI (거대 숫자 칩)
-- 숫자 84px / weight 300 (가늘게)
-- 라벨은 상단에 mono uppercase
-- 라벨 우측에 시리얼 `A` / `B` / `C` (편집 마킹)
-- 델타: `↑` / `↓` / `—` 부호 + mono
-
-### 5.4 Greeting (홈 인사말)
-- 두 줄 강제. 두번째 줄에 emdash 한 글자만 `font-weight: 200`로 약화
-- 좌측 byline: mono uppercase + 우측 끝까지 헤어라인 (편집물 머리띠)
-
-### 5.5 Sidebar (다크)
-- 배경 `--color-night`, 텍스트 `--color-paper`
-- 활성 항목: 좌측 2px 인디케이터 — **앰버 컬러** (잉크 위에 한 점의 색)
-- 하단에 세로 글자로 `v0 · 2026` 인쇄 마킹
-
-### 5.6 Empty State
-- 일러스트 사용 X. 단순 라인 SVG 아이콘만
-- 본문 카피 + CTA 버튼 1개
-
-### 5.7 PDF Preview (작성 화면 우측)
-- A4 비율 (1 : 1.414), `--color-paper-pure` 배경
-- **유일하게 그림자 허용**: `0 1px 3px rgba(15,15,20,0.04), 0 20px 60px -10px rgba(15,15,20,0.18)` — 종이가 떠 있는 느낌
-- 패널 배경에 2점 라디얼 그라데이션 5% (종이의 미세 톤)
-- 견적서 본문은 헤더 아래 **2px 검정 라인** 으로 분리 (신문 헤더 차용)
-
-### 5.8 Form Section
-- 카드 박스 X. **헤어라인 분할** 만 사용
-- 섹션 헤드: 시리얼 + 제목 → "01 거래처"
-- 입력 필드: `border: 0; border-bottom: 1px solid var(--color-hair-strong)` — 종이 양식 차용
-- 포커스: 하단 라인이 `--color-ink` 로 두꺼워짐
-
-### 5.9 Notification Drawer
-- 우측 슬라이드, 폭 420
-- 진입 모션: `translateX(100%) → 0`, `--d-slow` `--ease-out`
-- 빈 상태: 봉투 라인 SVG + "새로운 알림이 없습니다."
-
-### 5.10 Command Palette (⌘K)
-- 모달, 폭 620, 12vh top
-- 배경 오버레이: `rgba(10,10,15,0.4)` + `backdrop-filter: blur(4px)`
-- 그룹 헤더: mono uppercase
-- 결과 메타(우측): mono — 단축키나 `12 견적` 같은 카운트
-
-### 5.11 Auth 화면 (Public 영역)
-인증 영역(P1~P11)의 시각 규칙. 모든 화면은 SCREEN_DESIGN §1 의 명세에 따른다.
-
-- **레이아웃**: 단일 컬럼 max-w 380~420, 화면 중앙 배치, 상하단 여백 `--s-11`
-- **헤더**: 좌상단 워드마크 `B  BIDIT` + 우상단 serial `EDITION 01 · v0`
-- **카드 박스 사용 X** — 헤어라인 외곽 + 패딩 `--s-7` 만 사용 (종이 양식 차용)
-- **입력 필드**: §5.8 Form Section 패턴 그대로 — `border: 0; border-bottom: 1px solid var(--color-hair-strong)`, 포커스 시 하단 라인 `--color-ink` 두꺼워짐
-- **진행 표시**: 모노 시리얼 마크 `01 / 03 — EMAIL` (uppercase, `letter-spacing: 0.16em`, `--color-ink-soft`)
-- **비밀번호 강도 인디케이터**: 4칸 헤어라인 채움
-  - 1칸: `--color-terracotta` (약함)
-  - 2칸: `--color-amber` (보통)
-  - 3칸: `--color-lavender` (양호)
-  - 4칸: `--color-moss` (강함)
-  - 트랜지션 `--d-fast` `--ease`
-- **비밀번호 정책 캡션**: mono uppercase — `MIN 10 · A-Z · 0-9 · !@#`
-- **에러 메시지**: 인라인 캡션, mono uppercase, `--color-terracotta`
-- **재발송 카운트다운**: mono `재발송 (00:60)` 형식, 시간은 `tabular-nums`
-- **안내 화면 일러스트**: 봉투(P3·P7) / 체크(P8 완료) 라인 SVG (1.4 stroke) 만 — 색이 들어간 일러스트 금지
-- **CTA 버튼**: 1차 액션은 full-width, 검정 채움 (`--color-ink`)
-- **링크 위계**: 보조 액션은 `--color-ink-muted`, 호버 시 `--color-ink`, 밑줄 X
-
-### 5.12 Border-Radius 단일 값 통일
-
-라디우스는 **3단계 시스템** 으로만 적용한다. 카테고리별 미세 조정 금지 — 통일성 우선.
-
-| 적용 범위 | 토큰 / 유틸리티 | px |
-|---|---|---|
-| **Body 전체** — 버튼, 입력, 카드, 패널, 사이드바(모든 variant), 탭, 드롭다운, 팝오버, 툴팁, 토스트, 슬라이더, 스켈레톤, chip/tag/avatar/logo/썸네일, primitives 전체 | `rounded-md` | 8 |
-| **Apex** — `<Dialog>` (모달), 견적 비교 모달 root | `rounded-lg` | 12 |
-| **인디케이터** — 알림 점, 상태 점 | `rounded-full` | – |
-
-**금지 표기**:
-- `rounded-[Npx]` 임의 px 값 (예: `rounded-[6px]`, `rounded-[10px]`)
-- `rounded-[var(--r)]` / `rounded-[var(--r-sm)]` / `rounded-[var(--r-xs)]` arbitrary escape
-- `rounded-[min(...)]` 식 (Button 변형 등 모든 복잡 식)
-- 인라인 `style={{ borderRadius: '5px' }}`
-- `rounded-xl`, `rounded-b-xl` (12px로 remap되어 동작은 같지만 16px 연상 네이밍 추방)
-- `rounded` (suffix 없음, 5px), `rounded-xs` (2px), `rounded-sm` (3px) — 단일 값 정책상 사용 안 함
-
-**예외 1건** (functionally forced): `components/ui/tooltip.tsx`의 회전된 화살표 사각형은 `rounded-[2px]`을 유지. 8px radius는 4×4 회전 사각형에서 시각적으로 동작하지 않음.
-
-**토큰 자체는 유지**: `--r-xs/--r-sm/--r/--r-md/--r-lg` 5단계 CSS 변수는 다른 디자인 결정(테두리 강조, 영상 마스크 등)에 쓰일 수 있어 `tokens.css`에 보존. 단지 `border-radius`에서는 `--r-md`(8px)와 `--r-lg`(12px)만 사용한다.
-
-**검증 grep** (PR 머지 전 0건이어야 함, tooltip arrow 1건만 허용):
-```bash
-grep -rEn 'rounded-\[[0-9]+px\]|rounded-\[var\(--r|rounded-\[min\(|borderRadius|rounded-(xl|b-xl|t-xl|l-xl|r-xl)' components/ app/ \
-  | grep -v 'apple-icon\|opengraph-image\|outbox/templates\|tooltip.tsx'
-```
-
-**제외 영역**:
-- `lib/server/outbox/templates/*.tsx` — 이메일 클라이언트 호환 위해 px 하드코딩 필요
-- `app/apple-icon.tsx`, `app/opengraph-image.tsx` — OG 이미지 생성기 (다른 픽셀 스케일)
 
 ---
 
 ## 6. 모션
 
-**원칙**: 서너 곳의 큰 모션 + 어디에도 없는 마이크로 인터랙션. 펄스·바운스·스피너 애니메이션은 사용하지 않는다.
-
-**라이브러리**: `motion` (구 Framer Motion, 2024년 말 독립 리브랜드). 임포트는 `motion/react`. `framer-motion` 패키지명은 사용 금지 — 신규 코드는 `motion`만, 기존 코드는 발견 시 마이그레이션.
-
-| 위치 | 모션 | 듀레이션 / 이징 |
+| 토큰 | 값 | 용도 |
 |---|---|---|
-| 페이지 진입 | 위젯 stagger rise (8px ↑ / opacity) | 420ms / `ease-out`, 60ms 간격 |
-| Drawer 진입 | translateX 슬라이드 | 420ms / `ease-out` |
-| Cmdk 진입 | scale 0.96 → 1 + opacity | 240ms / `ease-out` |
-| 호버 (chip/btn) | 색·배경 트랜지션 | 140ms / `ease` |
-| 테이블 행 호버 | 좌측 마커 등장 | 140ms / `ease` |
-| PDF 미리보기 동기화 | 좌측 입력 → 우측 반영 디바운스 | 300ms |
-
-**금지**: rotate 스피너, 펄스 닷, parallax, 컬러 그라데이션 트랜지션, 큰 라디우스 morph.
-
----
-
-## 7. 아이콘
-
-- 자체 SVG 컴포넌트, **선형 1.4 stroke**, 20×20 또는 16×16
-- 모서리 라운드: `stroke-linecap: round`, `stroke-linejoin: round`
-- 채움 X (단, 활성 사이드바 인디케이터·태그 닷 같은 미세 요소는 채움)
-- 아이콘 라이브러리(lucide 등) 직접 import 금지 — 시각 통일을 위해 모두 직접 그린다.
+| `--md-sys-motion-easing-standard` | `cubic-bezier(0.2, 0, 0, 1)` | 기본 전환 |
+| `--md-sys-motion-easing-emphasized-decelerate` | `cubic-bezier(0.05, 0.7, 0.1, 1)` | 화면 진입, 슬라이드 인 |
+| `--md-sys-motion-easing-emphasized-accelerate` | `cubic-bezier(0.3, 0, 0.8, 0.15)` | 화면 퇴장, 슬라이드 아웃 |
+| `--md-sys-motion-duration-short-4` | 200ms | 버튼/Chip 상태 변화 |
+| `--md-sys-motion-duration-medium-2` | 300ms | 패널 오픈 |
+| `--md-sys-motion-duration-medium-4` | 400ms | 드로어 슬라이드 |
+| `--md-sys-motion-duration-long-2` | 500ms | 페이지 전환 |
 
 ---
 
-## 8. 접근성
+## 7. 컴포넌트 시스템
 
-- 명도 대비 WCAG AA 이상 (본문 7:1, 보조 4.5:1)
-- 포커스 링: `outline: 2px solid var(--color-ink)`, `outline-offset: 2px`. 보랏빛 OS 기본 링 회피
-- 모든 인터랙티브 요소 키보드 진입 가능 (`Tab`)
-- 모노 텍스트의 letter-spacing 은 가독성을 해치지 않는 0.1~0.18em 범위 내
-- 한국어 줄바꿈은 의미 단위로 `<br/>` 강제 (인사말, 공지 헤드라인 등 큰 텍스트만)
+### Button — 5개 변형
 
----
+| Variant | 외관 | 용도 |
+|---|---|---|
+| `filled` | Primary/Error 배경 | 주요 CTA (RFQ 발송, 낙찰) |
+| `outlined` | 테두리만 | 보조 액션 |
+| `text` | 텍스트만 | 3차 액션, 취소 |
+| `elevated` | surface-low 배경 + 그림자 | 카드 위 액션 |
+| `tonal` | Primary/Error 컨테이너 배경 | 중간 강조 |
 
-## 9. 클리셰 금지 목록
+`color` prop: `primary`(기본) / `error` (위험 액션)
 
-| 금지 | 이유 |
+### Chip — 4개 유형
+
+| Variant | 용도 |
 |---|---|
-| Inter / Roboto / Arial | 한국어 부재 + AI 생성물 시그니처 |
-| 보라(#7C3AED) → 파랑(#3B82F6) 그라데이션 | 모든 SaaS의 기본값 |
-| 큰 둥근 모서리 (16px+) | "AI 카드" 룩 |
-| 일러스트형 빈 상태 | 비용 + 톤 분산 |
-| 펄스/스피너 로딩 인디케이터 | 노이즈, 모노 `LOADING…` 으로 대체 |
-| Glassmorphism (`backdrop-filter` 강함) | 가독성 저하, 트렌드 꼬리 |
-| 네온 그린/시안 강조 | 자연 톤 원칙 위배 |
-| 모달 풀 스크린 인터스티셜 | 작업 중단, 결재 모달처럼 사이드 슬라이드 선호 |
-| 블러 처리된 3D 오브·블롭 (Apple-Stripe-after 미감) | 2026년 후반 AI 슬롭의 새 시그니처. 깊이 환영을 가짜 정보로 대체 |
-| "Build the future of X" 류 히어로 카피 | LLM 생성 랜딩 페이지의 표준 템플릿. 빈 약속의 향기 |
-| 16px 균일 카드 라디우스 (shadcn 디폴트) | 모든 AI 코딩 도구의 출력 시그니처. >12px 금지 원칙 위배 (§5.12 단일 값 통일) |
-| 크롬·홀로그램 AI 이미지 (DALL-E·Midjourney 시그니처) | 즉시 식별되는 AI 출처. 편집 미감과 정면 충돌 |
-| 다양성 노트북 스톡 사진 | 제품 차별화 0, 톤 손실 최대 |
+| `assist` | 일반 액션 도움 |
+| `filter` | 목록 필터 (selected/unselected 상태 있음) |
+| `input` | 입력된 태그 (삭제 버튼 포함) |
+| `suggestion` | 추천 텍스트 |
+
+`color` prop: `primary` / `tertiary` / `warning` / `error` / `surface`(기본)
+
+### IconButton — 4개 변형
+
+`standard` / `outlined` / `filled` / `tonal`
+
+### Card — 3개 변형
+
+| Variant | 배경 |
+|---|---|
+| `elevated` | surface-container-low + elevation-1 |
+| `filled` | surface-container-highest |
+| `outlined` | surface + outline-variant 테두리 |
+
+### Label
+
+섹션 레이블, 폼 라벨 등에 사용. `size`: `lg` / `md` / `sm`. `muted`: true(기본, on-surface-variant) / false(on-surface).
+
+### Tabs — MD3 Primary Tabs
+
+3px 상단 인디케이터. Title-small 타입스케일. Tab 텍스트는 기본 on-surface-variant, 활성은 primary.
 
 ---
 
-## 10. PG 견적 비교 도메인 규칙
+## 8. 쉘 레이아웃
 
-본 섹션은 PG 견적 비교라는 도메인 특성을 시각 시스템에 고정하기 위한 운영 규칙이다. 공통 미감은 앞선 섹션을 따르고, 이 섹션은 비교·검토·결재 흐름에 필요한 정보 설계를 정의한다.
+```
+--shell-rail:    80px   ← MD3 Navigation Rail 너비
+--shell-topbar:  64px   ← MD3 Small Top App Bar 높이
+--shell-subnav:  244px  ← 서브 내비게이션 (RFQ 상세 등)
+```
 
-### 10.1 제품 원칙 (Domain Lens)
+**Navigation Rail** (`IconSidebar`): inverse-surface 배경 (다크). 활성 아이템은 secondary-container 알약(pill) 인디케이터 + on-secondary-container 색상. 비활성은 inverse-on-surface 60% 투명도.
 
-1. **Trust** — 숫자는 흔들리지 않게 보인다.  
-   금액·수수료·기간·정산주기·수량은 항상 같은 규칙(모노, 우정렬, 단위 분리)으로 렌더링한다.
-2. **Comparability** — 한 화면에서 비교가 끝난다.  
-   공급사별 핵심 조건이 같은 축으로 배치되어 스크롤 없이 1차 판단이 가능해야 한다.
-3. **Auditability** — 결론의 근거가 추적된다.  
-   "왜 이 공급사를 선택했는지"를 구성 항목, 가정값, 타임라인으로 되돌아볼 수 있어야 한다.
-4. **Actionability** — 비교 다음 행동이 즉시 이어진다.  
-   요청·결재·확정 액션은 비교 UI와 분리하지 않고 인접 배치한다.
-
-### 10.2 상태 색 의미 고정
-
-상태 색은 프로젝트 전역에서 의미를 바꾸지 않는다.
-
-- `--color-moss`: 유리/확정/완료
-- `--color-amber`: 검토 필요/주의
-- `--color-terracotta`: 불리/만료/차단
-- `--color-lavender`: 결재 진행/대기
-
-규칙:
-- 상태 표현은 기본적으로 **텍스트 + 브래킷 태그**로 처리한다.
-- 상태색 풀 배경은 요약 칩, 경고 배너 등 제한된 영역에서만 사용한다.
-- "위험"을 의미하지 않는 정보성 강조에는 상태색을 사용하지 않는다.
-
-### 10.3 숫자·단위 표기 규칙
-
-- 금액: `1,234,567원` (천단위 콤마 필수)
-- 비율: `2.15%` (소수 자릿수는 화면별 고정)
-- 건수: `12,450건`
-- 월 추정치: `월 3,420,000원`
-- 모든 숫자 필드는 `font-mono + tabular-nums + right-align`
-- 단위(원, %, 건, 일)는 숫자와 시각적으로 분리된 컬럼 또는 suffix 스타일로 고정
-
-### 10.4 도메인 전용 컴포넌트
-
-1. **Quote Comparison Matrix**  
-   공급사별 핵심 항목(수수료, 정산주기, 지원 결제수단, 계약 조건)을 같은 행/열 축으로 비교.
-2. **Fee Breakdown Waterfall**  
-   기준 매출에서 항목별 공제를 거쳐 실수령/총비용으로 이어지는 흐름을 시각화.
-3. **Scenario Toggle**  
-   월 거래액·객단가·환불률 등의 가정을 바꿔 비교 결과를 즉시 재계산.
-4. **Confidence Badge**  
-   견적 최신성, 입력 완결성, 확인 주체를 기반으로 신뢰도를 노출.
-5. **Decision Timeline**  
-   요청 → 수신 → 내부 검토 → 결재 → 확정의 이력을 시간순으로 기록.
-6. **Constraint Chips**  
-   "해외결제 필수", "D+2 정산 필수" 같은 하드 조건 미충족 항목을 즉시 표기.
-
-### 10.5 차트 사용 규칙
-
-차트는 표를 대체하지 않고 보조한다.
-
-- 허용 차트: 막대(비교), 워터폴(구성), 라인(추세)
-- 금지 차트: 파이, 3D, 강한 그라데이션 차트, 장식형 모션 차트
-- 모든 차트는 축/단위/기준 시점/가정값을 명시한다.
-- 금액 비교의 최종 판단 UI는 반드시 테이블에도 동일 데이터가 존재해야 한다.
-
-### 10.6 의사결정 UX 규칙
-
-- 비교 화면에서 주요 CTA(요청/결재/확정)를 숨긴 2단계 이동 구조를 피한다.
-- "최저 비용"과 "운영 리스크"를 동시에 보여 단일 지표 오판을 줄인다.
-- 선택 근거는 최소 2개 이상(예: 총비용 + 정산주기) 노출한다.
-- 견적 만료/갱신 필요 시점은 경고 색 + 날짜 텍스트를 함께 사용한다.
-
-### 10.7 QA 체크리스트 (출시 전)
-
-- [ ] 상태 색 의미가 화면마다 뒤바뀌지 않는가
-- [ ] 숫자 열이 모두 모노 + 우정렬 + tabular-nums 인가
-- [ ] 비교 화면에서 1차 의사결정이 스크롤 과다 없이 가능한가
-- [ ] 차트 수치와 테이블 수치가 일치하는가
-- [ ] 결론(추천/선택)에 대한 근거가 화면에 남아 있는가
-- [ ] 편집물 마킹(시리얼/번호/브래킷)이 주요 화면에 유지되는가
+**Top App Bar** (`Topbar`): surface 배경, outline-variant 하단 테두리.
 
 ---
 
-## 11. 변경 이력
+## 9. 회피 패턴 (MD3 Anti-patterns)
 
-- 2026-05-05 v0.1 — 초안. Korean Editorial Modernism 방향 확정, 토큰·타이포·컴포넌트 원칙 정리.
-- 2026-05-05 v0.2 — PG 견적 비교 도메인 규칙 추가(비교·감사·결재 중심), 숫자/상태/차트/QA 운영 기준 명시.
-- 2026-05-08 v0.3 — §2 컬러 토큰 OKLCH 등가 주석 추가(Tailwind v4·shadcn 트렌드 정합), §6 모션 라이브러리 임포트 패스(`motion/react`) 명시, §9 2026-05 신규 클리셰 5종 추가(블러 3D 오브, "Build the future" 히어로, 16px 균일 라디우스, 크롬 AI 이미지, 다양성 스톡).
-- 2026-05-08 v0.4 — §5.12 Border-Radius 단일 값 통일 정책 추가. 기본을 5px → **8px(`rounded-md`)** 로 변경, Apex(modal/dialog)만 12px(`rounded-lg`), 인디케이터만 `rounded-full`. arbitrary 표기(`rounded-[Npx]`, `rounded-[var(--r-…)]`, `rounded-[min(...)]`, 인라인 `borderRadius`) 전면 금지. 27개 파일 ~50건 정합 마이그레이션 동반. tooltip arrow 1건은 functional exception으로 유지. §4 토큰 코멘트와 §9 클리셰 항목 cross-ref 갱신.
+- **No** 스큐어모픽(그림자 도배, 사실적 텍스처) — MD3는 평면+톤
+- **No** 과도한 고도 — 대부분 elevation-1, 팝오버만 elevation-5
+- **No** 토널 색상 오용 — primary-container는 컨테이너에, 버튼 텍스트엔 on-primary
+- **No** 내비/라벨에 font-mono — `.md-numeric`은 금융 수치에만
+- **No** uppercase + wide tracking — MD3 타입스케일은 sentence case
+- **No** 브래킷 상태 태그 — Chip을 사용
+- **No** Inter/Roboto/Arial — Pretendard Variable + JetBrains Mono만
+- **No** 보라/파랑 그라데이션 — MD3 solid color roles
+
+---
+
+## 10. 토큰 파일 참조
+
+`styles/tokens.css` ← MD3 시스템 토큰 전체 (`@theme {}` 블록)  
+`app/globals.css` ← Tailwind v4 shadcn semantic 매핑 (`@theme inline {}`)
+
+`DESIGN.md`가 변경되면 `styles/tokens.css`도 동기화한다 (단방향).
