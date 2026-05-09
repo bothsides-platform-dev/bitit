@@ -1,5 +1,5 @@
-import { Tag } from '@/components/primitives/Tag';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Chip } from '@/components/primitives/Chip';
+import { Label } from '@/components/primitives/Label';
 import { GRADE_LABELS } from '@/lib/types/biz-profile';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
 import { formatDate, formatDeadline } from '@/lib/format';
@@ -46,7 +46,7 @@ export function RfqBriefPanel({ rfq }: Props) {
       {/* Buyer biz info */}
       <div>
         <div className="flex items-center gap-3 mb-3">
-          <Eyebrow>구매사 정보</Eyebrow>
+          <Label size="md" muted={false}>구매사 정보</Label>
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
         <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
@@ -66,14 +66,14 @@ export function RfqBriefPanel({ rfq }: Props) {
       {/* Grade + statutory fee */}
       <div>
         <div className="flex items-center gap-3 mb-3">
-          <Eyebrow>가맹점 등급</Eyebrow>
+          <Label size="md" muted={false}>가맹점 등급</Label>
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
         <div className="flex items-center justify-between py-2.5 border-t border-[var(--color-hair)] border-b border-[var(--color-hair)]">
           <div className="flex items-center gap-3">
             {grade ? (
               <>
-                <Tag>{GRADE_LABELS[grade]}</Tag>
+                <Chip label={GRADE_LABELS[grade]} color="surface" />
                 {!isNaN(cardFee) && (
                   <span className="font-mono text-[12px] tabular-nums text-[var(--color-ink-muted)]">
                     카드 법정 {(cardFee * 100).toFixed(2)}%
@@ -87,7 +87,7 @@ export function RfqBriefPanel({ rfq }: Props) {
               </>
             ) : (
               <>
-                <Tag>미정</Tag>
+                <Chip label="미정" color="surface" />
                 <span className="font-mono text-[12px] text-[var(--color-ink-muted)]">
                   등급 미입력 — 일반 가정으로 카드사별 수수료 입력 필요
                 </span>
@@ -101,7 +101,7 @@ export function RfqBriefPanel({ rfq }: Props) {
       {rfq.memo && (
         <div>
           <div className="flex items-center gap-3 mb-3">
-            <Eyebrow>메모 (RFP)</Eyebrow>
+            <Label size="md" muted={false}>메모 (RFP)</Label>
             <div className="flex-1 h-px bg-[var(--color-hair)]" />
           </div>
           <p className="text-[13px] text-[var(--color-ink-muted)] leading-relaxed whitespace-pre-wrap">

@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Tag } from '@/components/primitives/Tag';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Chip, type ChipColor } from '@/components/primitives/Chip';
+import { Label } from '@/components/primitives/Label';
 import { EmptyState } from '@/components/primitives/EmptyState';
 import { formatDeadline } from '@/lib/format';
 import { useListNavigation } from '@/lib/hooks/useListNavigation';
@@ -17,15 +17,12 @@ const invStatusLabel: Record<string, string> = {
   expired: '만료',
 };
 
-const invStatusVariant: Record<
-  string,
-  'default' | 'amber' | 'moss' | 'terracotta' | 'muted'
-> = {
-  sent: 'amber',
-  opened: 'default',
-  accepted: 'moss',
-  declined: 'terracotta',
-  expired: 'muted',
+const invStatusColor: Record<string, ChipColor> = {
+  sent: 'warning',
+  opened: 'surface',
+  accepted: 'tertiary',
+  declined: 'error',
+  expired: 'surface',
 };
 
 export type InboxRow = {
@@ -54,7 +51,7 @@ export function InboxList({ rows }: { rows: InboxRow[] }) {
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-8 py-5 border-b border-[var(--color-hair)]">
         <div>
-          <Eyebrow>수신함 — PG 견적 요청</Eyebrow>
+          <Label size="md" muted={false}>수신함 — PG 견적 요청</Label>
           <h1 className="text-[20px] font-[700] tracking-[-0.02em] text-[var(--color-ink)] mt-1">
             받은 견적 요청
           </h1>
@@ -109,9 +106,10 @@ export function InboxList({ rows }: { rows: InboxRow[] }) {
                       {daysLeft}
                     </td>
                     <td className="px-3 py-4 text-right">
-                      <Tag variant={invStatusVariant[row.invitationStatus]}>
-                        {invStatusLabel[row.invitationStatus] ?? row.invitationStatus}
-                      </Tag>
+                      <Chip
+                        label={invStatusLabel[row.invitationStatus] ?? row.invitationStatus}
+                        color={invStatusColor[row.invitationStatus] ?? 'surface'}
+                      />
                     </td>
                   </tr>
                 );

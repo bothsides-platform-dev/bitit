@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/primitives/Button';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Label } from '@/components/primitives/Label';
 import {
   BizLookupField,
   type BizLookupResult,
@@ -85,7 +85,7 @@ export function WorkspaceBizNoForm({ currentBizNo, returnUrl }: Props) {
 
   return (
     <div className="space-y-4">
-      <Eyebrow>사업자 등록번호</Eyebrow>
+      <Label size="md" muted={false}>사업자 등록번호</Label>
       {!editing && currentBizNo !== null ? (
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-y border-[var(--color-hair)] py-2.5">
           <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">

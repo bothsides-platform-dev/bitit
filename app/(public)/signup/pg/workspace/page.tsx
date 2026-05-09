@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
-import { Serial } from '@/components/primitives/Serial';
 import { PgWorkspaceConfirm } from '@/components/auth/PgWorkspaceConfirm';
 import { signupCompleteAction } from '@/lib/server/actions/auth';
 import {
@@ -76,7 +75,6 @@ export default function PgWorkspacePage() {
   return (
     <div className="space-y-8">
       <div>
-        <Serial current={current} total={total} label="WORKSPACE" className="block mb-4" />
         <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
           워크스페이스에 합류합니다
         </h2>

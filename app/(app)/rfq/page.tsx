@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Label } from '@/components/primitives/Label';
 import { Button } from '@/components/primitives/Button';
 import { EmptyState } from '@/components/primitives/EmptyState';
 import { FileTextIcon } from '@/components/icons';
@@ -26,7 +26,7 @@ export default async function RfqListPage() {
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-8 py-5 border-b border-[var(--color-hair)]">
         <div>
-          <Eyebrow>RFQ — 견적 요청</Eyebrow>
+          <Label size="md" muted={false}>RFQ — 견적 요청</Label>
           <h1 className="text-[20px] font-[700] tracking-[-0.02em] text-[var(--color-ink)] mt-1">
             견적 요청 목록
           </h1>

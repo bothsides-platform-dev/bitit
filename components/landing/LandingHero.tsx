@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Logo } from '@/components/primitives/Logo';
 import { Button } from '@/components/primitives/Button';
-import { Serial } from '@/components/primitives/Serial';
 import { SavingsCalculator } from '@/components/landing/SavingsCalculator';
 import { LiveBidSimulation } from '@/components/landing/LiveBidSimulation';
 
@@ -116,7 +115,6 @@ export function LandingHero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.36, ease: EASE_OUT }}
             >
-              <Serial current={1} total={5} />
             </motion.div>
 
             {/* Headline */}
@@ -179,7 +177,6 @@ export function LandingHero() {
           <div className="mx-auto w-full max-w-[1080px] flex flex-col gap-[var(--s-9)]">
 
             <div className="flex flex-col gap-[var(--s-5)]">
-              <Serial current={2} total={5} />
               <motion.h2
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -224,7 +221,6 @@ export function LandingHero() {
           <div className="mx-auto w-full max-w-[1080px] flex flex-col gap-[var(--s-9)]">
 
             <div className="flex flex-col gap-[var(--s-5)]">
-              <Serial current={4} total={5} />
               <motion.h2
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -282,7 +278,6 @@ export function LandingHero() {
         <section className="py-[var(--s-11)] px-8 border-b border-[var(--color-hair)]">
           <div className="mx-auto w-full max-w-[1080px] flex flex-col gap-[var(--s-9)]">
             <div className="flex flex-col gap-[var(--s-5)]">
-              <Serial current={5} total={5} />
               <motion.h2
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}

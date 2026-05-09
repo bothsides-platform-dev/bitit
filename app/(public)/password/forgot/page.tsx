@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Serial } from '@/components/primitives/Serial';
 import { Button } from '@/components/primitives/Button';
 import { EnvelopeSvg } from '@/components/auth/EnvelopeSvg';
 import { ResendCountdown } from '@/components/auth/ResendCountdown';
@@ -26,7 +25,6 @@ export default function ForgotPasswordPage() {
   if (sent) {
     return (
       <div className="space-y-8 text-center">
-        <Serial current={1} total={2} label="PASSWORD" className="inline-block mb-4" />
         <div className="flex justify-center text-[var(--color-ink-faint)]"><EnvelopeSvg size={80} /></div>
         <div className="space-y-3">
           <h2 className="text-[20px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">재설정 링크를 보냈습니다</h2>
@@ -41,7 +39,6 @@ export default function ForgotPasswordPage() {
   return (
     <div className="space-y-8">
       <div>
-        <Serial current={1} total={2} label="PASSWORD" className="block mb-4" />
         <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">비밀번호 찾기</h2>
       </div>
       <form className="space-y-6" onSubmit={handleSubmit}>

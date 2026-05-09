@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/primitives/Button';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Label } from '@/components/primitives/Label';
 import { cn } from '@/lib/utils';
 
 // Slim BizProfile-shaped result (matches lib/types/biz-profile + DB schema).
@@ -90,7 +90,7 @@ export function BizLookupField({ onLookup, onResult, onReset }: Props) {
   return (
     <div className="space-y-4">
       <div className="space-y-1">
-        <Eyebrow>사업자 등록번호</Eyebrow>
+        <Label size="md" muted={false}>사업자 등록번호</Label>
         <div className="flex items-end gap-3">
           <input
             type="text"
@@ -125,7 +125,7 @@ export function BizLookupField({ onLookup, onResult, onReset }: Props) {
           ) : (
             <Button
               type="button"
-              variant="secondary"
+              variant="outlined"
               size="sm"
               disabled={!isComplete || status === 'loading'}
               onClick={handleLookup}

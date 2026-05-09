@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
-import { Tag } from '@/components/primitives/Tag';
+import { Label } from '@/components/primitives/Label';
+import { Chip } from '@/components/primitives/Chip';
 import { Avatar } from '@/components/primitives/Avatar';
 import { PageEnter } from '@/components/primitives/PageEnter';
 import { WorkspaceBizProfileForm } from '@/components/settings/WorkspaceBizProfileForm';
@@ -86,7 +86,7 @@ export default async function ProfilePage({ searchParams }: Props) {
   return (
     <PageEnter className="px-4 py-6 md:px-8 md:py-8 space-y-8 md:space-y-10">
       <div>
-        <Eyebrow className="block mb-2">SETTINGS · PROFILE</Eyebrow>
+        <Label size="md" muted={false} as="span" className="block mb-2">SETTINGS · PROFILE</Label>
         <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
           프로필 설정
         </h1>
@@ -95,19 +95,13 @@ export default async function ProfilePage({ searchParams }: Props) {
       {/* User profile (read-only for now — name/avatar editing is M9 surface) */}
       <section>
         <div className="flex items-center gap-3 mb-3">
-          <Eyebrow>사용자</Eyebrow>
+          <Label size="md" muted={false}>사용자</Label>
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
         <div className="flex items-center gap-4 mb-3">
           <Avatar
             name={me.name}
-            color={
-              VALID_AVATAR.includes(
-                me.avatarColor as (typeof VALID_AVATAR)[number],
-              )
-                ? (me.avatarColor as (typeof VALID_AVATAR)[number])
-                : 'ink'
-            }
+            color="primary"
             size="lg"
           />
           <div className="min-w-0">
@@ -134,8 +128,8 @@ export default async function ProfilePage({ searchParams }: Props) {
       {/* Workspace + biz profile */}
       <section>
         <div className="flex items-center gap-3 mb-3">
-          <Eyebrow>워크스페이스</Eyebrow>
-          <Tag variant="muted">{ws.type === 'buyer' ? '구매사' : 'PG'}</Tag>
+          <Label size="md" muted={false}>워크스페이스</Label>
+          <Chip label={ws.type === 'buyer' ? '구매사' : 'PG'} color="surface" />
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
 

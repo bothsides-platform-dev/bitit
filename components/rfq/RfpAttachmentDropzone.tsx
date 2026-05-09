@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Label } from '@/components/primitives/Label';
 import type { RfqMockFile } from '@/lib/stores/rfq-draft';
 import { DRAFT_OWNER_ID } from '@/lib/server/storage/constants';
 import { cn } from '@/lib/utils';
@@ -149,7 +149,7 @@ export function RfpAttachmentDropzone({ value, onChange }: Props) {
 
   return (
     <div className="space-y-3">
-      <Eyebrow>RFP 첨부 파일 (선택)</Eyebrow>
+      <Label size="md" muted={false}>RFP 첨부 파일 (선택)</Label>
 
       {rows.length < MAX_FILES && (
         <div

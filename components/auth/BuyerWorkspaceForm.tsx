@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/primitives/Button';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Label } from '@/components/primitives/Label';
 import {
   BizLookupField,
   type BizLookupResult,
@@ -69,7 +69,7 @@ export function BuyerWorkspaceForm({ onSubmit, submitting, error }: Props) {
   return (
     <div className="space-y-8">
       <div className="space-y-1">
-        <Eyebrow>워크스페이스 이름 *</Eyebrow>
+        <Label size="md" muted={false}>워크스페이스 이름 *</Label>
         <input
           type="text"
           value={wsName}

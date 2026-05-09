@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/primitives/Button';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Label } from '@/components/primitives/Label';
 
 type Props = {
   value: string[];
@@ -39,7 +39,7 @@ export function PgEmailAllowlist({ value, onChange }: Props) {
   return (
     <div className="space-y-3">
       <div className="space-y-1">
-        <Eyebrow>PG 이메일 주소</Eyebrow>
+        <Label size="md" muted={false}>PG 이메일 주소</Label>
         <div className="flex items-end gap-3">
           <input
             type="email"
@@ -51,7 +51,7 @@ export function PgEmailAllowlist({ value, onChange }: Props) {
           />
           <Button
             type="button"
-            variant="secondary"
+            variant="outlined"
             size="sm"
             disabled={!input.trim()}
             onClick={handleAdd}

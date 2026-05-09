@@ -3,7 +3,6 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Serial } from '@/components/primitives/Serial';
 import { Button } from '@/components/primitives/Button';
 import { PasswordField } from '@/components/auth/PasswordField';
 import { loginAction } from '@/lib/server/actions/auth';
@@ -39,7 +38,6 @@ function LoginContent() {
   return (
     <div className="space-y-8">
       <div>
-        <Serial current={1} total={2} label="LOGIN" className="block mb-4" />
         <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
           로그인
         </h2>

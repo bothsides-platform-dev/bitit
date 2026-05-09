@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
-import { Tag } from '@/components/primitives/Tag';
+import { Label } from '@/components/primitives/Label';
+import { Chip, type ChipColor } from '@/components/primitives/Chip';
 import { Button } from '@/components/primitives/Button';
 import { PageEnter } from '@/components/primitives/PageEnter';
 import { BidComparisonView } from '@/components/rfq/BidComparisonView';
@@ -28,15 +28,12 @@ const statusLabel: Record<string, string> = {
   awarded: '계약완료',
   cancelled: '취소',
 };
-const statusVariant: Record<
-  string,
-  'default' | 'amber' | 'moss' | 'terracotta' | 'muted'
-> = {
-  draft: 'muted',
-  sent: 'amber',
-  closed: 'muted',
-  awarded: 'moss',
-  cancelled: 'terracotta',
+const statusColor: Record<string, ChipColor> = {
+  draft: 'surface',
+  sent: 'warning',
+  closed: 'surface',
+  awarded: 'tertiary',
+  cancelled: 'error',
 };
 
 type Props = { params: Promise<{ id: string }> };
@@ -113,7 +110,7 @@ export default async function RfqDetailPage({ params }: Props) {
             {rfq.title}
           </h1>
           <div className="flex items-center gap-3 shrink-0">
-            <Tag variant={statusVariant[rfq.status]}>{statusLabel[rfq.status]}</Tag>
+            <Chip label={statusLabel[rfq.status]} color={statusColor[rfq.status]} />
             {rfq.status === 'sent' && rfqBids.length > 0 && (
               <Link href={`/rfq/${id}/award`}>
                 <Button size="sm">수주 처리 →</Button>
@@ -122,11 +119,11 @@ export default async function RfqDetailPage({ params }: Props) {
           </div>
         </div>
         <div className="flex items-center gap-4 mt-2">
-          <Eyebrow>마감 {formatDate(rfq.deadline)}</Eyebrow>
+          <Label size="md" muted={false}>마감 {formatDate(rfq.deadline)}</Label>
           <span className="text-[var(--color-hair-strong)]">·</span>
-          <Eyebrow>PG {rfq.allowedPgEmails.length}개사</Eyebrow>
+          <Label size="md" muted={false}>PG {rfq.allowedPgEmails.length}개사</Label>
           <span className="text-[var(--color-hair-strong)]">·</span>
-          <Eyebrow>받은 견적 {rfqBids.length}건</Eyebrow>
+          <Label size="md" muted={false}>받은 견적 {rfqBids.length}건</Label>
         </div>
       </div>
 
@@ -155,7 +152,7 @@ export default async function RfqDetailPage({ params }: Props) {
         {/* Biz info */}
         <section>
           <div className="flex items-center gap-3 mb-3">
-            <Eyebrow>사업자 정보</Eyebrow>
+            <Label size="md" muted={false}>사업자 정보</Label>
             <div className="flex-1 h-px bg-[var(--color-hair)]" />
           </div>
           <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
@@ -198,7 +195,7 @@ export default async function RfqDetailPage({ params }: Props) {
           {rfq.memo && (
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <Eyebrow>메모</Eyebrow>
+                <Label size="md" muted={false}>메모</Label>
                 <div className="flex-1 h-px bg-[var(--color-hair)]" />
               </div>
               <p className="text-[13px] text-[var(--color-ink-muted)] leading-relaxed whitespace-pre-wrap">

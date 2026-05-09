@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Serial } from '@/components/primitives/Serial';
 import { ResendCountdown } from '@/components/auth/ResendCountdown';
 import { EnvelopeSvg } from '@/components/auth/EnvelopeSvg';
 import { verifyEmailAction } from '@/lib/server/actions/auth';
@@ -72,7 +71,6 @@ function VerifyContent() {
     const displayEmail = emailQuery || readSignupDraft().email || 'your@email.com';
     return (
       <div className="space-y-8 text-center">
-        <Serial current={1} total={3} label="VERIFY" className="inline-block mb-4" />
         <div className="flex justify-center text-[var(--color-ink-faint)]">
           <EnvelopeSvg size={80} />
         </div>

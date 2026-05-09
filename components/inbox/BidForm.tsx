@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/primitives/Button';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Label } from '@/components/primitives/Label';
 import { Select } from '@/components/primitives/Select';
 import { StatutoryCardFeeNotice } from './StatutoryCardFeeNotice';
 import { submitBidAction } from '@/lib/server/actions/bid';
@@ -58,7 +58,7 @@ function PctInput({
 }) {
   return (
     <div className="space-y-1">
-      <Eyebrow>{label}</Eyebrow>
+      <Label size="md" muted={false}>{label}</Label>
       <div className="flex items-end gap-1">
         <input
           type="number"
@@ -88,7 +88,7 @@ function KrwInput({
 }) {
   return (
     <div className="space-y-1">
-      <Eyebrow>{label}</Eyebrow>
+      <Label size="md" muted={false}>{label}</Label>
       <div className="flex items-end gap-1">
         <input
           type="number"
@@ -261,7 +261,7 @@ export function BidForm({ rfqId, grade }: Props) {
         </div>
         <div className="grid grid-cols-2 gap-x-6 gap-y-5">
           <div className="col-span-2 space-y-1">
-            <Eyebrow>정산 주기</Eyebrow>
+            <Label size="md" muted={false}>정산 주기</Label>
             <Select
               options={SETTLE_CYCLES.map((c) => ({ value: c.value, label: c.label }))}
               value={settleCycle}
@@ -312,7 +312,7 @@ export function BidForm({ rfqId, grade }: Props) {
         </div>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Eyebrow>제안서 PDF (선택)</Eyebrow>
+            <Label size="md" muted={false}>제안서 PDF (선택)</Label>
             <input
               ref={proposalInputRef}
               type="file"
@@ -378,7 +378,7 @@ export function BidForm({ rfqId, grade }: Props) {
             )}
           </div>
           <div className="space-y-1">
-            <Eyebrow>메모</Eyebrow>
+            <Label size="md" muted={false}>메모</Label>
             <textarea
               value={memo}
               onChange={(e) => setMemo(e.target.value)}

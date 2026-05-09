@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Label } from '@/components/primitives/Label';
 
 type SubnavItem = { href: string; label: string };
 
@@ -21,7 +21,7 @@ export function Subnav({ title, items, action }: SubnavProps) {
       className="flex shrink-0 bg-[var(--color-paper)] flex-row md:flex-col w-full md:w-[var(--shell-subnav)] border-b md:border-b-0 md:border-r border-[var(--color-hair)] overflow-x-auto md:overflow-y-auto"
     >
       <div className="hidden md:flex px-5 py-4 border-b border-[var(--color-hair)] items-center justify-between">
-        <Eyebrow>{title}</Eyebrow>
+        <Label size="md" muted={false}>{title}</Label>
         {action}
       </div>
       <nav className="flex flex-row md:flex-col md:py-2">

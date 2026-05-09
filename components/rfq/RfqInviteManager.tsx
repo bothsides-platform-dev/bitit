@@ -3,8 +3,9 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/primitives/Button';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
-import { Tag } from '@/components/primitives/Tag';
+import { Label } from '@/components/primitives/Label';
+import { Chip } from '@/components/primitives/Chip';
+import type { ChipColor } from '@/components/primitives/Chip';
 import {
   addPgEmailsToRfqAction,
   sendDraftInvitationsAction,
@@ -33,16 +34,13 @@ const statusLabel: Record<InvitationStatus, string> = {
   expired: '만료',
 };
 
-const statusVariant: Record<
-  InvitationStatus,
-  'amber' | 'moss' | 'muted' | 'default' | 'terracotta'
-> = {
-  draft: 'muted',
-  sent: 'default',
-  opened: 'amber',
-  accepted: 'moss',
-  declined: 'terracotta',
-  expired: 'muted',
+const statusColor: Record<InvitationStatus, ChipColor> = {
+  draft: 'surface',
+  sent: 'surface',
+  opened: 'warning',
+  accepted: 'tertiary',
+  declined: 'error',
+  expired: 'surface',
 };
 
 function isValidEmail(s: string): boolean {
@@ -116,7 +114,7 @@ export function RfqInviteManager({
       {/* PG 목록 */}
       <div>
         <div className="flex items-center gap-3 mb-3">
-          <Eyebrow>초대 PG</Eyebrow>
+          <Label size="md" muted={false}>초대 PG</Label>
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
         {invitations.length === 0 ? (
@@ -138,9 +136,7 @@ export function RfqInviteManager({
                     {inv.email}
                   </span>
                 </div>
-                <Tag variant={statusVariant[inv.status]}>
-                  {statusLabel[inv.status]}
-                </Tag>
+                <Chip label={statusLabel[inv.status]} color={statusColor[inv.status]} />
               </div>
             ))}
           </div>
@@ -151,7 +147,7 @@ export function RfqInviteManager({
         <>
           {/* PG 추가 입력 */}
           <div className="space-y-2">
-            <Eyebrow>PG 이메일 추가</Eyebrow>
+            <Label size="md" muted={false}>PG 이메일 추가</Label>
             <div className="flex items-end gap-3">
               <input
                 type="email"
@@ -169,7 +165,7 @@ export function RfqInviteManager({
               />
               <Button
                 type="button"
-                variant="secondary"
+                variant="outlined"
                 size="sm"
                 disabled={!input.trim() || pending}
                 onClick={handleAdd}
@@ -194,7 +190,7 @@ export function RfqInviteManager({
               type="button"
               fullWidth
               size="md"
-              variant={draftCount > 0 ? 'primary' : 'ghost'}
+              variant={draftCount > 0 ? 'filled' : 'text'}
               disabled={draftCount === 0 || pending}
               onClick={handleSendDrafts}
             >
@@ -209,7 +205,7 @@ export function RfqInviteManager({
           {/* 공유 링크 */}
           <div className="space-y-2">
             <div className="flex items-center gap-3 mb-1">
-              <Eyebrow>공유 링크</Eyebrow>
+              <Label size="md" muted={false}>공유 링크</Label>
               <div className="flex-1 h-px bg-[var(--color-hair)]" />
             </div>
             <div className="flex items-center gap-3 border border-[var(--color-hair)] rounded-md px-3 py-2">
@@ -221,7 +217,7 @@ export function RfqInviteManager({
               />
               <Button
                 type="button"
-                variant="secondary"
+                variant="outlined"
                 size="sm"
                 onClick={handleCopyShare}
               >

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Serial } from '@/components/primitives/Serial';
 import { Button } from '@/components/primitives/Button';
 import { AgreementCheckboxes } from '@/components/auth/AgreementCheckboxes';
 import { useSignupDraftStore } from '@/lib/stores/signup-draft';
@@ -75,7 +74,6 @@ export default function BuyerSignupEmailPage() {
   return (
     <div className="space-y-8">
       <div>
-        <Serial current={1} total={4} label="EMAIL" className="block mb-4" />
         <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
           구매사 계정을 만듭니다
         </h2>

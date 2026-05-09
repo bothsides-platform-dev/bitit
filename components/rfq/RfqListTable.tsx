@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Tag } from '@/components/primitives/Tag';
+import { Chip, type ChipColor } from '@/components/primitives/Chip';
 import { useListNavigation } from '@/lib/hooks/useListNavigation';
 import { formatDate } from '@/lib/format';
 import type { RFQ } from '@/lib/types/rfq';
@@ -15,15 +15,12 @@ const statusLabel: Record<string, string> = {
   cancelled: '취소',
 };
 
-const statusVariant: Record<
-  string,
-  'default' | 'amber' | 'moss' | 'terracotta' | 'muted'
-> = {
-  draft: 'muted',
-  sent: 'amber',
-  closed: 'muted',
-  awarded: 'moss',
-  cancelled: 'terracotta',
+const statusColor: Record<string, ChipColor> = {
+  draft: 'surface',
+  sent: 'warning',
+  closed: 'surface',
+  awarded: 'tertiary',
+  cancelled: 'error',
 };
 
 type Props = { rfqs: RFQ[] };
@@ -87,7 +84,7 @@ export function RfqListTable({ rfqs }: Props) {
                 {rfq.allowedPgEmails.length}
               </td>
               <td className="px-3 py-4 text-right">
-                <Tag variant={statusVariant[rfq.status]}>{statusLabel[rfq.status]}</Tag>
+                <Chip label={statusLabel[rfq.status]} color={statusColor[rfq.status]} />
               </td>
             </tr>
           ))}

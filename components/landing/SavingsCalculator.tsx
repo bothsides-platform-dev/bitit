@@ -2,9 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import { Slider } from '@/components/ui/slider';
-import { Serial } from '@/components/primitives/Serial';
 import { KpiCell } from '@/components/primitives/KpiCell';
-import { Tag } from '@/components/primitives/Tag';
+import { Chip } from '@/components/primitives/Chip';
 import { CostComparisonChart } from '@/components/landing/CostComparisonChart';
 import { formatKRW } from '@/lib/format';
 import { GRADE_LABELS } from '@/lib/types/biz-profile';
@@ -64,7 +63,7 @@ export function SavingsCalculator() {
         <div className="flex flex-col gap-[var(--s-8)]">
           <div className="flex flex-col gap-[var(--s-3)]">
             <div className="flex items-baseline justify-between">
-              <Serial current={1} total={2} label="연간 거래액" />
+              <span className="font-mono text-[var(--text-xs)] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">연간 거래액</span>
               <span className="font-mono tabular-nums text-[var(--text-base)] text-[var(--color-ink)] tracking-[0.02em]">
                 {formatVolume(volume)}
               </span>
@@ -85,7 +84,7 @@ export function SavingsCalculator() {
 
           <div className="flex flex-col gap-[var(--s-3)]">
             <div className="flex items-baseline justify-between">
-              <Serial current={2} total={2} label="현재 PG 수수료율" />
+              <span className="font-mono text-[var(--text-xs)] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">현재 PG 수수료율</span>
               <span className="font-mono tabular-nums text-[var(--text-base)] text-[var(--color-ink)] tracking-[0.02em]">
                 {formatRate(rateBp / 100)}
               </span>
@@ -115,7 +114,7 @@ export function SavingsCalculator() {
             <span className="font-mono text-[var(--text-2xs)] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
               가맹점 등급
             </span>
-            <Tag>{GRADE_LABELS[grade]}</Tag>
+            <Chip label={GRADE_LABELS[grade]} color="surface" />
           </div>
           <span className="font-mono text-[var(--text-2xs)] tracking-[0.08em] text-[var(--color-ink-soft)]">
             {baselineNote}

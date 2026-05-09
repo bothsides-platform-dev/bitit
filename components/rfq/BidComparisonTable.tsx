@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Tag } from '@/components/primitives/Tag';
+import { Chip } from '@/components/primitives/Chip';
 import { Button } from '@/components/primitives/Button';
 import { EmptyState } from '@/components/primitives/EmptyState';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
@@ -150,14 +150,14 @@ export function BidComparisonTable({ rfqId, bids, grade, rfqStatus, awardedBidId
                 <td className="px-3 py-4 text-right">
                   {canAward && (
                     <Link href={`/rfq/${rfqId}/award?bidId=${bid.id}`}>
-                      <Button variant="secondary" size="sm">선택</Button>
+                      <Button variant="outlined" size="sm">선택</Button>
                     </Link>
                   )}
                   {!canAward && awardedBidId === bid.id && (
-                    <Tag variant="moss">수주</Tag>
+                    <Chip label="수주" color="tertiary" />
                   )}
                   {!canAward && awardedBidId && awardedBidId !== bid.id && (
-                    <Tag variant="muted">미선정</Tag>
+                    <Chip label="미선정" color="surface" />
                   )}
                 </td>
               </tr>

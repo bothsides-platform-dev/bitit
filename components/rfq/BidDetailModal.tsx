@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Tag } from '@/components/primitives/Tag';
+import { Chip, type ChipColor } from '@/components/primitives/Chip';
 import { Button } from '@/components/primitives/Button';
 import { IconButton } from '@/components/primitives/IconButton';
 import { PaperclipIcon, XIcon, FileTextIcon } from '@/components/icons';
@@ -29,10 +29,10 @@ const SETTLE_LABEL: Record<string, string> = {
   monthly: '월1회',
 };
 
-const stageTagVariant: Record<BuyerStage, 'muted' | 'amber' | 'moss'> = {
-  pending: 'muted',
-  negotiating: 'amber',
-  decided: 'moss',
+const stageChipColor: Record<BuyerStage, ChipColor> = {
+  pending: 'surface',
+  negotiating: 'warning',
+  decided: 'tertiary',
 };
 
 const stageLabel: Record<BuyerStage, string> = {
@@ -113,7 +113,7 @@ export function BidDetailModal({
                 {pgName}
               </h2>
               <div className="mt-2">
-                <Tag variant={stageTagVariant[stage]}>{stageLabel[stage]}</Tag>
+                <Chip label={stageLabel[stage]} color={stageChipColor[stage]} />
               </div>
             </div>
             <IconButton

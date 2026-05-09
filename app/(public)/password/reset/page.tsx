@@ -3,7 +3,6 @@
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import { Serial } from '@/components/primitives/Serial';
 import { Button } from '@/components/primitives/Button';
 import { PasswordField } from '@/components/auth/PasswordField';
 import { CheckSvg } from '@/components/auth/EnvelopeSvg';
@@ -71,7 +70,6 @@ function ResetContent() {
   return (
     <div className="space-y-8">
       <div>
-        <Serial current={2} total={2} label="RESET" className="block mb-4" />
         <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">새 비밀번호</h2>
       </div>
       <form className="space-y-6" onSubmit={handleSubmit}>

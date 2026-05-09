@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
-import { Serial } from '@/components/primitives/Serial';
 import { BuyerWorkspaceForm } from '@/components/auth/BuyerWorkspaceForm';
 import { signupCompleteAction } from '@/lib/server/actions/auth';
 import {
@@ -70,7 +69,6 @@ export default function BuyerWorkspacePage() {
   return (
     <div className="space-y-8">
       <div>
-        <Serial current={4} total={4} label="WORKSPACE" className="block mb-4" />
         <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
           구매사 워크스페이스를 만듭니다
         </h2>

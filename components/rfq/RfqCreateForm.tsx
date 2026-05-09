@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/primitives/Button';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Label } from '@/components/primitives/Label';
 import { PgEmailAllowlist } from './PgEmailAllowlist';
 import { RfpAttachmentDropzone } from './RfpAttachmentDropzone';
 import { useRfqDraftStore } from '@/lib/stores/rfq-draft';
@@ -169,7 +169,7 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
           <SectionHeader num="02" label="견적 내용" />
           <div className="space-y-5">
             <div className="space-y-1">
-              <Eyebrow>제목 *</Eyebrow>
+              <Label size="md" muted={false}>제목 *</Label>
               <input
                 type="text"
                 value={draft.title}
@@ -179,7 +179,7 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
               />
             </div>
             <div className="space-y-1">
-              <Eyebrow>자유 메모 (RFP)</Eyebrow>
+              <Label size="md" muted={false}>자유 메모 (RFP)</Label>
               <textarea
                 value={draft.memo}
                 onChange={(e) => draft.setField('memo', e.target.value)}
@@ -211,7 +211,7 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
           <SectionHeader num="04" label="발송 조건" />
           <div className="space-y-6">
             <div className="space-y-1">
-              <Eyebrow>마감일 *</Eyebrow>
+              <Label size="md" muted={false}>마감일 *</Label>
               <input
                 type="date"
                 value={draft.deadline ? draft.deadline.slice(0, 10) : ''}

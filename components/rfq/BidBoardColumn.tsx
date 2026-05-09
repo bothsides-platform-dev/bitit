@@ -6,16 +6,16 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import Link from 'next/link';
-import { Tag } from '@/components/primitives/Tag';
+import { Chip, type ChipColor } from '@/components/primitives/Chip';
 import { BidBoardCard } from './BidBoardCard';
 import { cn } from '@/lib/utils';
 import type { Bid, BuyerStage } from '@/lib/types/bid';
 import { BUYER_STAGE_LABEL } from '@/lib/types/bid';
 
-const stageTagVariant: Record<BuyerStage, 'muted' | 'amber' | 'moss'> = {
-  pending: 'muted',
-  negotiating: 'amber',
-  decided: 'moss',
+const stageChipColor: Record<BuyerStage, ChipColor> = {
+  pending: 'surface',
+  negotiating: 'warning',
+  decided: 'tertiary',
 };
 
 type Props = {
@@ -61,9 +61,7 @@ export function BidBoardColumn({
       {/* Column header */}
       <div className="flex items-center justify-between gap-2 px-1 pb-3 mb-3 border-b border-[var(--color-hair)]">
         <div className="flex items-center gap-2">
-          <Tag variant={stageTagVariant[stage]}>
-            {BUYER_STAGE_LABEL[stage]}
-          </Tag>
+          <Chip label={BUYER_STAGE_LABEL[stage]} color={stageChipColor[stage]} />
           <span className="font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)]">
             {String(bids.length).padStart(2, '0')}
           </span>

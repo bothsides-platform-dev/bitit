@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
-import { Tag } from '@/components/primitives/Tag';
+import { Label } from '@/components/primitives/Label';
+import { Chip } from '@/components/primitives/Chip';
 import { Button } from '@/components/primitives/Button';
 import { EmptyState } from '@/components/primitives/EmptyState';
 import { PageEnter } from '@/components/primitives/PageEnter';
@@ -18,15 +18,15 @@ export async function BuyerHome({ workspaceId }: { workspaceId: string }) {
     <PageEnter className="px-8 py-10">
       {/* KPI Strip */}
       <div className="flex items-start gap-16 mb-12 pb-12 border-b border-[var(--color-hair)]">
-        <KpiCell label="전체 견적" serial="A" value={String(rfqs.length)} />
-        <KpiCell label="진행 중" serial="B" value={String(sentRfqs.length)} />
-        <KpiCell label="수주 완료" serial="C" value={String(awardedRfqs.length)} />
+        <KpiCell label="전체 견적" value={String(rfqs.length)} />
+        <KpiCell label="진행 중" value={String(sentRfqs.length)} />
+        <KpiCell label="수주 완료" value={String(awardedRfqs.length)} />
       </div>
 
       {/* Active RFQs */}
       <section>
         <div className="flex items-center gap-3 mb-4">
-          <Eyebrow>진행 중인 견적</Eyebrow>
+          <Label size="md" muted={false}>진행 중인 견적</Label>
           <span className="font-mono tabular-nums text-[11px] text-[var(--color-ink-soft)]">
             {sentRfqs.length}건
           </span>
@@ -58,7 +58,7 @@ export async function BuyerHome({ workspaceId }: { workspaceId: string }) {
                     {rfq.id} · {formatDate(rfq.sentAt ?? rfq.createdAt)}
                   </span>
                 </div>
-                <Tag variant="amber">발송됨</Tag>
+                <Chip label="발송됨" color="warning" />
               </Link>
             ))}
           </div>

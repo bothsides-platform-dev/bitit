@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Serial } from '@/components/primitives/Serial';
 import { ResendCountdown } from '@/components/auth/ResendCountdown';
 import { EnvelopeSvg } from '@/components/auth/EnvelopeSvg';
 import { signupEmailAction } from '@/lib/server/actions/auth';
@@ -30,7 +29,6 @@ export default function PgVerifyPage() {
 
   return (
     <div className="space-y-8 text-center">
-      <Serial current={current} total={total} label="VERIFY" className="inline-block mb-4" />
 
       <div className="flex justify-center text-[var(--color-ink-faint)]">
         <EnvelopeSvg size={80} />

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/primitives/Button';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Label } from '@/components/primitives/Label';
 import { updateWorkspaceBizProfileAction } from '@/lib/server/actions/rfq';
 import { GRADE_LABELS, type MerchantGrade } from '@/lib/types/biz-profile';
 
@@ -48,7 +48,7 @@ export function WorkspaceBizProfileForm({ currentGrade }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <Eyebrow>가맹점 등급 갱신</Eyebrow>
+      <Label size="md" muted={false}>가맹점 등급 갱신</Label>
       <div className="border-t border-[var(--color-hair)] divide-y divide-[var(--color-hair)]">
         {ALL_GRADES.map((g) => {
           const selected = grade === g;

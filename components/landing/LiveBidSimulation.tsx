@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'motion/react';
-import { Serial } from '@/components/primitives/Serial';
 
 type BidStatus = 'waiting' | 'typing' | 'done';
 
@@ -101,7 +100,6 @@ export function LiveBidSimulation() {
 
         {/* Header */}
         <div className="flex flex-col gap-[var(--s-5)]">
-          <Serial current={3} total={5} label="경쟁이 만드는 차이" />
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}

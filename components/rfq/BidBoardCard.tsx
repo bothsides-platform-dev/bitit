@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { Tag } from '@/components/primitives/Tag';
+import { Chip, type ChipColor } from '@/components/primitives/Chip';
 import { IconButton } from '@/components/primitives/IconButton';
 import { MoreHorizontalIcon, FileTextIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
@@ -28,10 +28,10 @@ const SETTLE_LABEL: Record<string, string> = {
   monthly: '월1회',
 };
 
-const stageTagVariant: Record<BuyerStage, 'muted' | 'amber' | 'moss'> = {
-  pending: 'muted',
-  negotiating: 'amber',
-  decided: 'moss',
+const stageChipColor: Record<BuyerStage, ChipColor> = {
+  pending: 'surface',
+  negotiating: 'warning',
+  decided: 'tertiary',
 };
 
 type Props = {
@@ -112,11 +112,9 @@ export function BidBoardCard({
         {/* Stage + serial */}
         <div className="flex items-center gap-2 mb-3">
           {isAwarded ? (
-            <Tag variant="moss">수주</Tag>
+            <Chip label="수주" color="tertiary" />
           ) : (
-            <Tag variant={stageTagVariant[stage]}>
-              {BUYER_STAGE_LABEL[stage]}
-            </Tag>
+            <Chip label={BUYER_STAGE_LABEL[stage]} color={stageChipColor[stage]} />
           )}
           <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)] tabular-nums ml-auto">
             № {String(serial).padStart(2, '0')}

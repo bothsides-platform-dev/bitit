@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation';
-import { Serial } from '@/components/primitives/Serial';
 import { RfqCreateForm } from '@/components/rfq/RfqCreateForm';
 import { auth } from '@/auth';
 import { getWorkspaceRepo } from '@/lib/server/repositories/factory';
@@ -26,7 +25,6 @@ export default async function RfqNewPage() {
   return (
     <div className="px-8 py-8 lg:h-full lg:flex lg:flex-col lg:overflow-hidden">
       <div className="mb-10 lg:flex-none">
-        <Serial current={1} total={4} label="RFQ" className="block mb-3" />
         <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
           신규 견적 요청
         </h1>

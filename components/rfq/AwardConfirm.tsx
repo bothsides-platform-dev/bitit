@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
-import { Tag } from '@/components/primitives/Tag';
+import { Label } from '@/components/primitives/Label';
+import { Chip } from '@/components/primitives/Chip';
 import { Button } from '@/components/primitives/Button';
 import { awardRfqAction } from '@/lib/server/actions/rfq';
 import { STATUTORY_CARD_FEE } from '@/lib/types/bid';
@@ -91,12 +91,12 @@ export function AwardConfirm(props: Props) {
 
         <section>
           <div className="flex items-center gap-3 mb-3">
-            <Eyebrow>발송 알림</Eyebrow>
+            <Label size="md" muted={false}>발송 알림</Label>
             <div className="flex-1 h-px bg-[var(--color-hair)]" />
           </div>
           <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
             <div className="py-3 flex items-center gap-4">
-              <Tag variant="moss">선정</Tag>
+              <Chip label="선정" color="tertiary" />
               <span className="text-[13px] text-[var(--color-ink)]">
                 {pgName(selected.pgWsId)}
               </span>
@@ -106,7 +106,7 @@ export function AwardConfirm(props: Props) {
             </div>
             {others.map((b) => (
               <div key={b.id} className="py-3 flex items-center gap-4">
-                <Tag variant="muted">미선정</Tag>
+                <Chip label="미선정" color="surface" />
                 <span className="text-[13px] text-[var(--color-ink)]">
                   {pgName(b.pgWsId)}
                 </span>
@@ -151,7 +151,7 @@ export function AwardConfirm(props: Props) {
       {/* Selected bid */}
       <section>
         <div className="flex items-center gap-3 mb-3">
-          <Eyebrow>선택 견적</Eyebrow>
+          <Label size="md" muted={false}>선택 견적</Label>
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
         <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
@@ -195,7 +195,7 @@ export function AwardConfirm(props: Props) {
       {/* Buyer / RFQ context */}
       <section>
         <div className="flex items-center gap-3 mb-3">
-          <Eyebrow>계약 조건</Eyebrow>
+          <Label size="md" muted={false}>계약 조건</Label>
           <div className="flex-1 h-px bg-[var(--color-hair)]" />
         </div>
         <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
@@ -242,7 +242,7 @@ export function AwardConfirm(props: Props) {
         </div>
         <div className="flex gap-3">
           <Link href={`/rfq/${rfqId}`} className="flex-1">
-            <Button variant="secondary" fullWidth>
+            <Button variant="outlined" fullWidth>
               ← 비교로 돌아가기
             </Button>
           </Link>

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { PageEnter } from '@/components/primitives/PageEnter';
 import { KpiCell } from '@/components/primitives/KpiCell';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Label } from '@/components/primitives/Label';
 import { EmptyState } from '@/components/primitives/EmptyState';
 import { InboxIcon } from '@/components/icons';
 import { getInvitationRepo, getBidRepo } from '@/lib/server/repositories/factory';
@@ -40,10 +40,10 @@ export async function PgHome({
     <PageEnter className="px-8 py-10">
       {/* KPI Strip */}
       <div className="flex items-start gap-16 mb-12 pb-12 border-b border-[var(--color-hair)]">
-        <KpiCell label="전체 수신" serial="A" value={String(kpi.total)} />
-        <KpiCell label="응답 대기" serial="B" value={String(kpi.pending)} />
-        <KpiCell label="제출 완료" serial="C" value={String(kpi.submitted)} />
-        <KpiCell label="수주" serial="D" value={String(kpi.won)} />
+        <KpiCell label="전체 수신" value={String(kpi.total)} />
+        <KpiCell label="응답 대기" value={String(kpi.pending)} />
+        <KpiCell label="제출 완료" value={String(kpi.submitted)} />
+        <KpiCell label="수주" value={String(kpi.won)} />
       </div>
 
       {/* 2-column list */}
@@ -51,7 +51,7 @@ export async function PgHome({
         {/* Left: 응답 대기 */}
         <section>
           <div className="flex items-center gap-2 mb-3">
-            <Eyebrow>응답 대기</Eyebrow>
+            <Label size="md" muted={false}>응답 대기</Label>
             <span className="font-mono tabular-nums text-[11px] text-[var(--color-ink-soft)]">
               {kpi.pending}건
             </span>
@@ -105,7 +105,7 @@ export async function PgHome({
         {/* Right: 최근 제출 */}
         <section>
           <div className="flex items-center gap-2 mb-3">
-            <Eyebrow>최근 제출</Eyebrow>
+            <Label size="md" muted={false}>최근 제출</Label>
             <span className="font-mono tabular-nums text-[11px] text-[var(--color-ink-soft)]">
               최근 3건
             </span>

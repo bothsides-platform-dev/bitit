@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/primitives/Button';
-import { Tag } from '@/components/primitives/Tag';
+import { Chip } from '@/components/primitives/Chip';
 import { GRADE_LABELS, type MerchantGrade } from '@/lib/types/biz-profile';
 
 type Source = 'user_confirmed' | 'user_overridden';
@@ -36,7 +36,7 @@ export function GradeConfirmPanel({ onConfirm }: Props) {
         <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
           등급 확정
         </span>
-        <Tag variant="default">{GRADE_LABELS[grade]}</Tag>
+        <Chip label={GRADE_LABELS[grade]} color="surface" />
         <button
           type="button"
           onClick={() => setConfirmed(false)}

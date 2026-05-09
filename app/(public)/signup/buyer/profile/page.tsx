@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Serial } from '@/components/primitives/Serial';
 import { Button } from '@/components/primitives/Button';
 import { PasswordField } from '@/components/auth/PasswordField';
 import { useSignupDraftStore } from '@/lib/stores/signup-draft';
@@ -53,7 +52,6 @@ export default function BuyerProfilePage() {
   return (
     <div className="space-y-8">
       <div>
-        <Serial current={3} total={4} label="PROFILE" className="block mb-4" />
         <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
           프로필 설정
         </h2>

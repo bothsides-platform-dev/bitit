@@ -5,7 +5,7 @@
 // `channel: 'inapp'`만 SQL 단에서 필터하여 fetch.
 import { requireSession } from '@/lib/auth/session';
 import { getNotificationRepo } from '@/lib/server/repositories/factory';
-import { Eyebrow } from '@/components/primitives/Eyebrow';
+import { Label } from '@/components/primitives/Label';
 import { PageEnter } from '@/components/primitives/PageEnter';
 import type { Notification } from '@/lib/types/notification';
 
@@ -27,7 +27,7 @@ export default async function NotificationsSettingsPage() {
   return (
     <PageEnter className="px-4 py-6 md:px-8 md:py-8 space-y-8">
       <div>
-        <Eyebrow className="block mb-2">SETTINGS · NOTIFICATIONS</Eyebrow>
+        <Label size="md" muted={false} as="span" className="block mb-2">SETTINGS · NOTIFICATIONS</Label>
         <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
           알림 활동
         </h1>
@@ -38,7 +38,7 @@ export default async function NotificationsSettingsPage() {
 
       <section>
         <div className="flex items-center gap-3 mb-4">
-          <Eyebrow>받은 알림</Eyebrow>
+          <Label size="md" muted={false}>받은 알림</Label>
           <span className="font-mono tabular-nums text-[11px] text-[var(--color-ink-soft)]">
             {String(notifications.length).padStart(3, '0')}건
             {unreadCount > 0 && (

@@ -3,15 +3,15 @@
 import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { Tag } from '@/components/primitives/Tag';
+import { Chip, type ChipColor } from '@/components/primitives/Chip';
 import { markNotificationReadAction } from '@/lib/server/actions/notifications/markNotificationReadAction';
 import type { Notification, NotificationStatus } from '@/lib/types/notification';
 
-const statusVariant: Record<NotificationStatus, 'amber' | 'moss' | 'terracotta' | 'muted'> = {
-  pending: 'amber',
-  sent: 'terracotta',
-  failed: 'terracotta',
-  read: 'muted',
+const statusColor: Record<NotificationStatus, ChipColor> = {
+  pending: 'warning',
+  sent: 'error',
+  failed: 'error',
+  read: 'surface',
 };
 
 const statusLabel: Record<NotificationStatus, string> = {
@@ -100,7 +100,7 @@ function NotificationRow({
         </div>
       </div>
       <div className="flex flex-col items-end gap-2 shrink-0">
-        <Tag variant={statusVariant[notif.status]}>{statusLabel[notif.status]}</Tag>
+        <Chip label={statusLabel[notif.status]} color={statusColor[notif.status]} />
         {!hasLink && isUnread && (
           <button
             type="button"
