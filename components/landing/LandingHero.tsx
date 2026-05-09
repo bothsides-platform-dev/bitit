@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { motion, useScroll, useTransform, useMotionValueEvent } from 'motion/react';
+import { motion, useScroll, useMotionValueEvent } from 'motion/react';
 import { Logo } from '@/components/primitives/Logo';
 import { Button } from '@/components/primitives/Button';
 import { SavingsCalculator } from '@/components/landing/SavingsCalculator';
