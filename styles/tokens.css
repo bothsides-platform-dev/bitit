@@ -1,73 +1,212 @@
-/* bidit design tokens — single source of truth. Sync from DESIGN.md §2~4,6 */
+/* bidit design tokens — Material Design 3
+   Seed primary: #0061A4 (trust blue, finance)
+   Seed tertiary: #006D43 (success green, contracts)
+*/
 
 @theme {
-  /* ── Ink ──────────────────────────────── */
-  --color-ink:        #0a0a0f;
-  --color-ink-muted:  #5a5560;
-  --color-ink-soft:   #8c8690;
-  --color-ink-faint:  #b8b0a4;
+  /* ── Color System — Light Theme ───────────────────── */
 
-  /* ── Paper ────────────────────────────── */
-  --color-paper:      #faf7f0;
-  --color-paper-pure: #fefdf9;
-  --color-paper-warm: #f3eddd;
+  /* Primary — Trust Blue */
+  --md-sys-color-primary:                  #0061A4;
+  --md-sys-color-on-primary:               #FFFFFF;
+  --md-sys-color-primary-container:        #D1E4FF;
+  --md-sys-color-on-primary-container:     #001D36;
 
-  /* ── Night (sidebar) ──────────────────── */
-  --color-night:   #0a0a0f;
-  --color-night-2: #14141b;
+  /* Secondary — Slate support */
+  --md-sys-color-secondary:                #535F70;
+  --md-sys-color-on-secondary:             #FFFFFF;
+  --md-sys-color-secondary-container:      #D7E3F7;
+  --md-sys-color-on-secondary-container:   #101C2B;
 
-  /* ── Hairline ─────────────────────────── */
-  --color-hair:        #ece5d2;
-  --color-hair-strong: #c8c0ac;
+  /* Tertiary — Money/success green */
+  --md-sys-color-tertiary:                 #006D43;
+  --md-sys-color-on-tertiary:              #FFFFFF;
+  --md-sys-color-tertiary-container:       #8DF6BC;
+  --md-sys-color-on-tertiary-container:    #002113;
 
-  /* ── Accent ───────────────────────────── */
-  --color-accent:      #1a3a52;
-  --color-accent-deep: #0e2538;
-  --color-accent-tint: #e0e6ea;
+  /* Error */
+  --md-sys-color-error:                    #BA1A1A;
+  --md-sys-color-on-error:                 #FFFFFF;
+  --md-sys-color-error-container:          #FFDAD6;
+  --md-sys-color-on-error-container:       #410002;
 
-  /* ── Status ───────────────────────────── */
-  --color-amber:      #b97a25;
-  --color-terracotta: #a8443a;
-  --color-moss:       #4a6f3f;
-  --color-lavender:   #6b5d7a;
+  /* Warning (amber — pending/waiting states) */
+  --md-sys-color-warning:                  #7D5700;
+  --md-sys-color-on-warning:               #FFFFFF;
+  --md-sys-color-warning-container:        #FFDEA5;
+  --md-sys-color-on-warning-container:     #271900;
 
-  /* ── Typography ───────────────────────── */
-  --font-sans: 'Pretendard Variable', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  /* Surface container hierarchy */
+  --md-sys-color-surface-dim:              #D9DBE0;
+  --md-sys-color-surface:                  #F9F9FF;
+  --md-sys-color-surface-bright:           #F9F9FF;
+  --md-sys-color-surface-container-lowest: #FFFFFF;
+  --md-sys-color-surface-container-low:    #F3F4FA;
+  --md-sys-color-surface-container:        #EDEDF4;
+  --md-sys-color-surface-container-high:   #E7E8EE;
+  --md-sys-color-surface-container-highest:#E2E2E8;
 
-  /* Text scale */
-  --text-2xs:      0.625rem;   /* 10px */
-  --text-xs:       0.6875rem;  /* 11px */
-  --text-sm:       0.75rem;    /* 12px */
-  --text-base:     0.8125rem;  /* 13px */
-  --text-md:       0.875rem;   /* 14px */
-  --text-lg:       1rem;       /* 16px */
-  --text-xl:       1.25rem;    /* 20px */
-  --text-2xl:      1.625rem;   /* 26px */
-  --text-3xl:      2.25rem;    /* 36px */
-  --text-4xl:      3.25rem;    /* 52px */
-  --text-display:  5.25rem;    /* 84px */
+  --md-sys-color-on-surface:               #1A1C1E;
+  --md-sys-color-on-surface-variant:       #43474E;
+  --md-sys-color-outline:                  #73777F;
+  --md-sys-color-outline-variant:          #C3C7CF;
 
-  /* ── Shell / Layout ───────────────────── */
-  --shell-sidebar:  68px;
-  --shell-subnav:   244px;
-  --shell-topbar:   60px;
-  --content-max:    1440px;
+  /* Background */
+  --md-sys-color-background:               #F9F9FF;
+  --md-sys-color-on-background:            #1A1C1E;
 
-  /* Spacing */
-  --s-1:  4px;   --s-2:  8px;   --s-3:  12px;  --s-4:  16px;
-  --s-5:  20px;  --s-6:  24px;  --s-7:  32px;  --s-8:  40px;
-  --s-9:  56px;  --s-10: 80px;  --s-11: 120px;
+  /* Inverse (for dark surfaces like Navigation Rail) */
+  --md-sys-color-inverse-surface:          #2F3033;
+  --md-sys-color-inverse-on-surface:       #F1F0F4;
+  --md-sys-color-inverse-primary:          #9ECAFF;
 
-  /* Radius — 5단계 토큰. border-radius는 단일 값 통일 정책(DESIGN.md §5.12).
-     실사용: rounded-md(8px) 기본, rounded-lg(12px) Apex(modal), rounded-full 인디케이터 */
-  --r-xs: 2px;  --r-sm: 3px;  --r: 5px;
-  --r-md: 8px;  --r-lg: 12px;
+  /* Utility */
+  --md-sys-color-shadow:                   #000000;
+  --md-sys-color-scrim:                    #000000;
+  --md-sys-color-surface-tint:             #0061A4;
 
-  /* ── Motion ───────────────────────────── */
-  --ease:     cubic-bezier(0.22, 0.72, 0.18, 1);
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --d-fast:   140ms;
-  --d:        240ms;
-  --d-slow:   420ms;
+  /* ── Typography ─────────────────────────────────── */
+  --font-sans: 'Pretendard Variable', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Display Large  57px. Korean tracking: -0.02em (Latin spec: -0.25px) */
+  --md-typescale-display-large-size:        3.5625rem;
+  --md-typescale-display-large-weight:      400;
+  --md-typescale-display-large-line-height: 1.127;
+  --md-typescale-display-large-tracking:    -0.02em;
+
+  /* Display Medium 45px */
+  --md-typescale-display-medium-size:        2.8125rem;
+  --md-typescale-display-medium-weight:      400;
+  --md-typescale-display-medium-line-height: 1.156;
+  --md-typescale-display-medium-tracking:    -0.01em;
+
+  /* Display Small  36px */
+  --md-typescale-display-small-size:        2.25rem;
+  --md-typescale-display-small-weight:      400;
+  --md-typescale-display-small-line-height: 1.222;
+  --md-typescale-display-small-tracking:    -0.01em;
+
+  /* Headline Large  32px */
+  --md-typescale-headline-large-size:        2rem;
+  --md-typescale-headline-large-weight:      400;
+  --md-typescale-headline-large-line-height: 1.25;
+  --md-typescale-headline-large-tracking:    -0.005em;
+
+  /* Headline Medium 28px */
+  --md-typescale-headline-medium-size:        1.75rem;
+  --md-typescale-headline-medium-weight:      400;
+  --md-typescale-headline-medium-line-height: 1.286;
+  --md-typescale-headline-medium-tracking:    0;
+
+  /* Headline Small  24px */
+  --md-typescale-headline-small-size:        1.5rem;
+  --md-typescale-headline-small-weight:      400;
+  --md-typescale-headline-small-line-height: 1.333;
+  --md-typescale-headline-small-tracking:    0;
+
+  /* Title Large  22px */
+  --md-typescale-title-large-size:        1.375rem;
+  --md-typescale-title-large-weight:      400;
+  --md-typescale-title-large-line-height: 1.273;
+  --md-typescale-title-large-tracking:    0;
+
+  /* Title Medium 16px/500 */
+  --md-typescale-title-medium-size:        1rem;
+  --md-typescale-title-medium-weight:      500;
+  --md-typescale-title-medium-line-height: 1.5;
+  --md-typescale-title-medium-tracking:    0;
+
+  /* Title Small  14px/500 */
+  --md-typescale-title-small-size:        0.875rem;
+  --md-typescale-title-small-weight:      500;
+  --md-typescale-title-small-line-height: 1.429;
+  --md-typescale-title-small-tracking:    0;
+
+  /* Body Large  16px */
+  --md-typescale-body-large-size:        1rem;
+  --md-typescale-body-large-weight:      400;
+  --md-typescale-body-large-line-height: 1.5;
+  --md-typescale-body-large-tracking:    0;
+
+  /* Body Medium 14px */
+  --md-typescale-body-medium-size:        0.875rem;
+  --md-typescale-body-medium-weight:      400;
+  --md-typescale-body-medium-line-height: 1.429;
+  --md-typescale-body-medium-tracking:    0;
+
+  /* Body Small  12px */
+  --md-typescale-body-small-size:        0.75rem;
+  --md-typescale-body-small-weight:      400;
+  --md-typescale-body-small-line-height: 1.333;
+  --md-typescale-body-small-tracking:    0;
+
+  /* Label Large  14px/500 */
+  --md-typescale-label-large-size:        0.875rem;
+  --md-typescale-label-large-weight:      500;
+  --md-typescale-label-large-line-height: 1.429;
+  --md-typescale-label-large-tracking:    0.003em;
+
+  /* Label Medium 12px/500 */
+  --md-typescale-label-medium-size:        0.75rem;
+  --md-typescale-label-medium-weight:      500;
+  --md-typescale-label-medium-line-height: 1.333;
+  --md-typescale-label-medium-tracking:    0.02em;
+
+  /* Label Small  11px/500 */
+  --md-typescale-label-small-size:        0.6875rem;
+  --md-typescale-label-small-weight:      500;
+  --md-typescale-label-small-line-height: 1.455;
+  --md-typescale-label-small-tracking:    0.03em;
+
+  /* ── Shape Scale ─────────────────────────────────── */
+  --md-sys-shape-none:         0px;
+  --md-sys-shape-extra-small:  4px;
+  --md-sys-shape-small:        8px;
+  --md-sys-shape-medium:       12px;
+  --md-sys-shape-large:        16px;
+  --md-sys-shape-extra-large:  28px;
+  --md-sys-shape-full:         9999px;
+
+  /* ── Elevation ───────────────────────────────────── */
+  --md-sys-elevation-0: none;
+  --md-sys-elevation-1:
+    0px 1px 2px 0px rgba(0,0,0,0.30),
+    0px 1px 3px 1px rgba(0,0,0,0.15);
+  --md-sys-elevation-2:
+    0px 1px 2px 0px rgba(0,0,0,0.30),
+    0px 2px 6px 2px rgba(0,0,0,0.15);
+  --md-sys-elevation-3:
+    0px 1px 3px 0px rgba(0,0,0,0.30),
+    0px 4px 8px 3px rgba(0,0,0,0.15);
+  --md-sys-elevation-4:
+    0px 2px 3px 0px rgba(0,0,0,0.30),
+    0px 6px 10px 4px rgba(0,0,0,0.15);
+  --md-sys-elevation-5:
+    0px 4px 4px 0px rgba(0,0,0,0.30),
+    0px 8px 12px 6px rgba(0,0,0,0.15);
+
+  /* ── Motion ──────────────────────────────────────── */
+  --md-sys-motion-easing-standard:              cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --md-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+  --md-sys-motion-duration-short-4:   200ms;
+  --md-sys-motion-duration-medium-2:  300ms;
+  --md-sys-motion-duration-medium-4:  400ms;
+  --md-sys-motion-duration-long-2:    500ms;
+
+  /* ── State Layer Opacity ─────────────────────────── */
+  --md-sys-state-hover-opacity:    0.08;
+  --md-sys-state-pressed-opacity:  0.12;
+  --md-sys-state-focused-opacity:  0.12;
+
+  /* ── Shell Layout ────────────────────────────────── */
+  --shell-rail:    80px;
+  --shell-topbar:  64px;
+  --shell-subnav:  244px;
+  --content-max:   1440px;
+
+  /* backward compat alias */
+  --shell-sidebar: var(--shell-rail);
 }
