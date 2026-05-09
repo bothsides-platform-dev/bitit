@@ -46,3 +46,8 @@ export interface RfqAwardedProps {
   bidId: string;
   settlementCycle: string;
 }
+
+export interface WorkspaceInvitedProps {
+  workspaceName: string;
+  inviteUrl: string;
+}

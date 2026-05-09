@@ -7,7 +7,8 @@ export type OutboxEvent =
   | 'rfq.invited'
   | 'rfq.sent'
   | 'bid.submitted'
-  | 'rfq.awarded';
+  | 'rfq.awarded'
+  | 'workspace.invited';
 
 export type OutboxEntry = {
   id: string;
