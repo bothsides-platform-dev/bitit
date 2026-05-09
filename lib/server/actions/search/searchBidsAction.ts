@@ -10,7 +10,7 @@ export type BidSearchItem = {
   rfqId: string;
   rfqTitle: string;
   pgWsName: string;   // buyer에서만 채워짐, PG는 ''
-  memo: string | null;
+  memo: string;
   href: string;       // buyer → /rfq/[rfqId], pg → /inbox/[rfqId]
 };
 
@@ -45,7 +45,8 @@ export async function searchBidsAction(): Promise<BidSearchItem[]> {
       .from(bids)
       .innerJoin(rfqs, eq(bids.rfqId, rfqs.id))
       .innerJoin(workspaces, eq(bids.pgWsId, workspaces.id))
-      .where(and(eq(rfqs.buyerWsId, workspaceId), eq(bids.status, 'submitted')));
+      .where(and(eq(rfqs.buyerWsId, workspaceId), eq(bids.status, 'submitted')))
+      .limit(30);
 
     return rows.map((r: typeof rows[number]) => ({ ...r, href: `/rfq/${r.rfqId}` }));
   }
@@ -60,7 +61,8 @@ export async function searchBidsAction(): Promise<BidSearchItem[]> {
       })
       .from(bids)
       .innerJoin(rfqs, eq(bids.rfqId, rfqs.id))
-      .where(and(eq(bids.pgWsId, workspaceId), eq(bids.status, 'submitted')));
+      .where(and(eq(bids.pgWsId, workspaceId), eq(bids.status, 'submitted')))
+      .limit(30);
 
     return rows.map((r: typeof rows[number]) => ({ ...r, pgWsName: '', href: `/inbox/${r.rfqId}` }));
   }
