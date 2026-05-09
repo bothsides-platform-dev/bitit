@@ -40,8 +40,8 @@
   /* Navigation Rail = dark inverse surface */
   --color-sidebar:                   var(--md-sys-color-inverse-surface);
   --color-sidebar-foreground:        var(--md-sys-color-inverse-on-surface);
-  --color-sidebar-border:            transparent;
-  --color-sidebar-accent:            color-mix(in srgb, var(--md-sys-color-inverse-primary) 16%, var(--md-sys-color-inverse-surface));
+  --color-sidebar-border:            rgb(0 0 0 / 0);
+  --color-sidebar-accent:            var(--sidebar-accent-computed);
   --color-sidebar-accent-foreground: var(--md-sys-color-inverse-primary);
   --color-sidebar-primary:           var(--md-sys-color-inverse-primary);
   --color-sidebar-primary-foreground: var(--md-sys-color-inverse-surface);
@@ -55,8 +55,12 @@
   --radius-sm: var(--md-sys-shape-extra-small);
   --radius-md: var(--md-sys-shape-small);
   --radius-lg: var(--md-sys-shape-medium);
-  --radius-xl: var(--md-sys-shape-large);
+  --radius-xl: var(--md-sys-shape-medium); /* hard rule: max 12px */
   --radius:    var(--md-sys-shape-small);
+}
+
+:root {
+  --sidebar-accent-computed: color-mix(in srgb, var(--md-sys-color-inverse-primary) 16%, var(--md-sys-color-inverse-surface));
 }
 
 @layer base {
@@ -71,6 +75,9 @@
     font-weight: var(--md-typescale-body-large-weight);
     line-height: var(--md-typescale-body-large-line-height);
     letter-spacing: var(--md-typescale-body-large-tracking);
+  }
+  html {
+    @apply font-sans;
   }
 
   /*
