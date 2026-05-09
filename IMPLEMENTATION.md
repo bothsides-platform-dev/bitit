@@ -72,13 +72,13 @@ M0은 2026-04에 완료됐다. 부트스트랩 산출물은 `package.json`, `nex
 - [ ] `STATUTORY_CARD_FEE` — 영세/중소1~3 고정, 일반등급·등급 미입력(NULL)은 카드사별 입력 허용
 - [ ] RFQ 상태 전이 — `draft -> sent -> closed|cancelled|awarded`, 역방향/중복 전이 차단
 - [ ] Invitation 토큰 — 해시 저장, 만료, 첫 진입 후 워크스페이스 멤버십 권한 전환
-- [ ] Invitation 접근권 — `acceptedByUserId` 만 `/inbox/:rfqId` 접근, 같은 PG 도메인 타 멤버 차단
-- [ ] PG 도메인 워크스페이스 — `@domain` 자동 합류, buyer/pg route guard
+- [ ] Invitation 접근권 — `acceptedByUserId` 만 `/inbox/:rfqId` 접근, 워크스페이스 멤버십 기반 권한 전환
+- [ ] PG 워크스페이스 — 명시적 생성(이름 입력), 멤버 초대(`workspace_invitations`), buyer/pg route guard
 - [ ] Notification outbox — Resend 실패 retry, 성공 시 `sent`, 중복 발송 방지
 - [ ] Auth forms — 이메일/비밀번호/약관/토큰 만료 검증
 
 ### 4.2 클릭스루 시나리오 (PG_RFQ_SPEC §6 — M5 이후 적용)
-- [ ] **A** 구매사 RFQ 발송: `/rfq/new` → 사업자 조회/등급 확인 → PG 이메일 입력 → 발송
+- [ ] **A** 구매사 RFQ 발송: `/rfq/new` → 사업자 조회/등급 확인 → PG 워크스페이스 검색·선택 → 발송
 - [ ] **A'** 사업자번호 미입력 RFQ 발송: 사업자번호·등급 모두 스킵 → PG 이메일 입력 → 발송 (사전 견적 케이스)
 - [ ] **B** PG 견적 응답: `/invite/rfq/:token` → 가입/로그인 → `/inbox/:rfqId` 제출. 사업자번호 미입력 RFQ는 배너, 등급 미입력은 9개 카드사 입력 모드 진입
 - [ ] **C** 구매사 비교·수주: `/rfq/:id` 비교표 확인 → 수주 처리 → 상태 `계약완료`
