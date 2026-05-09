@@ -21,9 +21,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
-            'block w-full appearance-none bg-transparent border-0 border-b border-[var(--color-hair-strong)]',
-            'py-2 pr-6 text-[14px] font-mono text-[var(--color-ink)]',
-            'focus:outline-none focus:border-[var(--color-ink)] transition-colors',
+            'block w-full appearance-none bg-transparent',
+            'border border-[var(--md-sys-color-outline)] rounded-[var(--md-sys-shape-extra-small)]',
+            'py-2 px-3 pr-8',
+            'text-[length:var(--md-typescale-body-large-size)] text-[var(--md-sys-color-on-surface)]',
+            'focus:outline-none focus:border-[var(--md-sys-color-primary)] transition-colors',
             'cursor-pointer',
             className,
           )}
@@ -36,7 +38,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         </select>
         <span
           aria-hidden
-          className="pointer-events-none absolute right-0 bottom-2 font-mono text-[11px] text-[var(--color-ink-soft)]"
+          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[var(--md-sys-color-on-surface-variant)] text-sm"
         >
           ▾
         </span>

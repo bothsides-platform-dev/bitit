@@ -133,7 +133,7 @@ export function CommandPalette() {
                       bidItems.map((item) => (
                         <Command.Item
                           key={item.bidId}
-                          value={`${item.rfqTitle} ${item.pgWsName} ${item.memo ?? ''}`}
+                          value={[item.rfqTitle, item.pgWsName, item.memo].filter(Boolean).join(' ')}
                           onSelect={() => {
                             router.push(item.href);
                             closeCommandPalette();
@@ -150,7 +150,7 @@ export function CommandPalette() {
                           </span>
                           {item.memo && (
                             <span className="text-[11px] font-mono text-[var(--color-ink-soft)] truncate max-w-[540px]">
-                              {item.memo.slice(0, 40)}
+                              {item.memo}
                             </span>
                           )}
                         </Command.Item>

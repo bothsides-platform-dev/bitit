@@ -34,11 +34,11 @@ export function DataTable<T extends RowData>({
       <table className="w-full border-collapse">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="border-b border-[var(--color-hair)]">
+            <tr key={headerGroup.id} className="border-b border-[var(--md-sys-color-outline-variant)]">
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="px-3 py-2 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] font-normal"
+                  className="px-3 py-2 text-left text-[length:var(--md-typescale-label-medium-size)] font-[number:var(--md-typescale-label-medium-weight)] tracking-[var(--md-typescale-label-medium-tracking)] text-[var(--md-sys-color-on-surface-variant)] font-normal"
                 >
                   {flexRender(header.column.columnDef.header, header.getContext())}
                 </th>
@@ -52,19 +52,14 @@ export function DataTable<T extends RowData>({
               key={row.id}
               onClick={() => onRowClick?.(row.original)}
               className={cn(
-                'group border-b border-[var(--color-hair)] transition-colors duration-[140ms]',
-                onRowClick && 'cursor-pointer hover:bg-[var(--color-paper-warm)]',
+                'border-b border-[var(--md-sys-color-outline-variant)] transition-colors duration-[140ms]',
+                onRowClick && 'cursor-pointer hover:bg-[var(--md-sys-color-surface-container-high)]',
               )}
             >
-              {row.getVisibleCells().map((cell, i) => (
+              {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}
-                  className={cn(
-                    'relative px-3 py-3 text-[13px] text-[var(--color-ink)]',
-                    i === 0 &&
-                      onRowClick &&
-                      'group-hover:before:absolute group-hover:before:left-0 group-hover:before:top-0 group-hover:before:bottom-0 group-hover:before:w-2 group-hover:before:bg-[var(--color-ink)]',
-                  )}
+                  className="px-3 py-3 text-[length:var(--md-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface)]"
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
@@ -75,7 +70,7 @@ export function DataTable<T extends RowData>({
             <tr>
               <td
                 colSpan={columns.length}
-                className="py-12 text-center font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-ink-faint)]"
+                className="py-12 text-center text-[length:var(--md-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)]"
               >
               </td>
             </tr>
