@@ -23,6 +23,10 @@ export const PUBLIC_PREFIXES = [
 
 export const CLAIMABLE_PUBLIC_PREFIXES = ['/invite/rfq'];
 
+// Paths that guests (unauthenticated) may access even though they live outside
+// the (public) route group. Authenticated users pass through too.
+export const GUEST_ACCESSIBLE_PATHS = ['/rfq/new'];
+
 export type RouteDecision =
   | { kind: 'next' }
   | { kind: 'redirect'; to: string };
@@ -50,6 +54,7 @@ export function decideRoute(
   }
 
   if (!isAuthenticated) {
+    if (GUEST_ACCESSIBLE_PATHS.includes(pathname)) return { kind: 'next' };
     const next = encodeURIComponent(pathname + search);
     return { kind: 'redirect', to: `/login?next=${next}` };
   }

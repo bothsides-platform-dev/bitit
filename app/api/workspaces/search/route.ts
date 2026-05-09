@@ -28,11 +28,8 @@ function escapeIlike(s: string): string {
 }
 
 export async function GET(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return new NextResponse('Unauthorized', { status: 401 });
-  }
-
+  // type=pg: open to unauthenticated callers (PG names are public business entities).
+  // type=buyer: requires auth — buyer workspace names are private.
   const { searchParams } = request.nextUrl;
   const parsed = QuerySchema.safeParse({
     q: searchParams.get('q') ?? '',
@@ -46,6 +43,14 @@ export async function GET(request: NextRequest) {
   }
 
   const { q, type } = parsed.data;
+
+  if (type === 'buyer') {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
+    }
+  }
+
   const pattern = `%${escapeIlike(q)}%`;
 
   const rows = await db

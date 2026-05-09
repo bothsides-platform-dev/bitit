@@ -31,10 +31,12 @@ type Props = {
    */
   bizProfile?: Pick<BizProfile, 'bizNo' | 'taxType' | 'status'>;
   /** 회사명 (Workspace.name) — 표시용 */
-  workspaceName: string;
+  workspaceName?: string;
+  /** 비인증 게스트 모드 — 제출 시 가입 페이지로 이동 */
+  guest?: boolean;
 };
 
-export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
+export function RfqCreateForm({ bizProfile, workspaceName = '', guest = false }: Props) {
   const router = useRouter();
   const draft = useRfqDraftStore();
 
@@ -143,6 +145,14 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSend || submitting) return;
+
+    if (guest) {
+      // Save the intent so /signup/buyer/workspace can redirect back here
+      localStorage.setItem('bidit-rfq-next', '/rfq/new');
+      router.push('/signup/buyer');
+      return;
+    }
+
     setSubmitting(true);
     setServerError('');
     const r = await createRfqAction({
@@ -168,10 +178,22 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
     <form className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-12 lg:h-full" onSubmit={handleSubmit}>
       {/* Left column: sections 01, 02, 03 — independent scroll on lg+ */}
       <div className="space-y-12 lg:border-r lg:border-[var(--md-sys-color-outline-variant)] lg:pr-10 lg:overflow-y-auto lg:min-h-0">
-        {/* 01 사업자 정보 — read-only (workspace 시점) 또는 미입력 안내 */}
+        {/* 01 사업자 정보 — read-only (workspace 시점), 미입력 안내, 또는 게스트 안내 */}
         <section>
           <SectionHeader num="01" label="사업자 정보" />
-          {bizProfile ? (
+          {guest ? (
+            <div className="border border-[var(--md-sys-color-outline-variant)] px-4 py-4 space-y-2">
+              <div className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
+                [ 가입 후 연동 ]
+              </div>
+              <p className="text-[13px] leading-relaxed text-[var(--md-sys-color-on-surface)]">
+                가입 후 사업자 정보가 자동으로 연동됩니다.
+              </p>
+              <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
+                견적 내용을 먼저 작성한 뒤 발송 시 가입 페이지로 이동합니다.
+              </p>
+            </div>
+          ) : bizProfile ? (
             <>
               <div className="border border-[var(--md-sys-color-outline-variant)] divide-y divide-[var(--md-sys-color-outline-variant)]">
                 <div className="px-4 py-2 flex items-center justify-between">

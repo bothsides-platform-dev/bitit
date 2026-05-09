@@ -1,6 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type { BizProfile } from '@/lib/types/biz-profile';
 
 // `id` is the attachment row id returned by POST /api/files/upload
@@ -37,10 +38,26 @@ const defaultState = {
   deadline: '',
 };
 
-export const useRfqDraftStore = create<RfqDraftStore>((set) => ({
-  ...defaultState,
-  setStep: (step) => set({ step }),
-  setBizProfile: (bizProfile) => set({ bizProfile }),
-  setField: (key, value) => set({ [key]: value } as Partial<RfqDraftStore>),
-  reset: () => set(defaultState),
-}));
+export const useRfqDraftStore = create<RfqDraftStore>()(
+  persist(
+    (set) => ({
+      ...defaultState,
+      setStep: (step) => set({ step }),
+      setBizProfile: (bizProfile) => set({ bizProfile }),
+      setField: (key, value) => set({ [key]: value } as Partial<RfqDraftStore>),
+      reset: () => set(defaultState),
+    }),
+    {
+      name: 'bidit-rfq-draft',
+      storage: createJSONStorage(() => localStorage),
+      // Only persist form data fields, not UI/method state
+      partialize: (state) => ({
+        title: state.title,
+        memo: state.memo,
+        rfpFiles: state.rfpFiles,
+        allowedPgWorkspaceIds: state.allowedPgWorkspaceIds,
+        deadline: state.deadline,
+      }),
+    },
+  ),
+);
