@@ -11,13 +11,15 @@ import type { BizProfile } from '@/lib/types/biz-profile';
 // Name kept for blast-radius reasons (Step 13 will sweep `Mock` naming).
 export type RfqMockFile = { id: string; name: string; size: number };
 
+export type PgWorkspaceItem = { id: string; displayName: string };
+
 type RfqDraftStore = {
   step: number;
   bizProfile: BizProfile | null;
   title: string;
   memo: string;
   rfpFiles: RfqMockFile[];
-  allowedPgEmails: string[];
+  allowedPgWorkspaceIds: PgWorkspaceItem[];
   deadline: string;
   setStep: (step: number) => void;
   setBizProfile: (biz: BizProfile | null) => void;
@@ -31,7 +33,7 @@ const defaultState = {
   title: '',
   memo: '',
   rfpFiles: [] as RfqMockFile[],
-  allowedPgEmails: [],
+  allowedPgWorkspaceIds: [] as PgWorkspaceItem[],
   deadline: '',
 };
 

@@ -11,11 +11,10 @@
  * --------------
  * Seed stores only token *hashes* (sha256). To exercise the public
  * `/invite/rfq/:token` claim flow we mint a fresh raw token for the
- * existing pending kakao invitation on `Q-2604-0001`, persist its hash,
- * and use the raw token in the URL. We then log in as toss admin
+ * existing pending toss invitation on `Q-2604-0001`, persist its hash,
+ * and use the raw token in the URL. We log in as toss admin
  * (the seeded `ws-toss-admin@toss.im`) — `claimToken` resolves the
- * invitation to that PG workspace via email-domain auto-join and routes
- * to /inbox/Q-2604-0001 unchanged.
+ * invitation to the toss PG workspace via workspaceId check.
  *
  * Note: scenario A's seeded RFQ `Q-2604-0001` already has 2 submitted
  * bids (toss + inicis from seed) — but those reference fixed pgWsIds
@@ -26,7 +25,7 @@
 import { test, expect } from 'playwright/test';
 import { sql, eq, and } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { rfqInvitations, bids } from '@/lib/db/schema';
+import { rfqInvitations, bids, workspaces } from '@/lib/db/schema';
 import { generateToken, hashToken } from '@/lib/server/token';
 
 process.env.DATABASE_URL =
@@ -41,6 +40,15 @@ test.describe.serial('Scenario B — PG submits a bid', () => {
   test('toss claims invitation, submits bid, lands on submitted page', async ({
     page,
   }) => {
+    // ── Look up toss workspace by name ───────────────────────────
+    const [tossWsRow] = await db
+      .select({ id: workspaces.id })
+      .from(workspaces)
+      .where(eq(workspaces.name, '토스페이먼츠'))
+      .limit(1);
+    expect(tossWsRow).toBeDefined();
+    const tossWsId = tossWsRow.id;
+
     // ── Pre: clear toss's seeded bid so submission is permitted. ──
     // (Constraint: unique on (rfq_id, pg_ws_id).)
     await db
@@ -48,8 +56,7 @@ test.describe.serial('Scenario B — PG submits a bid', () => {
       .where(
         and(
           eq(bids.rfqId, RFQ_ID),
-          // toss workspace by domain — seeded earlier; we look it up.
-          sql`pg_ws_id = (SELECT id FROM workspaces WHERE domain = 'toss.im' LIMIT 1)`,
+          eq(bids.pgWsId, tossWsId),
         ),
       );
 
@@ -61,12 +68,11 @@ test.describe.serial('Scenario B — PG submits a bid', () => {
         tokenHash: hashToken(rawToken),
         status: 'pending',
         acceptedByUserId: null,
-        pgWsId: null,
       })
       .where(
         and(
           eq(rfqInvitations.rfqId, RFQ_ID),
-          eq(rfqInvitations.pgEmail, TOSS_EMAIL),
+          eq(rfqInvitations.pgWsId, tossWsId),
         ),
       );
 
@@ -115,7 +121,7 @@ test.describe.serial('Scenario B — PG submits a bid', () => {
     const bidRows = await db.execute<{ c: number }>(
       sql`SELECT count(*)::int AS c FROM bids
           WHERE rfq_id = ${RFQ_ID}
-            AND pg_ws_id = (SELECT id FROM workspaces WHERE domain = 'toss.im' LIMIT 1)
+            AND pg_ws_id = ${tossWsId}
             AND status = 'submitted'`,
     );
     const bidArr = Array.isArray(bidRows)

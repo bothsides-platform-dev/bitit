@@ -97,7 +97,7 @@ describe('dispatch wrapper integration in actions (advisor pin 3)', () => {
       bizProfileId: biz.id,
       title: 't',
       memo: '',
-      allowedPgEmails: ['sales@toss.im'],
+      allowedPgWorkspaceIds: [pgWs.id],
       deadline: new Date(Date.now() + 86_400_000),
       status: 'sent',
       createdBy: b1.id,
@@ -107,7 +107,6 @@ describe('dispatch wrapper integration in actions (advisor pin 3)', () => {
     await db.insert(rfqInvitations).values({
       id: invId,
       rfqId,
-      pgEmail: 'sales@toss.im',
       pgWsId: pgWs.id,
       acceptedByUserId: pgUser.id,
       tokenHash: randomUUID(),
@@ -166,7 +165,7 @@ describe('dispatch wrapper integration in actions (advisor pin 3)', () => {
       bizProfileId: biz.id,
       title: 't',
       memo: '',
-      allowedPgEmails: ['sales@toss.im'],
+      allowedPgWorkspaceIds: [pgWs.id],
       deadline: new Date(Date.now() + 86_400_000),
       status: 'sent',
       createdBy: b1.id,
@@ -176,7 +175,6 @@ describe('dispatch wrapper integration in actions (advisor pin 3)', () => {
     await db.insert(rfqInvitations).values({
       id: invId,
       rfqId,
-      pgEmail: 'sales@toss.im',
       pgWsId: pgWs.id,
       acceptedByUserId: pgUser.id,
       tokenHash: randomUUID(),
@@ -237,7 +235,7 @@ describe('dispatch wrapper integration in actions (advisor pin 3)', () => {
       bizProfileId: biz.id,
       title: 't',
       memo: '',
-      allowedPgEmails: ['w@toss.im', 'l@inicis.com'],
+      allowedPgWorkspaceIds: [winnerWs.id, loserWs.id],
       deadline: new Date(Date.now() + 86_400_000),
       status: 'sent',
       createdBy: buyer.id,
@@ -247,13 +245,11 @@ describe('dispatch wrapper integration in actions (advisor pin 3)', () => {
     async function seedBid(
       pgWsId: string,
       submittedBy: string,
-      pgEmail: string,
     ): Promise<string> {
       const invId = randomUUID();
       await db.insert(rfqInvitations).values({
         id: invId,
         rfqId,
-        pgEmail,
         pgWsId,
         tokenHash: randomUUID(),
         sentAt: new Date(),
@@ -278,8 +274,8 @@ describe('dispatch wrapper integration in actions (advisor pin 3)', () => {
       });
       return bidId;
     }
-    const winnerBidId = await seedBid(winnerWs.id, winnerUser.id, 'w@toss.im');
-    await seedBid(loserWs.id, loserUser.id, 'l@inicis.com');
+    const winnerBidId = await seedBid(winnerWs.id, winnerUser.id);
+    await seedBid(loserWs.id, loserUser.id);
 
     const recvWinner: Notification[] = [];
     const recvLoser: Notification[] = [];

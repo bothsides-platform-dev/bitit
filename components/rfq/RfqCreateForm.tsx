@@ -1,12 +1,12 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/primitives/Button';
 import { Label } from '@/components/primitives/Label';
-import { PgEmailAllowlist } from './PgEmailAllowlist';
 import { RfpAttachmentDropzone } from './RfpAttachmentDropzone';
 import { useRfqDraftStore } from '@/lib/stores/rfq-draft';
+import type { PgWorkspaceItem } from '@/lib/stores/rfq-draft';
 import { useShortcut } from '@/lib/hooks/useShortcut';
 import { createRfqAction } from '@/lib/server/actions/rfq';
 import type { BizProfile } from '@/lib/types/biz-profile';
@@ -45,6 +45,75 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
     () => new Date(Date.now() + 86_400_000).toISOString().slice(0, 10),
   );
 
+  // Workspace search state
+  const [wsQuery, setWsQuery] = useState('');
+  const [wsResults, setWsResults] = useState<PgWorkspaceItem[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [wsInputError, setWsInputError] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleWsQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const q = e.target.value;
+    setWsQuery(q);
+    setWsInputError('');
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+
+    if (!q.trim()) {
+      setWsResults([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    searchTimerRef.current = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await fetch(
+          `/api/workspaces/search?q=${encodeURIComponent(q)}&type=pg`,
+        );
+        if (res.ok) {
+          const data = (await res.json()) as { workspaces: PgWorkspaceItem[] };
+          setWsResults(data.workspaces);
+          setShowDropdown(data.workspaces.length > 0);
+        }
+      } finally {
+        setIsSearching(false);
+      }
+    }, 250);
+  };
+
+  const handleWsSelect = (ws: PgWorkspaceItem) => {
+    setShowDropdown(false);
+    setWsQuery('');
+    setWsResults([]);
+    setWsInputError('');
+
+    if (draft.allowedPgWorkspaceIds.some((w) => w.id === ws.id)) {
+      setWsInputError('이미 추가된 워크스페이스입니다.');
+      return;
+    }
+
+    draft.setField('allowedPgWorkspaceIds', [...draft.allowedPgWorkspaceIds, ws]);
+  };
+
+  const handleWsRemove = (id: string) => {
+    draft.setField(
+      'allowedPgWorkspaceIds',
+      draft.allowedPgWorkspaceIds.filter((w) => w.id !== id),
+    );
+  };
+
   const handleDraftSave = useCallback(() => {
     setSavedAt(
       new Date().toLocaleTimeString('ko-KR', {
@@ -64,9 +133,11 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
     { meta: true, preventInInput: false },
   );
 
+  const pgCount = draft.allowedPgWorkspaceIds.length;
+
   const canSend =
     draft.title.trim() !== '' &&
-    draft.allowedPgEmails.length > 0 &&
+    pgCount > 0 &&
     draft.deadline !== '';
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,7 +149,7 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
       title: draft.title.trim(),
       memo: draft.memo.trim() || undefined,
       deadline: draft.deadline,
-      allowedPgEmails: draft.allowedPgEmails,
+      allowedPgWorkspaceIds: draft.allowedPgWorkspaceIds.map((w) => w.id),
       // Attachments uploaded to /api/files/upload land with ownerId='__draft__';
       // the action patches them to the new rfqId after RFQ insert (Step 11 wiring).
       rfpAttachmentIds: draft.rfpFiles.map((f) => f.id),
@@ -195,13 +266,75 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
           </div>
         </section>
 
-        {/* 03 PG 이메일 */}
+        {/* 03 PG 워크스페이스 */}
         <section>
-          <SectionHeader num="03" label="초대할 PG 이메일" />
-          <PgEmailAllowlist
-            value={draft.allowedPgEmails}
-            onChange={(emails) => draft.setField('allowedPgEmails', emails)}
-          />
+          <SectionHeader num="03" label="초대할 PG 워크스페이스" />
+          <div className="space-y-4">
+            {/* 선택된 워크스페이스 목록 */}
+            {draft.allowedPgWorkspaceIds.length > 0 && (
+              <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-t border-[var(--md-sys-color-outline-variant)]">
+                {draft.allowedPgWorkspaceIds.map((ws, i) => (
+                  <div key={ws.id} className="py-2 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="font-mono text-[10px] tabular-nums text-[var(--md-sys-color-outline)]">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span className="text-[13px] text-[var(--md-sys-color-on-surface)] truncate">
+                        {ws.displayName}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleWsRemove(ws.id)}
+                      className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)] hover:text-[var(--md-sys-color-error)] transition-colors flex-shrink-0"
+                    >
+                      제거
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 검색 input */}
+            <div ref={dropdownRef} className="relative">
+              <div className="flex items-end gap-3">
+                <input
+                  type="text"
+                  value={wsQuery}
+                  onChange={handleWsQueryChange}
+                  onFocus={() => wsResults.length > 0 && setShowDropdown(true)}
+                  placeholder="워크스페이스 이름 검색…"
+                  className="flex-1 bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors"
+                />
+                {isSearching && (
+                  <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)] pb-2">
+                    LOADING…
+                  </span>
+                )}
+              </div>
+
+              {showDropdown && wsResults.length > 0 && (
+                <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-[var(--md-sys-color-surface-container)] border border-[var(--md-sys-color-outline-variant)] rounded-md shadow-sm overflow-hidden">
+                  {wsResults.map((ws) => (
+                    <button
+                      key={ws.id}
+                      type="button"
+                      onClick={() => handleWsSelect(ws)}
+                      className="w-full text-left px-3 py-2 text-[13px] text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-surface-container-high)] transition-colors"
+                    >
+                      {ws.displayName}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {wsInputError && (
+              <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]">
+                {wsInputError}
+              </p>
+            )}
+          </div>
         </section>
       </div>
 
@@ -229,8 +362,8 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
             {!canSend && (
               <ul className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)] space-y-1">
                 {!draft.title.trim() && <li>· 견적 제목 입력 필요</li>}
-                {draft.allowedPgEmails.length === 0 && (
-                  <li>· PG 이메일 1개 이상 추가 필요</li>
+                {pgCount === 0 && (
+                  <li>· PG 워크스페이스 1개 이상 추가 필요</li>
                 )}
                 {!draft.deadline && <li>· 마감일 선택 필요</li>}
               </ul>
@@ -248,8 +381,8 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
             <Button type="submit" fullWidth size="lg" disabled={!canSend || submitting}>
               {submitting
                 ? '발송 중…'
-                : draft.allowedPgEmails.length > 0
-                  ? `${draft.allowedPgEmails.length}개 PG사에 발송`
+                : pgCount > 0
+                  ? `${pgCount}개 PG사에 발송`
                   : '발송'}
             </Button>
 

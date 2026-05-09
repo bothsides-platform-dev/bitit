@@ -98,7 +98,7 @@ async function seedSetup(grade: 'sme2' | 'general' = 'sme2'): Promise<Setup> {
     bizProfileId: biz.id,
     title: 'bid test',
     memo: '',
-    allowedPgEmails: ['sales@toss.im'],
+    allowedPgWorkspaceIds: [pgWs.id],
     deadline: new Date(Date.now() + 86_400_000),
     status: 'sent',
     createdBy: buyer1.id,
@@ -110,7 +110,6 @@ async function seedSetup(grade: 'sme2' | 'general' = 'sme2'): Promise<Setup> {
   await db.insert(rfqInvitations).values({
     id: invId,
     rfqId,
-    pgEmail: 'sales@toss.im',
     pgWsId: pgWs.id,
     acceptedByUserId: pgUser.id, // 이미 클레임된 상태로 시드.
     tokenHash: hashToken(rawToken),

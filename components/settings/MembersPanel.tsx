@@ -1,29 +1,29 @@
 'use client';
 
-/**
- * MembersPanel — Members 페이지의 인터랙티브 부분.
- * 부모(settings/members/page.tsx)는 RSC에서 auth() + getWorkspaceRepo().findById로
- * 워크스페이스 + 멤버를 hydrate해 props로 내려준다. v0 단계에서는 초대 발송/
- * 역할 토글 모두 클라이언트 로컬 상태로만 처리(서버 액션 미구현 — 후속 마일스톤).
- */
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { Avatar } from '@/components/primitives/Avatar';
 import { Label } from '@/components/primitives/Label';
 import { Button } from '@/components/primitives/Button';
 import { Chip } from '@/components/primitives/Chip';
 import { formatDate } from '@/lib/format';
+import { inviteWorkspaceMemberAction } from '@/lib/server/actions/workspace/inviteWorkspaceMemberAction';
 import type { User } from '@/lib/types/user';
+
+type PendingInvite = { email: string; createdAt: string };
 
 type Props = {
   workspaceName: string;
   initialMembers: User[];
+  userRole: 'admin' | 'member';
+  initialPendingInvites: PendingInvite[];
 };
 
-export function MembersPanel({ workspaceName, initialMembers }: Props) {
+export function MembersPanel({ workspaceName, initialMembers, userRole, initialPendingInvites }: Props) {
   const [members] = useState<User[]>(initialMembers);
-  const [pendingInvites, setPendingInvites] = useState<{ email: string; invitedAt: string }[]>([]);
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>(initialPendingInvites);
   const [inviteEmail, setInviteEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,20 +34,25 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
       setError('이메일 형식이 올바르지 않습니다.');
       return;
     }
-    if (members.some((m) => m.email === email) || pendingInvites.some((p) => p.email === email)) {
-      setError('이미 등록되었거나 초대 대기 중인 이메일입니다.');
-      return;
-    }
 
-    setPendingInvites((prev) => [
-      ...prev,
-      { email, invitedAt: new Date().toISOString() },
-    ]);
-    setInviteEmail('');
-  };
-
-  const handleCancelInvite = (email: string) => {
-    setPendingInvites((prev) => prev.filter((p) => p.email !== email));
+    startTransition(async () => {
+      const result = await inviteWorkspaceMemberAction({ email });
+      if (!result.ok) {
+        if (result.error === 'ALREADY_INVITED') {
+          setError('이미 초대 대기 중인 이메일입니다.');
+        } else if (result.error === 'FORBIDDEN_NOT_ADMIN') {
+          setError('초대 권한이 없습니다.');
+        } else {
+          setError(`초대 실패 (${result.error})`);
+        }
+        return;
+      }
+      setPendingInvites((prev) => [
+        ...prev,
+        { email, createdAt: new Date().toISOString() },
+      ]);
+      setInviteEmail('');
+    });
   };
 
   return (
@@ -108,52 +113,47 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
                   <span className="font-mono text-[13px] tabular-nums text-[var(--md-sys-color-on-surface)]">{p.email}</span>
                 </div>
                 <Chip label="대기중" color="warning" />
-                <button
-                  type="button"
-                  onClick={() => handleCancelInvite(p.email)}
-                  className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-error)] transition-colors"
-                >
-                  취소
-                </button>
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* Invite form */}
-      <section>
-        <div className="flex items-center gap-3 mb-4">
-          <Label size="md" muted={false}>멤버 초대</Label>
-          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
-        </div>
-        <form onSubmit={handleInvite} className="space-y-4">
-          <div className="flex flex-col md:flex-row md:items-end gap-4">
-            <div className="flex-1 space-y-1">
-              <Label size="md" muted={false}>이메일</Label>
-              <input
-                type="email"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="member@company.com"
-                className="block w-full bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] font-mono tabular-nums text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors"
-              />
-            </div>
-            <Button type="submit" disabled={!inviteEmail.trim()} className="md:ml-4">
-              초대 발송
-            </Button>
+      {/* Invite form — admin only */}
+      {userRole === 'admin' && (
+        <section>
+          <div className="flex items-center gap-3 mb-4">
+            <Label size="md" muted={false}>멤버 초대</Label>
+            <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
           </div>
-          {error && (
-            <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-error)]">
-              {error}
+          <form onSubmit={handleInvite} className="space-y-4">
+            <div className="flex flex-col md:flex-row md:items-end gap-4">
+              <div className="flex-1 space-y-1">
+                <Label size="md" muted={false}>이메일</Label>
+                <input
+                  type="email"
+                  value={inviteEmail}
+                  disabled={isPending}
+                  onChange={(e) => { setInviteEmail(e.target.value); setError(null); }}
+                  placeholder="member@company.com"
+                  className="block w-full bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] font-mono tabular-nums text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors disabled:opacity-50"
+                />
+              </div>
+              <Button type="submit" disabled={!inviteEmail.trim() || isPending} className="md:ml-4">
+                {isPending ? '발송 중…' : '초대 발송'}
+              </Button>
+            </div>
+            {error && (
+              <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-error)]">
+                {error}
+              </p>
+            )}
+            <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
+              초대 메일이 발송되며, 수락 후 멤버 목록에 추가됩니다.
             </p>
-          )}
-          <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
-            초대 메일이 발송되며, 수락 후 멤버 목록에 추가됩니다.
-          </p>
-        </form>
-      </section>
-
+          </form>
+        </section>
+      )}
     </>
   );
 }

@@ -15,6 +15,7 @@ import {
   seedBizProfile,
   seedBuyerWorkspace,
   seedMembership,
+  seedPgWorkspace,
   seedUser,
 } from '@/lib/server/repositories/drizzle/__tests__/_seed';
 import { setupRfqActionEnv, teardownRfqActionEnv } from './_setup';
@@ -50,6 +51,7 @@ let db: PgliteDB;
 let buyerUserId: string;
 let buyerWsId: string;
 let bizId: string;
+let pgWsId: string;
 
 async function freshBuyer() {
   const u = await seedUser(db, { email: 'buyer@x.com' });
@@ -75,6 +77,9 @@ describe('createRfqAction', () => {
         role: 'admin',
       },
     };
+    // Default PG workspace for draft tests (no members needed — drafts skip invite logic)
+    const pgWs = await seedPgWorkspace(db, '테스트PG');
+    pgWsId = pgWs.id;
   });
   afterEach(() => {
     teardownRfqActionEnv();
@@ -86,7 +91,7 @@ describe('createRfqAction', () => {
     const r = await createRfqAction({
       title: 't',
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
-      allowedPgEmails: ['a@b.com'],
+      allowedPgWorkspaceIds: [randomUUID()],
     });
     expect(r.ok).toBe(false);
   });
@@ -96,7 +101,7 @@ describe('createRfqAction', () => {
       title: '결제 인프라 견적',
       memo: 'D+1 정산 희망',
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
-      allowedPgEmails: ['sales@toss.im', 'sales@inicis.com'],
+      allowedPgWorkspaceIds: [pgWsId],
       send: false,
     });
     expect(r.ok).toBe(true);
@@ -121,11 +126,30 @@ describe('createRfqAction', () => {
   });
 
   it('send branch — inserts RFQ status=sent, N invitations + N invite outbox + 1 sent outbox', async () => {
-    const emails = ['a@toss.im', 'b@inicis.com', 'c@kakaopay.com'];
+    // Seed 3 PG workspaces each with one admin — outbox is per admin member
+    const pg1 = await seedPgWorkspace(db, '토스페이먼츠');
+    const pg1Admin = await seedUser(db, { email: 'admin@toss.im' });
+    await seedMembership(db, pg1.id, pg1Admin.id, 'admin');
+
+    const pg2 = await seedPgWorkspace(db, 'KG이니시스');
+    const pg2Admin = await seedUser(db, { email: 'admin@inicis.com' });
+    await seedMembership(db, pg2.id, pg2Admin.id, 'admin');
+
+    const pg3 = await seedPgWorkspace(db, '카카오페이');
+    const pg3Admin = await seedUser(db, { email: 'admin@kakaopay.com' });
+    await seedMembership(db, pg3.id, pg3Admin.id, 'admin');
+
+    const pgWsIds = [pg1.id, pg2.id, pg3.id];
+    const adminEntries = [
+      { wsId: pg1.id, userId: pg1Admin.id },
+      { wsId: pg2.id, userId: pg2Admin.id },
+      { wsId: pg3.id, userId: pg3Admin.id },
+    ];
+
     const r = await createRfqAction({
       title: '결제 인프라 견적',
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
-      allowedPgEmails: emails,
+      allowedPgWorkspaceIds: pgWsIds,
       send: true,
     });
     expect(r.ok).toBe(true);
@@ -139,23 +163,23 @@ describe('createRfqAction', () => {
       .select()
       .from(rfqInvitations)
       .where(eq(rfqInvitations.rfqId, r.rfqId));
-    expect(invs).toHaveLength(emails.length);
+    expect(invs).toHaveLength(pgWsIds.length);
     for (const inv of invs) {
       expect(inv.tokenHash).toBeTruthy();
-      expect(emails).toContain(inv.pgEmail);
+      expect(pgWsIds).toContain(inv.pgWsId);
       expect(inv.status).toBe('pending');
     }
 
+    // One outbox entry per admin member
     const inviteRows = await db
       .select()
       .from(outboxEntries)
       .where(eq(outboxEntries.event, 'rfq.invited'));
-    expect(inviteRows).toHaveLength(emails.length);
-    // Per-email dedupe key.
-    const dedupeKeys = inviteRows.map((r) => r.dedupeKey).sort();
-    expect(dedupeKeys).toEqual(
-      emails.map((e) => `rfq:${row.id}:invite:${e}`).sort(),
-    );
+    expect(inviteRows).toHaveLength(pgWsIds.length);
+    const expectedKeys = adminEntries
+      .map(({ wsId, userId }) => `rfq:${row.id}:invite:ws:${wsId}:user:${userId}`)
+      .sort();
+    expect(inviteRows.map((r) => r.dedupeKey).sort()).toEqual(expectedKeys);
 
     const sentRows = await db
       .select()
@@ -176,7 +200,7 @@ describe('createRfqAction', () => {
     const r = await createRfqAction({
       title: '스냅샷 검증',
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
-      allowedPgEmails: ['x@y.com'],
+      allowedPgWorkspaceIds: [pgWsId],
       send: false,
     });
     expect(r.ok).toBe(true);
@@ -201,7 +225,7 @@ describe('createRfqAction', () => {
     const r = await createRfqAction({
       title: 'inherit',
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
-      allowedPgEmails: ['x@y.com'],
+      allowedPgWorkspaceIds: [pgWsId],
     });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -225,7 +249,7 @@ describe('createRfqAction', () => {
     const r = await createRfqAction({
       title: 't',
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
-      allowedPgEmails: ['x@y.com'],
+      allowedPgWorkspaceIds: [pgWsId],
     });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -238,7 +262,7 @@ describe('createRfqAction', () => {
     const r = await createRfqAction({
       title: 'pre-quote',
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
-      allowedPgEmails: ['x@y.com'],
+      allowedPgWorkspaceIds: [pgWsId],
       bizProfileMode: 'none',
     });
     expect(r.ok).toBe(true);
@@ -252,7 +276,7 @@ describe('createRfqAction', () => {
     const r = await createRfqAction({
       title: 't',
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
-      allowedPgEmails: ['x@y.com'],
+      allowedPgWorkspaceIds: [pgWsId],
       bizProfileMode: 'override',
     });
     expect(r.ok).toBe(false);
@@ -264,7 +288,7 @@ describe('createRfqAction', () => {
     const r = await createRfqAction({
       title: 'override',
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
-      allowedPgEmails: ['x@y.com'],
+      allowedPgWorkspaceIds: [pgWsId],
       bizProfileMode: 'override',
       gradeOverride: 'sme3',
     });
@@ -287,12 +311,12 @@ describe('createRfqAction', () => {
     const r1 = await createRfqAction({
       title: 'a',
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
-      allowedPgEmails: ['x@y.com'],
+      allowedPgWorkspaceIds: [pgWsId],
     });
     const r2 = await createRfqAction({
       title: 'b',
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
-      allowedPgEmails: ['x@y.com'],
+      allowedPgWorkspaceIds: [pgWsId],
     });
     expect(r1.ok && r2.ok).toBe(true);
     if (!r1.ok || !r2.ok) return;
@@ -305,7 +329,7 @@ describe('createRfqAction', () => {
     const r = await createRfqAction({
       title: '',
       deadline: 'nope',
-      allowedPgEmails: [],
+      allowedPgWorkspaceIds: [],
     });
     expect(r.ok).toBe(false);
   });
@@ -342,7 +366,7 @@ describe('createRfqAction', () => {
     const r = await createRfqAction({
       title: '첨부 link-up 테스트',
       deadline: new Date(Date.now() + 86_400_000).toISOString(),
-      allowedPgEmails: ['sales@toss.im'],
+      allowedPgWorkspaceIds: [pgWsId],
       rfpAttachmentIds: [draftAttId, foreignAttId],
       send: false,
     });

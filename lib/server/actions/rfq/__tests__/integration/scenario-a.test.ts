@@ -15,6 +15,11 @@ import {
   workspaces,
   users,
 } from '@/lib/db/schema';
+import {
+  seedMembership,
+  seedPgWorkspace,
+  seedUser,
+} from '@/lib/server/repositories/drizzle/__tests__/_seed';
 import { setupRfqActionEnv, teardownRfqActionEnv } from '../_setup';
 import { signupCompleteAction } from '@/lib/server/actions/auth/signupCompleteAction';
 import { signupEmailAction } from '@/lib/server/actions/auth/signupEmailAction';
@@ -62,6 +67,26 @@ describe('scenario A — buyer signs up, captures bizProfile, creates+sends RFQ'
   });
 
   it('end-to-end: P2→P4→P6 buyer signup → createRfq(send=true) → invitations N + outbox 1+N', async () => {
+    // Pre-seed 3 PG workspaces with admin members so outbox entries are generated
+    const pg1 = await seedPgWorkspace(db, '토스페이먼츠');
+    const pg1Admin = await seedUser(db, { email: 'sales@toss.im' });
+    await seedMembership(db, pg1.id, pg1Admin.id, 'admin');
+
+    const pg2 = await seedPgWorkspace(db, 'KG이니시스');
+    const pg2Admin = await seedUser(db, { email: 'biz@inicis.com' });
+    await seedMembership(db, pg2.id, pg2Admin.id, 'admin');
+
+    const pg3 = await seedPgWorkspace(db, '나이스페이');
+    const pg3Admin = await seedUser(db, { email: 'partner@nicepay.co.kr' });
+    await seedMembership(db, pg3.id, pg3Admin.id, 'admin');
+
+    const pgWsIds = [pg1.id, pg2.id, pg3.id];
+    const adminEntries = [
+      { wsId: pg1.id, userId: pg1Admin.id },
+      { wsId: pg2.id, userId: pg2Admin.id },
+      { wsId: pg3.id, userId: pg3Admin.id },
+    ];
+
     // P2 — request verify email
     const p2 = await signupEmailAction({ email: 'kim@example.com' });
     expect(p2.ok).toBe(true);
@@ -125,16 +150,11 @@ describe('scenario A — buyer signs up, captures bizProfile, creates+sends RFQ'
       },
     };
 
-    const emails = [
-      'sales@toss.im',
-      'biz@inicis.com',
-      'partner@nicepay.co.kr',
-    ];
     const created = await createRfqAction({
       title: '2026 결제 인프라 견적',
       memo: 'D+1 정산 희망. RFP 첨부.',
       deadline: new Date(Date.now() + 7 * 86_400_000).toISOString(),
-      allowedPgEmails: emails,
+      allowedPgWorkspaceIds: pgWsIds,
       send: true,
     });
     expect(created.ok).toBe(true);
@@ -164,28 +184,29 @@ describe('scenario A — buyer signs up, captures bizProfile, creates+sends RFQ'
       .where(eq(workspaces.id, ws.id));
     expect(wsAfter.id).toBe(wsBizBefore);
 
-    // Assertion 2: invitations N — token_hash present, accepted_by null.
+    // Assertion 2: invitations N — token_hash present, pgWsId set, accepted_by null.
     const invs = await db
       .select()
       .from(rfqInvitations)
       .where(eq(rfqInvitations.rfqId, created.rfqId));
-    expect(invs).toHaveLength(emails.length);
-    expect(invs.map((i) => i.pgEmail).sort()).toEqual([...emails].sort());
+    expect(invs).toHaveLength(pgWsIds.length);
+    expect(invs.map((i) => i.pgWsId).sort()).toEqual([...pgWsIds].sort());
     for (const inv of invs) {
       expect(inv.tokenHash).toBeTruthy();
       expect(inv.acceptedByUserId).toBeNull();
       expect(inv.status).toBe('pending');
     }
 
-    // Assertion 3: outbox — N invite rows + 1 sent row, all dedupe-keyed.
+    // Assertion 3: outbox — N invite rows (1 per admin) + 1 sent row.
     const inviteRows = await db
       .select()
       .from(outboxEntries)
       .where(eq(outboxEntries.event, 'rfq.invited'));
-    expect(inviteRows).toHaveLength(emails.length);
-    expect(inviteRows.map((r) => r.dedupeKey).sort()).toEqual(
-      emails.map((e) => `rfq:${created.rfqId}:invite:${e}`).sort(),
-    );
+    expect(inviteRows).toHaveLength(pgWsIds.length);
+    const expectedKeys = adminEntries
+      .map(({ wsId, userId }) => `rfq:${created.rfqId}:invite:ws:${wsId}:user:${userId}`)
+      .sort();
+    expect(inviteRows.map((r) => r.dedupeKey).sort()).toEqual(expectedKeys);
 
     const sentRows = await db
       .select()

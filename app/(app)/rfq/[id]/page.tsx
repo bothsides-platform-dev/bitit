@@ -63,17 +63,29 @@ export default async function RfqDetailPage({ params }: Props) {
   const ws = await wsRepo.findById(rfq.buyerWsId);
   const companyName = ws?.name ?? '—';
 
-  // Invitation status per email — `allowedPgEmails`를 source of truth로 두고
-  // 매칭되는 invitation row의 status를 매핑. addPgEmailsToRfqAction이 row를
-  // 생성하므로 미발송 PG도 'draft' 상태로 표시된다.
+  // Invitation status per workspace — `allowedPgWorkspaceIds` is source of truth.
+  // addPgWorkspacesToRfqAction creates a 'draft' row per workspace so all appear
+  // even before the invite is sent.
   const invitations = await (await getInvitationRepo()).findByRfq(id);
-  const invByEmail = new Map<string, InvitationStatus>();
+  const invByWsId = new Map<string, InvitationStatus>();
   for (const inv of invitations) {
-    invByEmail.set(inv.pgEmail.toLowerCase(), inv.status);
+    if (inv.pgWsId) invByWsId.set(inv.pgWsId, inv.status);
   }
-  const inviteList = rfq.allowedPgEmails.map((email) => ({
-    email,
-    status: invByEmail.get(email.toLowerCase()) ?? ('sent' as InvitationStatus),
+
+  // Fetch workspace names for all invited PG workspaces
+  const allPgWsIds = Array.from(
+    new Set([...rfq.allowedPgWorkspaceIds, ...rfqBids.map((b) => b.pgWsId)]),
+  );
+  const allPgWorkspaces = await Promise.all(allPgWsIds.map((pgId) => wsRepo.findById(pgId)));
+  const allPgWsNameMap: Record<string, string> = {};
+  allPgWorkspaces.forEach((w, i) => {
+    if (w) allPgWsNameMap[allPgWsIds[i]] = w.name;
+  });
+
+  const inviteList = rfq.allowedPgWorkspaceIds.map((wsId) => ({
+    wsId,
+    wsName: allPgWsNameMap[wsId] ?? wsId,
+    status: invByWsId.get(wsId) ?? ('draft' as InvitationStatus),
   }));
 
   // RSC는 매 요청마다 재실행되므로 시계 접근이 필요하다 — purity 룰은 클라이언트
@@ -86,14 +98,7 @@ export default async function RfqDetailPage({ params }: Props) {
     ? `${baseUrl()}/share/rfq/${rfq.shareToken}`
     : '';
 
-  // pgWsId → name map. dedup 후 parallel fetch — RFQ 당 PG 수가 작아(≤10) 직접 N
-  // 회 호출도 안전하지만, Set으로 중복 제거 + Promise.all 병렬화가 정석 형태.
-  const pgWsIds = Array.from(new Set(rfqBids.map((b) => b.pgWsId)));
-  const pgWorkspaces = await Promise.all(pgWsIds.map((pgId) => wsRepo.findById(pgId)));
-  const pgWsNameMap: Record<string, string> = {};
-  pgWorkspaces.forEach((w, i) => {
-    if (w) pgWsNameMap[pgWsIds[i]] = w.name;
-  });
+  const pgWsNameMap = allPgWsNameMap;
 
   const bizProfile = rfq.bizProfile;
   const cardFee = bizProfile?.grade ? STATUTORY_CARD_FEE[bizProfile.grade] : NaN;
@@ -121,7 +126,7 @@ export default async function RfqDetailPage({ params }: Props) {
         <div className="flex items-center gap-4 mt-2">
           <Label size="md" muted={false}>마감 {formatDate(rfq.deadline)}</Label>
           <span className="text-[var(--md-sys-color-outline)]">·</span>
-          <Label size="md" muted={false}>PG {rfq.allowedPgEmails.length}개사</Label>
+          <Label size="md" muted={false}>PG {rfq.allowedPgWorkspaceIds.length}개사</Label>
           <span className="text-[var(--md-sys-color-outline)]">·</span>
           <Label size="md" muted={false}>받은 견적 {rfqBids.length}건</Label>
         </div>

@@ -94,7 +94,7 @@ async function seedAwardSetup(): Promise<Setup> {
     bizProfileId: biz.id,
     title: 'award test',
     memo: '',
-    allowedPgEmails: ['w1@toss.im', 'la1@inicis.com', 'lb1@kakaopay.com'],
+    allowedPgWorkspaceIds: [winnerWs.id, loserAWs.id, loserBWs.id],
     deadline: new Date(Date.now() + 86_400_000),
     status: 'sent',
     createdBy: buyer.id,
@@ -106,7 +106,6 @@ async function seedAwardSetup(): Promise<Setup> {
     await db.insert(rfqInvitations).values({
       id: invId,
       rfqId,
-      pgEmail: email,
       pgWsId,
       tokenHash: randomUUID(),
       sentAt: new Date(),

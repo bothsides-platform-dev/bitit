@@ -10,6 +10,7 @@ import {
   bizProfiles,
   rfqInvitations,
   rfqs,
+  users,
   workspaceMembers,
   workspaces,
 } from '@/lib/db/schema';
@@ -28,7 +29,6 @@ import {
 } from '@/lib/server/notifications/dispatch';
 import type { Notification } from '@/lib/types/notification';
 import { DRAFT_OWNER_ID } from '@/lib/server/storage/path';
-import { emailDomain } from '@/lib/server/actions/auth/_shared';
 import {
   actionDb,
   baseUrl,
@@ -42,7 +42,7 @@ const Input = z
     title: z.string().min(1).max(200),
     memo: z.string().max(2000).optional(),
     deadline: z.string().min(1), // ISO timestamp
-    allowedPgEmails: z.array(z.string().email()).min(1).max(50),
+    allowedPgWorkspaceIds: z.array(z.string().uuid()).min(1).max(50),
     rfpAttachmentIds: z.array(z.string().uuid()).optional(),
     send: z.boolean().optional().default(false),
     // bizProfile 분기 — default 'inherit' 은 워크스페이스 bizProfile 을 스냅샷.
@@ -171,7 +171,7 @@ export async function createRfqAction(
         bizProfileId: snapshotId,
         title: parsed.data.title.trim(),
         memo: parsed.data.memo?.trim() ?? '',
-        allowedPgEmails: parsed.data.allowedPgEmails,
+        allowedPgWorkspaceIds: parsed.data.allowedPgWorkspaceIds,
         deadline: new Date(parsed.data.deadline),
         shareToken: generateToken(),
         status: send ? 'sent' : 'draft',
@@ -199,7 +199,7 @@ export async function createRfqAction(
           );
       }
 
-      // 6. send 분기 — invitation N + outbox N + 1
+      // 6. send 분기 — invitation N rows + outbox per-admin + 1 sent outbox
       if (send) {
         const invitationsRepo = await getInvitationRepo();
         const outbox = await getOutboxRepo();
@@ -211,14 +211,14 @@ export async function createRfqAction(
           .replace('T', ' ')
           .slice(0, 16);
 
-        for (const email of parsed.data.allowedPgEmails) {
+        for (const pgWsId of parsed.data.allowedPgWorkspaceIds) {
           const rawToken = generateToken();
           const invId = randomUUID();
           await invitationsRepo.save(
             {
               id: invId,
               rfqId,
-              pgEmail: email,
+              pgWsId,
               uniqueToken: '',
               sentAt: now.toISOString(),
               expiresAt,
@@ -227,59 +227,52 @@ export async function createRfqAction(
             rawToken,
             tx,
           );
-          const inviteUrl = `${baseUrl()}/invite/rfq/${rawToken}`;
-          const html = await renderRfqInvited({
-            rfqId,
-            rfqTitle: parsed.data.title.trim(),
-            buyerName,
-            deadline: deadlineDisplay,
-            inviteUrl,
-          });
-          await outbox.enqueue(
-            {
-              event: 'rfq.invited',
-              to: email,
-              subject: `[BIDIT · ${rfqId}] 견적 요청 도착`,
-              html,
-              dedupeKey: `rfq:${rfqId}:invite:${email}`,
-            },
-            tx,
-          );
-        }
 
-        // PG 워크스페이스가 도메인으로 가입돼 있으면 멤버 전원에게 인앱 알림.
-        // 미가입 도메인은 outbox 메일만으로 충분 — workspaces 조회 결과 없음.
-        const pgDomains = Array.from(
-          new Set(
-            parsed.data.allowedPgEmails
-              .map((e) => emailDomain(e))
-              .filter((d): d is string => d !== null),
-          ),
-        );
-        const pgWsRows =
-          pgDomains.length > 0
-            ? ((await tx
-                .select({ id: workspaces.id })
-                .from(workspaces)
-                .where(
-                  and(
-                    eq(workspaces.type, 'pg'),
-                    inArray(workspaces.domain, pgDomains),
-                  ),
-                )) as { id: string }[])
-            : [];
-        for (const ws of pgWsRows) {
-          const members = (await tx
+          // Admin members receive the invite email.
+          const adminRows = (await tx
+            .select({ userId: workspaceMembers.userId, email: users.email })
+            .from(workspaceMembers)
+            .innerJoin(users, eq(workspaceMembers.userId, users.id))
+            .where(
+              and(
+                eq(workspaceMembers.workspaceId, pgWsId),
+                eq(workspaceMembers.role, 'admin'),
+              ),
+            )) as { userId: string; email: string }[];
+
+          for (const admin of adminRows) {
+            const inviteUrl = `${baseUrl()}/invite/rfq/${rawToken}`;
+            const html = await renderRfqInvited({
+              rfqId,
+              rfqTitle: parsed.data.title.trim(),
+              buyerName,
+              deadline: deadlineDisplay,
+              inviteUrl,
+            });
+            await outbox.enqueue(
+              {
+                event: 'rfq.invited',
+                to: admin.email,
+                subject: `[BIDIT · ${rfqId}] 견적 요청 도착`,
+                html,
+                dedupeKey: `rfq:${rfqId}:invite:ws:${pgWsId}:user:${admin.userId}`,
+              },
+              tx,
+            );
+          }
+
+          // All members receive in-app notification.
+          const allMemberRows = (await tx
             .select({ userId: workspaceMembers.userId })
             .from(workspaceMembers)
-            .where(eq(workspaceMembers.workspaceId, ws.id))) as {
+            .where(eq(workspaceMembers.workspaceId, pgWsId))) as {
             userId: string;
           }[];
-          for (const m of members) {
+          for (const m of allMemberRows) {
             const notif: Notification = {
               id: randomUUID(),
               userId: m.userId,
-              workspaceId: ws.id,
+              workspaceId: pgWsId,
               type: 'rfq.invited',
               title: `[${rfqId}] 견적 요청 도착`,
               body: `${buyerName}가 견적을 요청했습니다.`,
@@ -297,7 +290,7 @@ export async function createRfqAction(
         const sentHtml = await renderRfqSent({
           rfqId,
           rfqTitle: parsed.data.title.trim(),
-          inviteCount: parsed.data.allowedPgEmails.length,
+          inviteCount: parsed.data.allowedPgWorkspaceIds.length,
         });
         await outbox.enqueue(
           {

@@ -79,7 +79,7 @@ async function seedScenario(): Promise<Scenario> {
     bizProfileId: biz.id,
     title: 'perm test',
     memo: '',
-    allowedPgEmails: ['pg@toss.im', 'pg@kakaopay.com'],
+    allowedPgWorkspaceIds: [pgWs.id, otherPgWs.id],
     deadline: new Date(Date.now() + 86_400_000),
     status: 'sent',
     createdBy: buyer.id,
@@ -90,7 +90,6 @@ async function seedScenario(): Promise<Scenario> {
   await db.insert(rfqInvitations).values({
     id: invForToss,
     rfqId,
-    pgEmail: 'pg@toss.im',
     pgWsId: pgWs.id,
     acceptedByUserId: pgUser.id,
     tokenHash: hashToken(generateToken()),
@@ -102,7 +101,6 @@ async function seedScenario(): Promise<Scenario> {
   await db.insert(rfqInvitations).values({
     id: randomUUID(),
     rfqId,
-    pgEmail: 'pg@kakaopay.com',
     pgWsId: otherPgWs.id,
     acceptedByUserId: otherPg.id,
     tokenHash: hashToken(generateToken()),

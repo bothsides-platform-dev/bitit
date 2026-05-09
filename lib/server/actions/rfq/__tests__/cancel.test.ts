@@ -60,7 +60,7 @@ async function seedSentRfqWithBid() {
     bizProfileId: biz.id,
     title: 'cancel test',
     memo: '',
-    allowedPgEmails: ['pg@toss.im'],
+    allowedPgWorkspaceIds: [pgWs.id],
     deadline: new Date(Date.now() + 86_400_000),
     status: 'sent',
     createdBy: buyer.id,
@@ -70,7 +70,6 @@ async function seedSentRfqWithBid() {
   await db.insert(rfqInvitations).values({
     id: invId,
     rfqId,
-    pgEmail: 'pg@toss.im',
     pgWsId: pgWs.id,
     tokenHash: randomUUID(),
     sentAt: new Date(),

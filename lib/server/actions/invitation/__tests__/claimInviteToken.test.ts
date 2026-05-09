@@ -1,10 +1,11 @@
-// claimInviteTokenAction tests (Step 8).
+// claimInviteTokenAction tests.
 //
 // Coverage:
-//   - email 매칭 검사 (advisor pin 3): 같은 도메인 동료 토큰 가로채기 차단
-//   - 잘못된/만료된/이미 사용된 토큰 분기
-//   - 도메인 매칭 PG ws에 자동 join
-//   - 매칭 ws가 없으면 새 PG ws + admin 멤버 생성
+//   - UNAUTHENTICATED / INVITE_INVALID for bad/unknown token
+//   - INVITE_NOT_MEMBER when user's workspaceId !== inv.pgWsId
+//   - Successful claim when user is in the invited workspace
+//   - INVITE_USED on re-claim
+//   - INVITE_EXPIRED on expired invitation
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
@@ -12,12 +13,11 @@ import { and, eq } from 'drizzle-orm';
 import {
   rfqs,
   rfqInvitations,
-  workspaces,
-  workspaceMembers,
 } from '@/lib/db/schema';
 import {
   seedBizProfile,
   seedBuyerWorkspace,
+  seedMembership,
   seedPgWorkspace,
   seedUser,
 } from '@/lib/server/repositories/drizzle/__tests__/_seed';
@@ -61,6 +61,7 @@ async function setup() {
   const buyer = await seedUser(db, { email: 'buyer@x.com' });
   const biz = await seedBizProfile(db);
   const buyerWs = await seedBuyerWorkspace(db, { bizProfileId: biz.id });
+  const pgWs = await seedPgWorkspace(db, '토스페이먼츠');
 
   const rfqId = 'Q-2605-0001';
   await db.insert(rfqs).values({
@@ -69,7 +70,7 @@ async function setup() {
     bizProfileId: biz.id,
     title: 'invite test',
     memo: '',
-    allowedPgEmails: ['sales@toss.im'],
+    allowedPgWorkspaceIds: [pgWs.id],
     deadline: new Date(Date.now() + 86_400_000),
     status: 'sent',
     createdBy: buyer.id,
@@ -81,14 +82,14 @@ async function setup() {
   await db.insert(rfqInvitations).values({
     id: invId,
     rfqId,
-    pgEmail: 'sales@toss.im',
+    pgWsId: pgWs.id,
     tokenHash: hashToken(rawToken),
     sentAt: new Date(),
     expiresAt: new Date(addMinutes(new Date(), 7 * 24 * 60)),
     status: 'pending',
   });
 
-  return { rfqId, invId, rawToken, buyerWsId: buyerWs.id };
+  return { rfqId, invId, rawToken, buyerWsId: buyerWs.id, pgWsId: pgWs.id };
 }
 
 describe('claimInviteTokenAction', () => {
@@ -110,110 +111,82 @@ describe('claimInviteTokenAction', () => {
 
   it('returns INVITE_INVALID for unknown token', async () => {
     await setup();
-    const peer = await seedUser(db, { email: 'peer@toss.im' });
-    sessionRef.value = { user: { id: peer.id, email: peer.email } };
+    const u = await seedUser(db, { email: 'peer@toss.im' });
+    sessionRef.value = { user: { id: u.id, email: u.email } };
     const r = await claimInviteTokenAction('not-a-real-token-xxx');
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toBe('INVITE_INVALID');
   });
 
-  it('🚨 rejects same-domain peer with INVITE_EMAIL_MISMATCH (advisor pin 3)', async () => {
+  it('🚨 rejects user from wrong workspace with INVITE_NOT_MEMBER', async () => {
     const ctx = await setup();
-    // sales@toss.im 으로 발송된 초대를 cs@toss.im 동료가 가로채려는 시도.
-    const peer = await seedUser(db, { email: 'cs@toss.im' });
-    sessionRef.value = { user: { id: peer.id, email: peer.email } };
+    // User belongs to a different PG workspace, not the invited one.
+    const otherWs = await seedPgWorkspace(db, '다른PG');
+    const u = await seedUser(db, { email: 'other@pg.com' });
+    await seedMembership(db, otherWs.id, u.id, 'admin');
+    sessionRef.value = {
+      user: { id: u.id, email: u.email, workspaceId: otherWs.id },
+    };
 
     const r = await claimInviteTokenAction(ctx.rawToken);
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error).toBe('INVITE_EMAIL_MISMATCH');
-
-    // 토큰은 여전히 unclaim — 가로챘다고 atomic claim은 일어나지 않음.
-    const [row] = await db
-      .select()
-      .from(rfqInvitations)
-      .where(eq(rfqInvitations.id, ctx.invId));
-    expect(row.acceptedByUserId).toBeNull();
+    if (!r.ok) expect(r.error).toBe('INVITE_NOT_MEMBER');
   });
 
-  it('case-insensitive email match — sales@TOSS.IM matches sales@toss.im', async () => {
+  it('returns INVITE_NOT_MEMBER when user has no workspaceId', async () => {
     const ctx = await setup();
-    const u = await seedUser(db, { email: 'SALES@toss.im' });
-    sessionRef.value = { user: { id: u.id, email: 'SALES@toss.im' } };
+    const u = await seedUser(db, { email: 'nomember@pg.com' });
+    // No workspace membership at all
+    sessionRef.value = { user: { id: u.id, email: u.email } };
+
+    const r = await claimInviteTokenAction(ctx.rawToken);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toBe('INVITE_NOT_MEMBER');
+  });
+
+  it('successful claim — user workspace matches pgWsId', async () => {
+    const ctx = await setup();
+    const u = await seedUser(db, { email: 'sales@toss.im' });
+    await seedMembership(db, ctx.pgWsId, u.id, 'admin');
+    sessionRef.value = {
+      user: { id: u.id, email: u.email, workspaceId: ctx.pgWsId },
+    };
 
     const r = await claimInviteTokenAction(ctx.rawToken);
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.rfqId).toBe(ctx.rfqId);
   });
 
-  it('successful claim auto-joins existing PG ws by domain', async () => {
-    const ctx = await setup();
-    const tossWs = await seedPgWorkspace(db, 'toss.im', { name: '토스페이먼츠' });
-    const u = await seedUser(db, { email: 'sales@toss.im' });
-    sessionRef.value = { user: { id: u.id, email: u.email } };
-
-    const r = await claimInviteTokenAction(ctx.rawToken);
-    expect(r.ok).toBe(true);
-    if (!r.ok) return;
-
-    // membership row exists for tossWs.
-    const [m] = await db
-      .select()
-      .from(workspaceMembers)
-      .where(
-        and(
-          eq(workspaceMembers.workspaceId, tossWs.id),
-          eq(workspaceMembers.userId, u.id),
-        ),
-      );
-    expect(m).toBeDefined();
-
-    // No new pg ws was created.
-    const allTossWs = await db
-      .select()
-      .from(workspaces)
-      .where(eq(workspaces.domain, 'toss.im'));
-    expect(allTossWs).toHaveLength(1);
-  });
-
-  it('successful claim creates new PG ws when domain has no ws', async () => {
+  it('successful claim sets acceptedByUserId on invitation row', async () => {
     const ctx = await setup();
     const u = await seedUser(db, { email: 'sales@toss.im' });
-    sessionRef.value = { user: { id: u.id, email: u.email } };
+    await seedMembership(db, ctx.pgWsId, u.id, 'admin');
+    sessionRef.value = {
+      user: { id: u.id, email: u.email, workspaceId: ctx.pgWsId },
+    };
 
-    const r = await claimInviteTokenAction(ctx.rawToken);
-    expect(r.ok).toBe(true);
+    await claimInviteTokenAction(ctx.rawToken);
 
-    const [ws] = await db
+    const [row] = await db
       .select()
-      .from(workspaces)
-      .where(eq(workspaces.domain, 'toss.im'));
-    expect(ws).toBeDefined();
-    expect(ws.type).toBe('pg');
-    expect(ws.name).toBe('toss.im');
-
-    const [m] = await db
-      .select()
-      .from(workspaceMembers)
-      .where(
-        and(
-          eq(workspaceMembers.workspaceId, ws.id),
-          eq(workspaceMembers.userId, u.id),
-        ),
-      );
-    expect(m).toBeDefined();
-    expect(m.role).toBe('admin');
+      .from(rfqInvitations)
+      .where(eq(rfqInvitations.id, ctx.invId));
+    expect(row.acceptedByUserId).toBe(u.id);
+    expect(row.status).toBe('accepted');
   });
 
   it('second claim of same token returns INVITE_USED', async () => {
     const ctx = await setup();
     const u = await seedUser(db, { email: 'sales@toss.im' });
-    sessionRef.value = { user: { id: u.id, email: u.email } };
+    await seedMembership(db, ctx.pgWsId, u.id, 'admin');
+    sessionRef.value = {
+      user: { id: u.id, email: u.email, workspaceId: ctx.pgWsId },
+    };
 
     const r1 = await claimInviteTokenAction(ctx.rawToken);
     expect(r1.ok).toBe(true);
 
-    // Same user re-claim — atomic claimToken returns 'used' since
-    // acceptedByUserId is no longer null.
+    // Same user re-claim — atomic claimToken returns 'used'.
     const r2 = await claimInviteTokenAction(ctx.rawToken);
     expect(r2.ok).toBe(false);
     if (!r2.ok) expect(r2.error).toBe('INVITE_USED');
@@ -223,6 +196,7 @@ describe('claimInviteTokenAction', () => {
     const buyer = await seedUser(db, { email: 'buyer-2@x.com' });
     const biz = await seedBizProfile(db, { bizNo: '9876543210' });
     const buyerWs = await seedBuyerWorkspace(db, { bizProfileId: biz.id });
+    const pgWs = await seedPgWorkspace(db, '만료테스트PG');
 
     const rfqId = 'Q-2605-0099';
     await db.insert(rfqs).values({
@@ -231,7 +205,7 @@ describe('claimInviteTokenAction', () => {
       bizProfileId: biz.id,
       title: 'expired invite test',
       memo: '',
-      allowedPgEmails: ['sales@toss.im'],
+      allowedPgWorkspaceIds: [pgWs.id],
       deadline: new Date(Date.now() + 86_400_000),
       status: 'sent',
       createdBy: buyer.id,
@@ -241,19 +215,24 @@ describe('claimInviteTokenAction', () => {
     await db.insert(rfqInvitations).values({
       id: randomUUID(),
       rfqId,
-      pgEmail: 'sales@toss.im',
+      pgWsId: pgWs.id,
       tokenHash: hashToken(rawToken),
       sentAt: new Date(Date.now() - 8 * 86_400_000),
-      // 1초 전 — 만료.
-      expiresAt: new Date(Date.now() - 1000),
+      expiresAt: new Date(Date.now() - 1000), // 1초 전 — 만료
       status: 'pending',
     });
 
-    const u = await seedUser(db, { email: 'sales@toss.im' });
-    sessionRef.value = { user: { id: u.id, email: u.email } };
+    const u = await seedUser(db, { email: 'sales@expired.im' });
+    await seedMembership(db, pgWs.id, u.id, 'admin');
+    sessionRef.value = {
+      user: { id: u.id, email: u.email, workspaceId: pgWs.id },
+    };
 
     const r = await claimInviteTokenAction(rawToken);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toBe('INVITE_EXPIRED');
   });
+
+  // _suppress unused import warnings
+  void and;
 });

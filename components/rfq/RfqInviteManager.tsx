@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/primitives/Button';
 import { Label } from '@/components/primitives/Label';
@@ -13,8 +13,11 @@ import {
 import { toast } from '@/lib/toast';
 import type { InvitationStatus } from '@/lib/types/invitation';
 
+type WsSearchResult = { id: string; displayName: string };
+
 type InvitationView = {
-  email: string;
+  wsId: string;
+  wsName: string;
   status: InvitationStatus;
 };
 
@@ -43,10 +46,6 @@ const statusColor: Record<InvitationStatus, ChipColor> = {
   expired: 'surface',
 };
 
-function isValidEmail(s: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
-}
-
 export function RfqInviteManager({
   rfqId,
   invitations,
@@ -54,31 +53,74 @@ export function RfqInviteManager({
   canEdit,
 }: Props) {
   const router = useRouter();
-  const [input, setInput] = useState('');
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<WsSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [inputError, setInputError] = useState('');
   const [pending, startTransition] = useTransition();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const draftCount = invitations.filter((i) => i.status === 'draft').length;
 
-  const handleAdd = () => {
-    const email = input.trim().toLowerCase();
-    if (!isValidEmail(email)) {
-      setInputError('올바른 이메일 형식이 아닙니다.');
-      return;
-    }
-    if (invitations.some((i) => i.email.toLowerCase() === email)) {
-      setInputError('이미 추가된 이메일입니다.');
-      return;
-    }
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const q = e.target.value;
+    setQuery(q);
     setInputError('');
-    // TODO(Task7): 이 컴포넌트를 workspace 검색 기반 UI로 교체해야 함.
-    // addPgWorkspacesToRfqAction은 workspaceIds: string[] 를 입력받으며,
-    // 이메일 직접 입력 → PG 워크스페이스 선택 흐름으로 UI 변경 필요.
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+
+    if (!q.trim()) {
+      setResults([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    searchTimerRef.current = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await fetch(
+          `/api/workspaces/search?q=${encodeURIComponent(q)}&type=pg`,
+        );
+        if (res.ok) {
+          const data = (await res.json()) as { workspaces: WsSearchResult[] };
+          setResults(data.workspaces);
+          setShowDropdown(data.workspaces.length > 0);
+        }
+      } finally {
+        setIsSearching(false);
+      }
+    }, 250);
+  };
+
+  const handleSelect = (ws: WsSearchResult) => {
+    setShowDropdown(false);
+    setQuery('');
+    setResults([]);
+    setInputError('');
+
+    if (invitations.some((i) => i.wsId === ws.id)) {
+      setInputError('이미 추가된 워크스페이스입니다.');
+      return;
+    }
+
     startTransition(async () => {
-      // Placeholder: workspace-based invite not yet wired in UI.
-      // Use addPgWorkspacesToRfqAction({ rfqId, workspaceIds: [...] }) here.
-      void addPgWorkspacesToRfqAction;
-      toast('PG 워크스페이스 초대 UI 준비 중입니다.', { type: 'error' });
+      const r = await addPgWorkspacesToRfqAction({ rfqId, workspaceIds: [ws.id] });
+      if (!r.ok) {
+        toast(`추가 실패 — ${r.error}`, { type: 'error' });
+        return;
+      }
+      router.refresh();
     });
   };
 
@@ -120,7 +162,7 @@ export function RfqInviteManager({
           <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-t border-[var(--md-sys-color-outline-variant)]">
             {invitations.map((inv, i) => (
               <div
-                key={`${inv.email}-${i}`}
+                key={inv.wsId}
                 className="py-2 flex items-center justify-between gap-3"
               >
                 <div className="flex items-center gap-3 min-w-0">
@@ -128,7 +170,7 @@ export function RfqInviteManager({
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <span className="text-[13px] text-[var(--md-sys-color-on-surface)] truncate">
-                    {inv.email}
+                    {inv.wsName}
                   </span>
                 </div>
                 <Chip label={statusLabel[inv.status]} color={statusColor[inv.status]} />
@@ -140,33 +182,41 @@ export function RfqInviteManager({
 
       {canEdit && (
         <>
-          {/* PG 추가 입력 */}
+          {/* PG 검색 추가 */}
           <div className="space-y-2">
-            <Label size="md" muted={false}>PG 이메일 추가</Label>
-            <div className="flex items-end gap-3">
-              <input
-                type="email"
-                value={input}
-                disabled={pending}
-                onChange={(e) => {
-                  setInput(e.target.value);
-                  setInputError('');
-                }}
-                onKeyDown={(e) =>
-                  e.key === 'Enter' && (e.preventDefault(), handleAdd())
-                }
-                placeholder="sales@pg.com"
-                className="flex-1 bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors disabled:opacity-50"
-              />
-              <Button
-                type="button"
-                variant="outlined"
-                size="sm"
-                disabled={!input.trim() || pending}
-                onClick={handleAdd}
-              >
-                추가
-              </Button>
+            <Label size="md" muted={false}>PG 워크스페이스 추가</Label>
+            <div ref={dropdownRef} className="relative">
+              <div className="flex items-end gap-3">
+                <input
+                  type="text"
+                  value={query}
+                  disabled={pending}
+                  onChange={handleQueryChange}
+                  onFocus={() => results.length > 0 && setShowDropdown(true)}
+                  placeholder="워크스페이스 이름 검색…"
+                  className="flex-1 bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors disabled:opacity-50"
+                />
+                {isSearching && (
+                  <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)] pb-2">
+                    LOADING…
+                  </span>
+                )}
+              </div>
+
+              {showDropdown && results.length > 0 && (
+                <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-[var(--md-sys-color-surface-container)] border border-[var(--md-sys-color-outline-variant)] rounded-md shadow-sm overflow-hidden">
+                  {results.map((ws) => (
+                    <button
+                      key={ws.id}
+                      type="button"
+                      onClick={() => handleSelect(ws)}
+                      className="w-full text-left px-3 py-2 text-[13px] text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-surface-container-high)] transition-colors"
+                    >
+                      {ws.displayName}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             {inputError && (
               <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]">
@@ -220,7 +270,7 @@ export function RfqInviteManager({
               </Button>
             </div>
             <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
-              초대된 PG 도메인의 이메일로 가입한 누구나 이 링크로 진입 가능합니다.
+              초대받은 PG 워크스페이스 멤버라면 이 링크로 입장 가능합니다.
               마감일에 자동 만료됩니다.
             </p>
           </div>

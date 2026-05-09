@@ -63,7 +63,7 @@ async function seedRfq(opts: {
     buyerWsId: opts.buyerWsId,
     title: opts.title,
     memo: '',
-    allowedPgEmails: [],
+    allowedPgWorkspaceIds: [],
     deadline: new Date(Date.now() + 86_400_000),
     status: 'sent',
     createdBy: opts.createdBy,
@@ -101,14 +101,12 @@ async function seedBid(opts: {
 
 async function seedInvitation(opts: {
   rfqId: string;
-  pgEmail: string;
   pgWsId: string;
 }) {
   const id = randomUUID();
   await db.insert(rfqInvitations).values({
     id,
     rfqId: opts.rfqId,
-    pgEmail: opts.pgEmail,
     pgWsId: opts.pgWsId,
     tokenHash: randomUUID(),
     sentAt: new Date(),
@@ -135,7 +133,7 @@ describe('searchBidsAction', () => {
     await seedMembership(db, pgWs.id, pgUser.id, 'admin');
 
     await seedRfq({ id: 'Q-2605-0001', buyerWsId: buyerWs.id, title: '수수료 문의', createdBy: buyer.id });
-    const invId = await seedInvitation({ rfqId: 'Q-2605-0001', pgEmail: 'pg@toss.im', pgWsId: pgWs.id });
+    const invId = await seedInvitation({ rfqId: 'Q-2605-0001', pgWsId: pgWs.id });
     await seedBid({ rfqId: 'Q-2605-0001', pgWsId: pgWs.id, invitationId: invId, submittedBy: pgUser.id, memo: '정산 협의 가능' });
 
     sessionRef.value = { user: { id: buyer.id, workspaceId: buyerWs.id, workspaceType: 'buyer', role: 'admin' } };
@@ -159,7 +157,7 @@ describe('searchBidsAction', () => {
     await seedMembership(db, pgWs.id, pgUser.id, 'admin');
 
     await seedRfq({ id: 'Q-2605-0002', buyerWsId: buyerWs.id, title: 'Draft Test', createdBy: buyer.id });
-    const invId = await seedInvitation({ rfqId: 'Q-2605-0002', pgEmail: 'pg@toss.im', pgWsId: pgWs.id });
+    const invId = await seedInvitation({ rfqId: 'Q-2605-0002', pgWsId: pgWs.id });
     await seedBid({ rfqId: 'Q-2605-0002', pgWsId: pgWs.id, invitationId: invId, submittedBy: pgUser.id, status: 'draft' });
 
     sessionRef.value = { user: { id: buyer.id, workspaceId: buyerWs.id, workspaceType: 'buyer', role: 'admin' } };
@@ -178,7 +176,7 @@ describe('searchBidsAction', () => {
     await seedMembership(db, pgWs.id, pgUser.id, 'admin');
 
     await seedRfq({ id: 'Q-2605-0003', buyerWsId: buyerWs.id, title: 'PG Test RFQ', createdBy: buyer.id });
-    const invId = await seedInvitation({ rfqId: 'Q-2605-0003', pgEmail: 'sales@kakao.com', pgWsId: pgWs.id });
+    const invId = await seedInvitation({ rfqId: 'Q-2605-0003', pgWsId: pgWs.id });
     await seedBid({ rfqId: 'Q-2605-0003', pgWsId: pgWs.id, invitationId: invId, submittedBy: pgUser.id });
 
     sessionRef.value = { user: { id: pgUser.id, workspaceId: pgWs.id, workspaceType: 'pg', role: 'admin' } };

@@ -1,7 +1,10 @@
 // PG_RFQ_SPEC.md §6 시나리오 B — PG 영업담당 입찰 (action-only e2e).
 //
-// buyer signup → createRfq(send=true) → PG signup → claim invite → submitBid →
-// buyer 알림 row + outbox row 검증.
+// PG signup → buyer signup → createRfq(send=true, pgWsId) → PG claim invite →
+// submitBid → buyer 알림 row + outbox row 검증.
+//
+// 새 모델: PG 워크스페이스가 먼저 존재해야 buyer가 초대할 수 있다.
+// PG signups → PG workspace 생성 → buyer가 workspace ID로 RFQ 발송.
 //
 // 인증 모킹: requireSession/requireBuyerSession/requirePgSession 모두 sessionRef.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -62,7 +65,44 @@ function tokenFromInviteUrl(html: string): string {
   return m?.[1] ?? '';
 }
 
-async function buyerSignupAndCreateRfq(): Promise<{
+async function pgSignup(email: string): Promise<{ id: string; email: string; wsId: string }> {
+  const p2 = await signupEmailAction({ email });
+  expect(p2.ok).toBe(true);
+
+  const verifyOutbox = await db
+    .select({ html: outboxEntries.html, toAddr: outboxEntries.toAddr })
+    .from(outboxEntries)
+    .where(
+      and(
+        eq(outboxEntries.event, 'auth.verify'),
+        eq(outboxEntries.toAddr, email),
+      ),
+    )
+    .limit(1);
+  const verifyToken = decodeURIComponent(
+    verifyOutbox[0].html.match(/token=([^"]+)"/)?.[1] ?? '',
+  );
+  const p4 = await verifyEmailAction(verifyToken);
+  expect(p4.ok).toBe(true);
+  if (!p4.ok) throw new Error('verify failed');
+
+  // PG signup — wsKind='pg' creates a new PG workspace with the given name.
+  const wsName = `${email.split('@')[1]} 워크스페이스`;
+  const p6 = await signupCompleteAction({
+    email: p4.email,
+    name: '박판매',
+    password: 'Password123!',
+    wsKind: 'pg',
+    wsName,
+  });
+  expect(p6.ok).toBe(true);
+
+  const [u] = await db.select().from(users).where(eq(users.email, email));
+  const [ws] = await db.select().from(workspaces).where(eq(workspaces.name, wsName));
+  return { id: u.id, email: u.email, wsId: ws.id };
+}
+
+async function buyerSignupAndCreateRfq(pgWsId: string): Promise<{
   buyerUserId: string;
   buyerEmail: string;
   buyerWsId: string;
@@ -76,7 +116,12 @@ async function buyerSignupAndCreateRfq(): Promise<{
   const verifyOutbox = await db
     .select({ html: outboxEntries.html })
     .from(outboxEntries)
-    .where(eq(outboxEntries.event, 'auth.verify'))
+    .where(
+      and(
+        eq(outboxEntries.event, 'auth.verify'),
+        eq(outboxEntries.toAddr, 'kim@example.com'),
+      ),
+    )
     .limit(1);
   const verifyToken = decodeURIComponent(
     verifyOutbox[0].html.match(/token=([^"]+)"/)?.[1] ?? '',
@@ -111,7 +156,7 @@ async function buyerSignupAndCreateRfq(): Promise<{
     .from(workspaces)
     .where(eq(workspaces.name, '(주)샘플테크'));
 
-  // Buyer creates+sends RFQ.
+  // Buyer creates+sends RFQ targeting the PG workspace that already exists.
   sessionRef.value = {
     user: {
       id: u.id,
@@ -125,17 +170,18 @@ async function buyerSignupAndCreateRfq(): Promise<{
     title: 'PG 견적',
     memo: '',
     deadline: new Date(Date.now() + 7 * 86_400_000).toISOString(),
-    allowedPgEmails: ['sales@toss.im'],
+    allowedPgWorkspaceIds: [pgWsId],
     send: true,
   });
   expect(created.ok).toBe(true);
   if (!created.ok) throw new Error('createRfq failed');
 
-  // Pull invite raw token from outbox HTML.
+  // Pull invite raw token from outbox HTML (PG admin gets the email).
   const [inviteRow] = await db
     .select({ html: outboxEntries.html })
     .from(outboxEntries)
-    .where(eq(outboxEntries.event, 'rfq.invited'));
+    .where(eq(outboxEntries.event, 'rfq.invited'))
+    .limit(1);
   const pgInviteToken = tokenFromInviteUrl(inviteRow.html);
   expect(pgInviteToken).toBeTruthy();
 
@@ -148,41 +194,6 @@ async function buyerSignupAndCreateRfq(): Promise<{
   };
 }
 
-async function pgSignup(email: string): Promise<{ id: string; email: string }> {
-  const p2 = await signupEmailAction({ email });
-  expect(p2.ok).toBe(true);
-
-  const verifyOutbox = await db
-    .select({ html: outboxEntries.html, toAddr: outboxEntries.toAddr })
-    .from(outboxEntries)
-    .where(
-      and(
-        eq(outboxEntries.event, 'auth.verify'),
-        eq(outboxEntries.toAddr, email),
-      ),
-    )
-    .limit(1);
-  const verifyToken = decodeURIComponent(
-    verifyOutbox[0].html.match(/token=([^"]+)"/)?.[1] ?? '',
-  );
-  const p4 = await verifyEmailAction(verifyToken);
-  expect(p4.ok).toBe(true);
-  if (!p4.ok) throw new Error('verify failed');
-
-  // PG signup — wsKind='pg' creates a new PG workspace with the given name.
-  const p6 = await signupCompleteAction({
-    email: p4.email,
-    name: '박판매',
-    password: 'Password123!',
-    wsKind: 'pg',
-    wsName: `${email.split('@')[1]} 워크스페이스`,
-  });
-  expect(p6.ok).toBe(true);
-
-  const [u] = await db.select().from(users).where(eq(users.email, email));
-  return { id: u.id, email: u.email };
-}
-
 describe('scenario B — PG signup → claim invite → submitBid → buyer notified', () => {
   beforeEach(async () => {
     db = await setupRfqActionEnv();
@@ -193,18 +204,18 @@ describe('scenario B — PG signup → claim invite → submitBid → buyer noti
   });
 
   it('end-to-end: buyer creates RFQ → PG claims & submits → buyer ws gets in_app + outbox row', async () => {
-    const setup = await buyerSignupAndCreateRfq();
-
-    // PG signup (sales@toss.im — same email as the invite recipient).
+    // 1. PG signs up first (workspace must exist before buyer can invite)
     const pgUser = await pgSignup('sales@toss.im');
 
-    // PG-side session before claim — workspaceId not yet known. Use placeholder
-    // for requireSession-only step; claim populates the membership.
+    // 2. Buyer signs up and creates+sends RFQ targeting the PG workspace
+    const setup = await buyerSignupAndCreateRfq(pgUser.wsId);
+
+    // 3. PG user claims invite (workspaceId already known from signup)
     sessionRef.value = {
       user: {
         id: pgUser.id,
         email: pgUser.email,
-        workspaceId: '00000000-0000-0000-0000-000000000000',
+        workspaceId: pgUser.wsId,
         workspaceType: 'pg',
         role: 'admin',
       },
@@ -215,11 +226,11 @@ describe('scenario B — PG signup → claim invite → submitBid → buyer noti
     if (!claim.ok) return;
     expect(claim.rfqId).toBe(setup.rfqId);
 
-    // Workspace + membership created.
+    // Workspace + membership exist from PG signup.
     const [pgWs] = await db
       .select()
       .from(workspaces)
-      .where(eq(workspaces.domain, 'toss.im'));
+      .where(eq(workspaces.id, pgUser.wsId));
     expect(pgWs).toBeDefined();
     expect(pgWs.type).toBe('pg');
 
@@ -228,24 +239,14 @@ describe('scenario B — PG signup → claim invite → submitBid → buyer noti
       .from(workspaceMembers)
       .where(
         and(
-          eq(workspaceMembers.workspaceId, pgWs.id),
+          eq(workspaceMembers.workspaceId, pgUser.wsId),
           eq(workspaceMembers.userId, pgUser.id),
         ),
       );
     expect(m).toBeDefined();
     expect(m.role).toBe('admin');
 
-    // Now PG submits a bid (workspaceId resolved).
-    sessionRef.value = {
-      user: {
-        id: pgUser.id,
-        email: pgUser.email,
-        workspaceId: pgWs.id,
-        workspaceType: 'pg',
-        role: 'admin',
-      },
-    };
-
+    // 4. PG submits a bid.
     const bid = await submitBidAction({
       rfqId: setup.rfqId,
       settleCycle: 'D+1',
@@ -275,7 +276,7 @@ describe('scenario B — PG signup → claim invite → submitBid → buyer noti
     //   (advisor pin 1: STATUTORY_CARD_FEE 강제).
     const [bidRow] = await db.select().from(bids).where(eq(bids.id, bid.bidId));
     expect(bidRow.status).toBe('submitted');
-    expect(bidRow.pgWsId).toBe(pgWs.id);
+    expect(bidRow.pgWsId).toBe(pgUser.wsId);
     expect(bidRow.cardFeesByIssuer).toBeNull();
 
     // — invitation now accepted with this user.
@@ -310,7 +311,7 @@ describe('scenario B — PG signup → claim invite → submitBid → buyer noti
     expect(submittedOutbox).toHaveLength(1);
     expect(submittedOutbox[0].toAddr).toBe(setup.buyerEmail);
     expect(submittedOutbox[0].dedupeKey).toBe(
-      `bid:${setup.rfqId}:${pgWs.id}:${setup.buyerUserId}`,
+      `bid:${setup.rfqId}:${pgUser.wsId}:${setup.buyerUserId}`,
     );
   });
 });

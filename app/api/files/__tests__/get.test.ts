@@ -101,7 +101,7 @@ async function seedScenario() {
     bizProfileId: biz.id,
     title: 'get test',
     memo: '',
-    allowedPgEmails: ['sales@toss.im'],
+    allowedPgWorkspaceIds: [pgWs.id],
     deadline: new Date(Date.now() + 86_400_000),
     status: 'sent',
     createdBy: buyer.id,
@@ -110,7 +110,6 @@ async function seedScenario() {
   await db.insert(rfqInvitations).values({
     id: randomUUID(),
     rfqId,
-    pgEmail: 'sales@toss.im',
     pgWsId: pgWs.id,
     acceptedByUserId: pg.id,
     tokenHash: hashToken(generateToken()),

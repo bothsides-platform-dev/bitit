@@ -76,7 +76,7 @@ async function setup() {
     bizProfileId: biz.id,
     title: 'withdraw test',
     memo: '',
-    allowedPgEmails: ['sales@toss.im'],
+    allowedPgWorkspaceIds: [pgWs.id],
     deadline: new Date(Date.now() + 86_400_000),
     status: 'sent',
     createdBy: buyer.id,
@@ -87,7 +87,6 @@ async function setup() {
   await db.insert(rfqInvitations).values({
     id: invId,
     rfqId,
-    pgEmail: 'sales@toss.im',
     pgWsId: pgWs.id,
     acceptedByUserId: pgUser.id,
     tokenHash: hashToken(generateToken()),

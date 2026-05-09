@@ -81,7 +81,7 @@ export function RfqListTable({ rfqs }: Props) {
                 {formatDate(rfq.deadline)}
               </td>
               <td className="px-3 py-4 font-mono text-[12px] tabular-nums text-[var(--md-sys-color-on-surface-variant)]">
-                {rfq.allowedPgEmails.length}
+                {rfq.allowedPgWorkspaceIds.length}
               </td>
               <td className="px-3 py-4 text-right">
                 <Chip label={statusLabel[rfq.status]} color={statusColor[rfq.status]} />
