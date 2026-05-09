@@ -1,8 +1,8 @@
 // canAccessAttachment matrix:
 //   rfq_rfp:
 //     - buyer ws member of the owning RFQ → ALLOW
-//     - PG user with accepted invitation → ALLOW
-//     - PG user without accepted invitation (peer same domain) → DENY
+//     - any member of an invited PG ws (claim-state agnostic) → ALLOW
+//     - PG user from a different ws (not invited) → DENY
 //     - random user → DENY
 //     - uploader (own row, e.g. draft window) → ALLOW
 //   bid_proposal:
@@ -225,7 +225,7 @@ describe('canAccessAttachment — rfq_rfp', () => {
     expect(ok).toBe(true);
   });
 
-  it('DENY for PG ws peer who did not claim the invitation', async () => {
+  it('ALLOW for PG ws peer (member of invited ws, did not personally claim)', async () => {
     const s = await seedScenario();
     const ok = await canAccessAttachment(
       db,
@@ -235,7 +235,7 @@ describe('canAccessAttachment — rfq_rfp', () => {
       },
       await repos(),
     );
-    expect(ok).toBe(false);
+    expect(ok).toBe(true);
   });
 
   it('DENY for random unrelated user', async () => {

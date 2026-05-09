@@ -167,27 +167,6 @@ export class DrizzleInvitationRepository implements InvitationRepo {
     return row ? rowToInvitation(row) : undefined;
   }
 
-  async findByPgUser(
-    userId: string,
-    tx?: Tx,
-  ): Promise<{ invitation: RfqInvitation; rfq: RFQ }[]> {
-    const db = this.h(tx);
-    const rows = (await db
-      .select({ inv: rfqInvitations, rfq: rfqs, biz: bizProfiles })
-      .from(rfqInvitations)
-      .innerJoin(rfqs, eq(rfqInvitations.rfqId, rfqs.id))
-      .leftJoin(bizProfiles, eq(rfqs.bizProfileId, bizProfiles.id))
-      .where(eq(rfqInvitations.acceptedByUserId, userId))) as {
-      inv: InvRow;
-      rfq: RfqRow;
-      biz: BizRow | null;
-    }[];
-    return rows.map((r) => ({
-      invitation: rowToInvitation(r.inv),
-      rfq: rowToRfq(r.rfq, r.biz),
-    }));
-  }
-
   async findByPgWorkspace(
     pgWsId: string,
     tx?: Tx,
@@ -252,18 +231,20 @@ export class DrizzleInvitationRepository implements InvitationRepo {
     tx?: Tx,
   ): Promise<void> {
     const db = this.h(tx);
+    // pending(미클레임) 또는 accepted(클레임 완료) → opened. opened/expired/draft 는 no-op.
+    // 워크스페이스 멤버 누구라도 detail 페이지 첫 진입 시 검토 시작 시그널이 됨.
     await db
       .update(rfqInvitations)
       .set({ status: 'opened', openedAt })
       .where(
         and(
           eq(rfqInvitations.id, invitationId),
-          eq(rfqInvitations.status, 'accepted'),
+          inArray(rfqInvitations.status, ['pending', 'accepted']),
         ),
       );
   }
 
-  async canAccess(rfqId: string, userId: string, tx?: Tx): Promise<boolean> {
+  async canAccess(rfqId: string, pgWsId: string, tx?: Tx): Promise<boolean> {
     const db = this.h(tx);
     const [row] = await db
       .select({
@@ -274,7 +255,8 @@ export class DrizzleInvitationRepository implements InvitationRepo {
             .where(
               and(
                 eq(rfqInvitations.rfqId, rfqId),
-                eq(rfqInvitations.acceptedByUserId, userId),
+                eq(rfqInvitations.pgWsId, pgWsId),
+                inArray(rfqInvitations.status, ['pending', 'opened', 'accepted']),
               ),
             ),
         ).as('ok'),

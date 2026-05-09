@@ -62,12 +62,17 @@ describe('InMemoryInvitationRepository', () => {
     expect(await repo.claimToken(raw, 'user-2')).toEqual({ ok: false, reason: 'used' });
   });
 
-  it('canAccess is true only for the accepting user (same-domain peers blocked)', async () => {
+  it('canAccess passes any caller scoped to the invited PG workspace', async () => {
     const raw = generateToken();
     await repo.save(makeInvitation(raw), raw);
-    await repo.claimToken(raw, 'user-pg');
 
-    expect(await repo.canAccess('rfq-1', 'user-pg')).toBe(true);
-    expect(await repo.canAccess('rfq-1', 'other-pg-user')).toBe(false);
+    // Pre-claim ('sent' / DB pending) — workspace id passes.
+    expect(await repo.canAccess('rfq-1', 'ws-toss')).toBe(true);
+    // A different ws never passes.
+    expect(await repo.canAccess('rfq-1', 'ws-other')).toBe(false);
+
+    // Claim transitions to 'accepted' — still passes for the same ws.
+    await repo.claimToken(raw, 'user-pg');
+    expect(await repo.canAccess('rfq-1', 'ws-toss')).toBe(true);
   });
 });

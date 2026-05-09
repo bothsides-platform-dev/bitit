@@ -180,7 +180,7 @@ export async function nextRfqId(tx: Tx): Promise<string> {
      RETURNING *
     ```
     rowCount 0이면 만료/사용/무효 분기 (DB 재조회로 reason 결정)
-  - **canAccess**: `SELECT EXISTS(SELECT 1 FROM rfq_invitations WHERE rfq_id=$1 AND accepted_by_user_id=$2)` — 같은 도메인 동료도 차단(현재 in-memory 의미론 보존)
+  - **canAccess**: `SELECT EXISTS(SELECT 1 FROM rfq_invitations WHERE rfq_id=$1 AND pg_ws_id=$2 AND status IN ('pending','opened','accepted'))` — 초대된 PG 워크스페이스 멤버 모두 통과 (2026-05-10 정책 변경)
   - **transition**: 액션 레이어에서 `assertTransition` (`lib/server/rfq-state.ts`) + DB layer에서 `WHERE status=$prev` 가드 → 동시성 안전
 - `lib/server/repositories/factory.ts`: `getRfqRepo()` 등 — `process.env.NODE_ENV==='test' || process.env.REPO_BACKEND==='memory'` 시 in-memory, else drizzle
 - `lib/server/__tests__/drizzle/*.test.ts`: pglite 기반 (`@electric-sql/pglite` + `drizzle-orm/pglite`). 기존 `rfq-repo.test.ts`/`invitation.test.ts`/`workspace.test.ts`의 어서션 그대로 복제. 각 테스트 격리는 매 테스트 `BEGIN`/`ROLLBACK`로
@@ -278,7 +278,7 @@ P6 submit → `signupCompleteAction({ wsKind, name, bizProfile? })`. **buyer 분
 
 `lib/server/actions/`:
 - `invitation/claimInviteTokenAction.ts`: 세션 필요. 미가입자는 Step 5 흐름으로 가입(inviteToken 동봉). 가입자는 직접 클레임 → `invitationRepo.claimToken(rawToken, userId)` → 도메인의 PG ws auto-join (`workspaceRepo.autoJoinPg`) → 반환 `{ rfqId }`
-- `bid/submitBidAction.ts`: `requirePgSession()` + `invitationRepo.canAccess(rfqId, userId)` 가드. **STATUTORY_CARD_FEE 서버 강제** (등급 미입력 RFQ는 일반 폴백):
+- `bid/submitBidAction.ts`: `requirePgSession()` + `invitationRepo.canAccess(rfqId, pgWsId)` 가드(워크스페이스 단위). **STATUTORY_CARD_FEE 서버 강제** (등급 미입력 RFQ는 일반 폴백):
   ```ts
   const rfq = await rfqRepo.findById(rfqId);
   const bizProfile = rfq.bizProfileId
@@ -295,11 +295,11 @@ P6 submit → `signupCompleteAction({ wsKind, name, bizProfile? })`. **buyer 분
 
 화면 수정:
 - `app/(public)/invite/rfq/[token]/page.tsx`: 액션 사용, 가입/로그인 분기 보존
-- `app/(app)/inbox/page.tsx`: RSC. `invitationRepo.findByPgUser(session.userId)` 신규 추가 → `(rfq, invitation)` 페어 반환. `MOCK_INVITATIONS`/`MOCK_RFQS` 제거
+- `app/(app)/inbox/page.tsx`: RSC. `invitationRepo.findByPgWorkspace(session.workspaceId)` → 본인 워크스페이스로 발송된 모든 활성 invitation+RFQ 페어. 미클레임 'pending' 도 표시(알림 딥링크와 일관)
 - `app/(app)/inbox/[rfqId]/page.tsx`: RSC + `canAccess` 가드. 미통과 시 404
 - `components/inbox/BidForm.tsx`: `useBidListStore`/`useNotificationsStore`/`MOCK_SESSION_PG`/`MOCK_WORKSPACES`/`MOCK_SESSION_BUYER` 제거 → `submitBidAction` 호출. proposalPdf는 attachment id로 전달
 
-검증: 시나리오 B/C 그린. 같은 도메인 동료가 다른 사용자의 RFQ에 직접 접근 시 차단 확인 (`/inbox/Q-xxxx-xxxx` 진입 → 404).
+검증: 시나리오 B/C 그린. **초대된 PG 워크스페이스의 모든 멤버**가 같은 RFQ에 접근 가능 — 알림 딥링크(미클레임 멤버 클릭) 정상 동작 회귀 가드. 다른 워크스페이스 사용자는 `canAccess` 차단(404).
 
 ## Step 9 — 알림: SSE + actions
 
@@ -330,7 +330,7 @@ P6 submit → `signupCompleteAction({ wsKind, name, bizProfile? })`. **buyer 분
 - `lib/server/storage/local.ts`: `saveFile`/`readFile`/`deleteFile`. `STORAGE_ROOT = process.env.UPLOAD_DIR ?? './uploads'`. 스토리지 인터페이스 `Storage`로 추상화 (v1에 S3 클래스 swap)
 - `app/api/files/upload/route.ts`: POST multipart. `auth()` 필수. mime 화이트리스트 (`application/pdf`, `image/png`, `image/jpeg`), 20MB 제한. `${STORAGE_ROOT}/{yyyy}/{mm}/{uuid}.{ext}` 저장 후 `attachments` insert. 응답 `{ id, name, size, mimeType }`
 - `app/api/files/[id]/route.ts`: GET. 권한 검사 — owner_kind에 따라:
-  - `rfq_rfp`: rfq의 buyer ws 멤버 OR `canAccess(rfqId, userId)` PG
+  - `rfq_rfp`: rfq의 buyer ws 멤버 OR `canAccess(rfqId, pgWsId)` PG (초대된 ws 멤버 모두)
   - `bid_proposal`: rfq의 buyer ws 멤버 OR 업로드한 PG ws 멤버
   - 그 외 401/403. stream으로 응답, `Cache-Control: private, no-store`
 - `.gitignore`에 `uploads/` 추가

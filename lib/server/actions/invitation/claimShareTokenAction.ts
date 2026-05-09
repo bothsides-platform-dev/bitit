@@ -26,7 +26,7 @@ export type ClaimShareTokenResult =
  *      포함 여부 확인. 불일치 → `WORKSPACE_NOT_ALLOWED`.
  *   6. 같은 ws가 같은 RFQ에 이미 invitation row를 가진 경우 idempotent —
  *      그렇지 않으면 audit row(`status='accepted'`, fresh tokenHash) 생성. 이
- *      row가 있어야 `findByPgUser`로 인박스에 노출되고 `canAccess`도 통과.
+ *      row가 있어야 `findByPgWorkspace`로 인박스에 노출되고 `canAccess`도 통과.
  */
 export async function claimShareTokenAction(
   rawToken: string,

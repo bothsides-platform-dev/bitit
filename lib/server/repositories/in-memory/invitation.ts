@@ -6,9 +6,9 @@ import type { InvitationRepo, RfqRepo, TokenClaimResult, Tx } from '../types';
 export class InMemoryInvitationRepository implements InvitationRepo {
   private store = new Map<string, RfqInvitation>();
   private tokenHashIndex = new Map<string, string>(); // hash → id
-  // Optional getter for the RFQ repo so findByPgUser can hydrate the JOIN
-  // shape without inverting factory ordering. Wired by the factory; tests
-  // that only exercise invitation-only methods can leave it unset.
+  // Optional getter for the RFQ repo so findByPgWorkspace can hydrate the
+  // JOIN shape without inverting factory ordering. Wired by the factory;
+  // tests that only exercise invitation-only methods can leave it unset.
   private rfqRepoRef?: () => RfqRepo;
 
   setRfqRepoRef(getter: () => RfqRepo): void {
@@ -50,24 +50,6 @@ export class InMemoryInvitationRepository implements InvitationRepo {
     if (!id) return undefined;
     const inv = this.store.get(id);
     return inv ? { ...inv } : undefined;
-  }
-
-  async findByPgUser(
-    userId: string,
-    _tx?: Tx,
-  ): Promise<{ invitation: RfqInvitation; rfq: RFQ }[]> {
-    void _tx;
-    if (!this.rfqRepoRef) return [];
-    const rfqRepo = this.rfqRepoRef();
-    const claimed = [...this.store.values()].filter(
-      (i) => i.acceptedByUserId === userId,
-    );
-    const out: { invitation: RfqInvitation; rfq: RFQ }[] = [];
-    for (const inv of claimed) {
-      const rfq = await rfqRepo.findById(inv.rfqId);
-      if (rfq) out.push({ invitation: { ...inv }, rfq });
-    }
-    return out;
   }
 
   async findByPgWorkspace(
@@ -121,7 +103,8 @@ export class InMemoryInvitationRepository implements InvitationRepo {
     void _tx;
     const inv = this.store.get(invitationId);
     if (!inv) return;
-    if (inv.status !== 'accepted') return;
+    // pending('sent') / accepted 만 전이 대상. 나머지 status 는 no-op.
+    if (inv.status !== 'sent' && inv.status !== 'accepted') return;
     this.store.set(invitationId, {
       ...inv,
       status: 'opened',
@@ -129,11 +112,16 @@ export class InMemoryInvitationRepository implements InvitationRepo {
     });
   }
 
-  // Only the user who accepted the token has access — same-domain peers blocked.
-  async canAccess(rfqId: string, userId: string, _tx?: Tx): Promise<boolean> {
+  // 워크스페이스 멤버십 단위 접근권 — 초대된 PG ws의 모든 멤버가 통과.
+  async canAccess(rfqId: string, pgWsId: string, _tx?: Tx): Promise<boolean> {
     void _tx;
     return [...this.store.values()].some(
-      (i) => i.rfqId === rfqId && i.acceptedByUserId === userId,
+      (i) =>
+        i.rfqId === rfqId &&
+        i.pgWsId === pgWsId &&
+        (i.status === 'sent' ||
+          i.status === 'opened' ||
+          i.status === 'accepted'),
     );
   }
 

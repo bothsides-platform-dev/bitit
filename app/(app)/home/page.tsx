@@ -10,9 +10,7 @@ export default async function HomePage() {
   if (!session?.user?.id) redirect('/login?next=/home');
 
   if (session.user.workspaceType === 'pg' && session.user.workspaceId) {
-    return (
-      <PgHome userId={session.user.id} workspaceId={session.user.workspaceId} />
-    );
+    return <PgHome workspaceId={session.user.workspaceId} />;
   }
 
   if (session.user.workspaceType === 'buyer' && session.user.workspaceId) {

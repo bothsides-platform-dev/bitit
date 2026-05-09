@@ -1,6 +1,7 @@
-// Step 8: 제출 완료 화면 (RSC + canAccess 가드).
+// 제출 완료 화면 (RSC + canAccess 가드).
 //
-// canAccess 게이트로 도메인 동료 차단. 본인 ws의 submitted bid를 hydrate.
+// canAccess 게이트는 초대된 워크스페이스 멤버 모두 통과. 본인 ws의 submitted
+// bid 를 hydrate (동료가 제출한 견적도 같이 보임).
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@/auth';
@@ -28,10 +29,12 @@ export default async function InboxSubmittedPage({ params }: Props) {
   const { rfqId } = await params;
 
   const session = await auth();
-  if (!session?.user?.id) redirect(`/login?next=/inbox/${rfqId}/submitted`);
+  if (!session?.user?.id || !session.user.workspaceId) {
+    redirect(`/login?next=/inbox/${rfqId}/submitted`);
+  }
 
   const invRepo = await getInvitationRepo();
-  const ok = await invRepo.canAccess(rfqId, session.user.id);
+  const ok = await invRepo.canAccess(rfqId, session.user.workspaceId);
   if (!ok) notFound();
 
   const rfqRepo = await getRfqRepo();

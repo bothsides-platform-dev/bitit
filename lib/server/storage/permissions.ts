@@ -5,7 +5,7 @@
  *
  *   `rfq_rfp` (RFP PDFs attached to a buyer-side RFQ)
  *     - Buyer ws members of the RFQ owner: ALLOW
- *     - PG users with `invitationRepo.canAccess(rfqId, userId)`: ALLOW
+ *     - PG ws members where `invitationRepo.canAccess(rfqId, pgWsId)` is true: ALLOW
  *     - Uploader themselves (covers pre-RFQ-create draft window where
  *       `ownerId` may not yet resolve to an `rfqs` row): ALLOW
  *     - Otherwise: DENY
@@ -91,8 +91,14 @@ export async function canAccessAttachment(
       if (member) return true;
     }
 
-    // PG side — accepted invitation tying this user to this RFQ.
-    if (await repos.invitation.canAccess(att.ownerId, userId, tx)) return true;
+    // PG side — invitation gates by workspace membership (any member of an
+    // invited PG ws may read the RFP PDF).
+    if (
+      wsId &&
+      (await repos.invitation.canAccess(att.ownerId, wsId, tx))
+    ) {
+      return true;
+    }
 
     return false;
   }

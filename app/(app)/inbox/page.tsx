@@ -1,9 +1,9 @@
-// Step 8: PG 수신함 (RSC).
+// PG 수신함 (RSC).
 //
-// - `auth()` 후 `getInvitationRepo().findByPgUser(userId)` — PG 사용자가 클레임한
-//   invitation + RFQ pair 목록.
-// - mock import 제거. 미클레임 invitation은 더 이상 표시 안 함(클레임 후 인박스
-//   진입이 v0 정책).
+// - `auth()` 후 `getInvitationRepo().findByPgWorkspace(workspaceId)` — 본인이
+//   소속한 PG 워크스페이스로 발송된 모든 활성 invitation + RFQ pair.
+// - 정책: 초대된 워크스페이스 멤버 모두 접근. 미클레임 invitation 도 표시(알림
+//   딥링크와 일관). 클레임 자체는 첫 진입자가 처리(감사용).
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { getInvitationRepo } from '@/lib/server/repositories/factory';
@@ -14,10 +14,12 @@ export const dynamic = 'force-dynamic';
 
 export default async function InboxPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/login?next=/inbox');
+  if (!session?.user?.id || !session.user.workspaceId) {
+    redirect('/login?next=/inbox');
+  }
 
   const invRepo = await getInvitationRepo();
-  const pairs = await invRepo.findByPgUser(session.user.id);
+  const pairs = await invRepo.findByPgWorkspace(session.user.workspaceId);
 
   // RSC → client component로 직렬화 가능한 plain object만 전달.
   const rows = pairs.map(({ invitation, rfq }) => ({

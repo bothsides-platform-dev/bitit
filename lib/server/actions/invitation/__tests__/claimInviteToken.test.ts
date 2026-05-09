@@ -175,7 +175,7 @@ describe('claimInviteTokenAction', () => {
     expect(row.status).toBe('accepted');
   });
 
-  it('second claim of same token returns INVITE_USED', async () => {
+  it('second claim of same token by same-ws caller returns ok with alreadyClaimed', async () => {
     const ctx = await setup();
     const u = await seedUser(db, { email: 'sales@toss.im' });
     await seedMembership(db, ctx.pgWsId, u.id, 'admin');
@@ -186,10 +186,15 @@ describe('claimInviteTokenAction', () => {
     const r1 = await claimInviteTokenAction(ctx.rawToken);
     expect(r1.ok).toBe(true);
 
-    // Same user re-claim — atomic claimToken returns 'used'.
+    // Re-claim by same/peer ws member — claimToken returns 'used' but action
+    // surfaces ok=true + alreadyClaimed=true so the caller redirects to inbox
+    // instead of seeing an error page (workspace-scoped access policy).
     const r2 = await claimInviteTokenAction(ctx.rawToken);
-    expect(r2.ok).toBe(false);
-    if (!r2.ok) expect(r2.error).toBe('INVITE_USED');
+    expect(r2.ok).toBe(true);
+    if (r2.ok) {
+      expect(r2.alreadyClaimed).toBe(true);
+      expect(r2.rfqId).toBe(ctx.rfqId);
+    }
   });
 
   it('expired token returns INVITE_EXPIRED', async () => {

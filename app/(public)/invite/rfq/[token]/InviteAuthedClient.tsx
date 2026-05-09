@@ -7,8 +7,7 @@ import { claimInviteTokenAction } from '@/lib/server/actions/invitation';
 const ERROR_LABELS: Record<string, string> = {
   INVITE_INVALID: '존재하지 않는 초대 링크입니다.',
   INVITE_EXPIRED: '만료된 초대 링크입니다.',
-  INVITE_USED: '이미 사용된 초대 링크입니다.',
-  INVITE_EMAIL_MISMATCH: '초대된 이메일과 로그인 계정이 다릅니다.',
+  INVITE_NOT_MEMBER: '초대된 워크스페이스의 멤버가 아닙니다.',
   UNAUTHENTICATED: '로그인이 필요합니다.',
 };
 

@@ -1,7 +1,7 @@
-// submitBidAction tests (Step 8).
+// submitBidAction tests.
 //
 // Coverage:
-//   - canAccess 가드 (advisor pin 2): 도메인 동료 차단 (action 레이어)
+//   - canAccess 가드: 초대된 PG 워크스페이스 멤버 누구나 통과
 //   - STATUTORY_CARD_FEE 강제 (advisor pin 1): sme 등급에서 cardFees=null 강제
 //   - UNIQUE(rfqId, pgWsId) 위반 → BID_ALREADY_SUBMITTED (advisor pin 4)
 //   - bid.submitted 알림 — buyer ws 전 멤버 인앱 + 메일 (advisor pin 6)
@@ -155,9 +155,9 @@ describe('submitBidAction', () => {
     expect(r.ok).toBe(false);
   });
 
-  it('🚨 canAccess gate — same-domain peer who never claimed is FORBIDDEN (advisor pin 2)', async () => {
+  it('canAccess passes — workspace peer who never claimed token can still submit', async () => {
     const s = await seedSetup();
-    // 같은 도메인 동료(@toss.im) — 클레임 안 함.
+    // 같은 PG 워크스페이스 동료 — 토큰 미클레임. 정책상 ws 멤버이면 제출 가능.
     const peer = await seedUser(db, { email: 'cs@toss.im' });
     await seedMembership(db, s.pgWsId, peer.id);
 
@@ -171,15 +171,17 @@ describe('submitBidAction', () => {
       },
     };
     const r = await submitBidAction({ rfqId: s.rfqId, ...baseInput });
-    expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.error).toBe('FORBIDDEN');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
 
-    // No bid row inserted.
-    const allBids = await db
+    // Bid row inserted under the peer's workspace, attributed to peer.
+    const [row] = await db
       .select()
       .from(bids)
       .where(eq(bids.rfqId, s.rfqId));
-    expect(allBids).toHaveLength(0);
+    expect(row).toBeDefined();
+    expect(row.pgWsId).toBe(s.pgWsId);
+    expect(row.submittedBy).toBe(peer.id);
   });
 
   it('🚨 STATUTORY_CARD_FEE forced null for sme2 grade (advisor pin 1)', async () => {

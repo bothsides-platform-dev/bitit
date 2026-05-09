@@ -52,20 +52,15 @@ export interface InvitationRepo {
   findByRfq(rfqId: string, tx?: Tx): Promise<RfqInvitation[]>;
   /** 한 RFQ의 draft 상태 초대만 조회 — sendDraftInvitationsAction 일괄 발송용. */
   findDraftsByRfq(rfqId: string, tx?: Tx): Promise<RfqInvitation[]>;
-  /** PG 사용자가 클레임한 초대 + 해당 RFQ pair (PG 인박스용). */
-  findByPgUser(
-    userId: string,
-    tx?: Tx,
-  ): Promise<{ invitation: RfqInvitation; rfq: RFQ }[]>;
-  /** PG 워크스페이스에 발송된 활성 초대 + RFQ pair — PG 홈 칸반용. */
+  /** PG 워크스페이스에 발송된 활성 초대 + RFQ pair — 인박스/칸반 공통 fetcher. */
   findByPgWorkspace(
     pgWsId: string,
     tx?: Tx,
   ): Promise<{ invitation: RfqInvitation; rfq: RFQ }[]>;
   /** 토큰 atomic claim — 만료/사용/무효 분기. 동일 raw 토큰 동시 진입 가드. */
   claimToken(rawToken: string, userId: string, tx?: Tx): Promise<TokenClaimResult>;
-  /** 같은 도메인 동료도 차단 — acceptedByUserId 매칭만 통과. */
-  canAccess(rfqId: string, userId: string, tx?: Tx): Promise<boolean>;
+  /** 워크스페이스 멤버십 단위 접근권 — 초대된 PG ws의 모든 멤버 통과. */
+  canAccess(rfqId: string, pgWsId: string, tx?: Tx): Promise<boolean>;
   /**
    * `accepted` 상태의 초대를 `opened` 로 한 번만 전이. 이미 `opened` 이상이면 no-op.
    * inbox 상세 RSC 진입 시 호출 — PG 칸반의 '검토중' 컬럼을 활성화하기 위한 시그널.

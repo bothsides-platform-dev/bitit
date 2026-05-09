@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 import { requirePgSession } from '@/lib/auth/session';
 import { workspaceMembers, users, workspaces } from '@/lib/db/schema';
@@ -60,12 +60,12 @@ export type SubmitBidResult = BidActionResult<{ bidId: string }>;
  * 트랜잭션 단계:
  *   1) requirePgSession — workspace_type='pg' 게이트.
  *   2) zod 검증.
- *   3) **canAccess 가드 (advisor pin 2)**: invitation.acceptedByUserId === session.user.id.
- *      도메인 동료가 같은 RFQ에 입찰 차단.
+ *   3) **canAccess 가드**: 초대된 PG 워크스페이스 멤버라면 누구나 통과.
+ *      acceptedByUserId 는 첫 클레임자 감사용으로만 유지.
  *   4) RFQ + 스냅샷 BizProfile 조회 → grade 추출.
  *   5) **STATUTORY_CARD_FEE 서버 강제 (advisor pin 1)**:
  *      grade !== 'general' 이면 cardFeesByIssuer = null. 영세/중소 1~3은 법정 고정.
- *   6) invitation 조회 → invitationId 픽업.
+ *   6) invitation 조회 → 본인 워크스페이스 row 픽업(invitationId).
  *   7) BidRepo.save (id 호출자 발급) — UNIQUE(rfqId, pgWsId) 위반은 'BID_ALREADY_SUBMITTED'.
  *   8) buyer ws 멤버 each → notifications.in_app + outbox.bid.submitted.
  */
@@ -86,9 +86,9 @@ export async function submitBidAction(
   const userId = session.user.id;
   const pgWsId = session.user.workspaceId;
 
-  // canAccess 가드 — 액션 레이어 1차 방어.
+  // canAccess 가드 — 워크스페이스 멤버십 단위. 초대된 PG ws 멤버는 모두 통과.
   const invRepo = await getInvitationRepo();
-  const ok = await invRepo.canAccess(data.rfqId, userId);
+  const ok = await invRepo.canAccess(data.rfqId, pgWsId);
   if (!ok) return { ok: false, error: 'FORBIDDEN' };
 
   const rfqRepo = await getRfqRepo();
@@ -107,24 +107,38 @@ export async function submitBidAction(
     ? (data.overseasCardFeePct ?? undefined)
     : undefined;
 
-  // 호출자 invitation row 픽업 — bid.invitationId FK.
+  // 본인 워크스페이스의 invitation row 픽업 — bid.invitationId FK.
   const allInvs = await invRepo.findByRfq(data.rfqId);
-  const myInv = allInvs.find((i) => i.acceptedByUserId === userId);
+  const myInv = allInvs.find((i) => i.pgWsId === pgWsId);
   if (!myInv) return { ok: false, error: 'INVITATION_NOT_FOUND' };
 
-  // proposalAttachmentId가 있다면 본인 업로드인지 강제(advisor pin: 다른
-  // PG의 attachment id로 자기 견적을 만드는 spoofing 방지). canAccess는
-  // 같은 RFQ에 초대된 다른 PG도 통과시키므로 별도 ownership 체크 필요.
+  // proposalAttachmentId가 있다면 같은 워크스페이스 멤버가 업로드한 첨부인지 검증
+  // (다른 PG ws의 attachment id로 자기 견적을 만드는 spoofing 방지). canAccess는
+  // 같은 RFQ에 초대된 다른 PG ws 도 통과시키지만, 첨부는 본인 ws 단위로 격리.
+  // 같은 ws 의 동료가 업로드한 PDF는 허용.
   if (data.proposalAttachmentId) {
     const att = await (await getAttachmentRepo()).findById(
       data.proposalAttachmentId,
     );
     if (
       !att ||
-      att.uploadedBy !== userId ||
       att.ownerKind !== 'bid_proposal' ||
       att.ownerId !== data.rfqId
     ) {
+      return { ok: false, error: 'INVALID_ATTACHMENT' };
+    }
+    // uploader 의 워크스페이스가 본인과 일치해야 한다 — 본인 또는 동료.
+    const [uploaderMember] = (await actionDb()
+      .select({ workspaceId: workspaceMembers.workspaceId })
+      .from(workspaceMembers)
+      .where(
+        and(
+          eq(workspaceMembers.userId, att.uploadedBy),
+          eq(workspaceMembers.workspaceId, pgWsId),
+        ),
+      )
+      .limit(1)) as { workspaceId: string }[];
+    if (!uploaderMember) {
       return { ok: false, error: 'INVALID_ATTACHMENT' };
     }
   }

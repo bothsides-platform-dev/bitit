@@ -142,10 +142,10 @@ export async function POST(req: Request): Promise<Response> {
       if (rfq.buyerWsId !== wsId) return fail(403, 'FORBIDDEN');
     }
   } else {
-    // bid_proposal — PG-only, must have accepted invitation for ownerId.
+    // bid_proposal — PG-only, must be a member of an invited PG ws for ownerId.
     if (wsType !== 'pg' || !wsId) return fail(403, 'FORBIDDEN');
     const invRepo = await getInvitationRepo();
-    const ok = await invRepo.canAccess(meta.data.ownerId, userId);
+    const ok = await invRepo.canAccess(meta.data.ownerId, wsId);
     if (!ok) return fail(403, 'FORBIDDEN');
   }
 

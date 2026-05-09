@@ -11,7 +11,6 @@ import {
 } from './pg-kanban';
 
 export async function getPgKanbanData(
-  userId: string,
   workspaceId: string,
 ): Promise<PgKanbanCard[]> {
   const [invRepo, bidRepo] = await Promise.all([

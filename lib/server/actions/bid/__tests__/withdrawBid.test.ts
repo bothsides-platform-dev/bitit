@@ -1,8 +1,8 @@
-// withdrawBidAction tests (Step 8).
+// withdrawBidAction tests.
 //
 // Coverage:
 //   - 같은 ws 가드: 다른 ws bid 철회 차단
-//   - canAccess 가드: 도메인 동료 차단 (advisor pin 2)
+//   - 워크스페이스 동료가 동료 견적 철회 가능 (협업 정책)
 //   - 멱등성: 이미 withdrawn 인 bid 재호출 ok
 //   - withdrawn 후 같은 (rfqId, pgWsId)로 다시 submit → BID_ALREADY_SUBMITTED
 //     (advisor pin 4: v0 단순화)
@@ -181,7 +181,7 @@ describe('withdrawBidAction', () => {
     expect(r3.ok).toBe(true);
   });
 
-  it('🚨 same-domain peer cannot withdraw — canAccess gate', async () => {
+  it('workspace peer can withdraw a colleague-submitted bid (collaboration policy)', async () => {
     const s = await setup();
     sessionRef.value = {
       user: {
@@ -196,7 +196,7 @@ describe('withdrawBidAction', () => {
     expect(r1.ok).toBe(true);
     if (!r1.ok) return;
 
-    // Peer @toss.im member — joined the ws but never claimed the RFQ invitation.
+    // Peer @toss.im member — joined the ws but did not submit the bid.
     const peer = await seedUser(db, { email: 'cs@toss.im' });
     await seedMembership(db, s.pgWsId, peer.id);
     sessionRef.value = {
@@ -210,10 +210,46 @@ describe('withdrawBidAction', () => {
     };
 
     const r2 = await withdrawBidAction({ bidId: r1.bidId });
+    expect(r2.ok).toBe(true);
+
+    // bid is now withdrawn.
+    const [row] = await db.select().from(bids).where(eq(bids.id, r1.bidId));
+    expect(row.status).toBe('withdrawn');
+  });
+
+  it('cross-workspace user cannot withdraw — bid.pgWsId mismatch blocks', async () => {
+    const s = await setup();
+    sessionRef.value = {
+      user: {
+        id: s.pgUser.id,
+        email: s.pgUser.email,
+        workspaceId: s.pgWsId,
+        workspaceType: 'pg',
+        role: 'admin',
+      },
+    };
+    const r1 = await submitBidAction({ rfqId: s.rfqId, ...submitInput });
+    expect(r1.ok).toBe(true);
+    if (!r1.ok) return;
+
+    // Different PG workspace's user.
+    const otherWs = await seedPgWorkspace(db, '이니시스');
+    const otherUser = await seedUser(db, { email: 'sales@inicis.com' });
+    await seedMembership(db, otherWs.id, otherUser.id);
+    sessionRef.value = {
+      user: {
+        id: otherUser.id,
+        email: 'sales@inicis.com',
+        workspaceId: otherWs.id,
+        workspaceType: 'pg',
+        role: 'member',
+      },
+    };
+
+    const r2 = await withdrawBidAction({ bidId: r1.bidId });
     expect(r2.ok).toBe(false);
     if (!r2.ok) expect(r2.error).toBe('FORBIDDEN');
 
-    // bid still submitted.
     const [row] = await db.select().from(bids).where(eq(bids.id, r1.bidId));
     expect(row.status).toBe('submitted');
   });

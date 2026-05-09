@@ -1,7 +1,8 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { createPgliteDb } from '@/lib/db/client-pglite';
-import { rfqs } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+import { rfqInvitations, rfqs } from '@/lib/db/schema';
 import { DrizzleInvitationRepository } from '../invitation';
 import { generateToken, addMinutes, hashToken } from '../../../token';
 import type { RfqInvitation } from '@/lib/types/invitation';
@@ -98,16 +99,48 @@ describe('DrizzleInvitationRepository', () => {
     expect(await repo.claimToken(raw, b.id)).toEqual({ ok: false, reason: 'used' });
   });
 
-  it('canAccess is true only for the accepting user (workspace peers blocked)', async () => {
+  it('canAccess passes any member of the invited PG workspace', async () => {
+    const raw = generateToken();
+    await repo.save(makeInvitation(ctx.rfqId, ctx.pgWs.id), raw);
+    // canAccess is keyed by pgWsId — any member of the invited ws passes,
+    // regardless of who (or whether anyone) claimed the token.
+    expect(await repo.canAccess(ctx.rfqId, ctx.pgWs.id)).toBe(true);
+
+    const otherPgWs = await seedPgWorkspace(ctx.db, '이니시스');
+    expect(await repo.canAccess(ctx.rfqId, otherPgWs.id)).toBe(false);
+  });
+
+  it('canAccess remains true after claim transitions invitation to accepted/opened', async () => {
     const raw = generateToken();
     await repo.save(makeInvitation(ctx.rfqId, ctx.pgWs.id), raw);
     const accepter = await seedUser(ctx.db, { email: 'sales@toss.im' });
-    const peer = await seedUser(ctx.db, { email: 'cs@toss.im' }); // same workspace, NOT the accepter
     await repo.claimToken(raw, accepter.id);
+    expect(await repo.canAccess(ctx.rfqId, ctx.pgWs.id)).toBe(true);
+  });
 
-    expect(await repo.canAccess(ctx.rfqId, accepter.id)).toBe(true);
-    // Critical invariant: workspace peer who never claimed must be blocked.
-    expect(await repo.canAccess(ctx.rfqId, peer.id)).toBe(false);
+  it('markOpened transitions pending → opened (non-claimer first visit) and is idempotent', async () => {
+    const raw = generateToken();
+    const inv = makeInvitation(ctx.rfqId, ctx.pgWs.id);
+    await repo.save(inv, raw);
+
+    // Pre-claim ('sent' / DB pending) — first ws-member visit advances kanban.
+    await repo.markOpened(inv.id, new Date());
+    let [row] = await ctx.db
+      .select()
+      .from(rfqInvitations)
+      .where(eq(rfqInvitations.id, inv.id));
+    expect(row.status).toBe('opened');
+    const firstOpenedAt = row.openedAt;
+
+    // Second visit by another member — idempotent (no overwrite of openedAt).
+    await new Promise((r) => setTimeout(r, 5));
+    await repo.markOpened(inv.id, new Date());
+    [row] = await ctx.db
+      .select()
+      .from(rfqInvitations)
+      .where(eq(rfqInvitations.id, inv.id));
+    expect(row.status).toBe('opened');
+    expect(row.openedAt).toEqual(firstOpenedAt);
   });
 
   it('parallel claimToken: one wins, the other returns used (atomic UPDATE WHERE)', async () => {
@@ -158,25 +191,29 @@ describe('DrizzleInvitationRepository', () => {
     expect(missing).toBeUndefined();
   });
 
-  it('findByPgUser returns claimed invitation+RFQ pairs only for that user', async () => {
+  it('findByPgWorkspace returns active invitation+RFQ pairs for the ws regardless of claim state', async () => {
     const pgWs2 = await seedPgWorkspace(ctx.db, '이니시스');
     const r1 = generateToken();
     const r2 = generateToken();
     await repo.save(makeInvitation(ctx.rfqId, ctx.pgWs.id), r1);
     await repo.save(makeInvitation(ctx.rfqId, pgWs2.id), r2);
 
+    // Neither claimed yet — both 'sent' (DB: pending). findByPgWorkspace must
+    // include them so the inbox/kanban surface invitations to ws members
+    // before anyone clicks the email token link.
+    const tossPairs = await repo.findByPgWorkspace(ctx.pgWs.id);
+    expect(tossPairs).toHaveLength(1);
+    expect(tossPairs[0].invitation.pgWsId).toBe(ctx.pgWs.id);
+
+    const inicisPairs = await repo.findByPgWorkspace(pgWs2.id);
+    expect(inicisPairs).toHaveLength(1);
+    expect(inicisPairs[0].invitation.pgWsId).toBe(pgWs2.id);
+
+    // After claim, the row is still surfaced (status flips to 'accepted').
     const userA = await seedUser(ctx.db, { email: 'a@toss.im' });
-    const userB = await seedUser(ctx.db, { email: 'b@inicis.com' });
-
-    // userA claims their token; userB never claims.
     await repo.claimToken(r1, userA.id);
-
-    const aPairs = await repo.findByPgUser(userA.id);
-    expect(aPairs).toHaveLength(1);
-    expect(aPairs[0].rfq.id).toBe(ctx.rfqId);
-    expect(aPairs[0].invitation.acceptedByUserId).toBe(userA.id);
-
-    const bPairs = await repo.findByPgUser(userB.id);
-    expect(bPairs).toHaveLength(0);
+    const tossPairsAfter = await repo.findByPgWorkspace(ctx.pgWs.id);
+    expect(tossPairsAfter).toHaveLength(1);
+    expect(tossPairsAfter[0].invitation.acceptedByUserId).toBe(userA.id);
   });
 });

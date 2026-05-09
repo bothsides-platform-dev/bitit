@@ -71,8 +71,8 @@ M0은 2026-04에 완료됐다. 부트스트랩 산출물은 `package.json`, `nex
 ### 4.1.1 자동화 테스트 범위
 - [ ] `STATUTORY_CARD_FEE` — 영세/중소1~3 고정, 일반등급·등급 미입력(NULL)은 카드사별 입력 허용
 - [ ] RFQ 상태 전이 — `draft -> sent -> closed|cancelled|awarded`, 역방향/중복 전이 차단
-- [ ] Invitation 토큰 — 해시 저장, 만료, 첫 진입 후 워크스페이스 멤버십 권한 전환
-- [ ] Invitation 접근권 — `acceptedByUserId` 만 `/inbox/:rfqId` 접근, 워크스페이스 멤버십 기반 권한 전환
+- [ ] Invitation 토큰 — 해시 저장, 만료, atomic 1회 claim. 첫 클레임자만 `acceptedByUserId` 세팅(감사). 'used' token 을 같은 ws 동료가 클릭 시 인박스로 redirect
+- [ ] Invitation 접근권 — 초대된 PG 워크스페이스의 모든 멤버가 `/inbox/:rfqId` 접근 가능. `acceptedByUserId` 는 첫 클레임자 감사용
 - [ ] PG 워크스페이스 — 명시적 생성(이름 입력), 멤버 초대(`workspace_invitations`), buyer/pg route guard
 - [ ] Notification outbox — Resend 실패 retry, 성공 시 `sent`, 중복 발송 방지
 - [ ] Auth forms — 이메일/비밀번호/약관/토큰 만료 검증

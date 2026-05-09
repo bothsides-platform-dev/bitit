@@ -5,7 +5,7 @@ import { getInvitationRepo } from '@/lib/server/repositories/factory';
 import { hashToken } from '@/lib/server/token';
 
 export type ClaimInviteTokenResult =
-  | { ok: true; rfqId: string }
+  | { ok: true; rfqId: string; alreadyClaimed?: boolean }
   | { ok: false; error: string };
 
 /**
@@ -17,6 +17,8 @@ export type ClaimInviteTokenResult =
  *   3) 워크스페이스 멤버십 검사: inv.pgWsId !== session.user.workspaceId
  *      → INVITE_NOT_MEMBER.
  *   4) `claimToken(rawToken, userId)` atomic — 만료/사용/무효 분기.
+ *      'used' 인데 같은 PG ws 동료가 이미 클레임한 경우 → 정책상 멤버 모두 접근
+ *      가능하므로 ok=true + alreadyClaimed=true 로 반환해 인박스로 redirect 시킨다.
  */
 export async function claimInviteTokenAction(
   rawToken: string,
@@ -50,7 +52,10 @@ export async function claimInviteTokenAction(
   const claim = await invRepo.claimToken(rawToken, session.user.id);
   if (!claim.ok) {
     if (claim.reason === 'expired') return { ok: false, error: 'INVITE_EXPIRED' };
-    if (claim.reason === 'used') return { ok: false, error: 'INVITE_USED' };
+    if (claim.reason === 'used') {
+      // 동료가 이미 클레임 — 같은 ws 라면 그대로 인박스로 안내(에러 X).
+      return { ok: true, rfqId: inv.rfqId, alreadyClaimed: true };
+    }
     return { ok: false, error: 'INVITE_INVALID' };
   }
 

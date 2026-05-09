@@ -1,7 +1,7 @@
-// Step 8: PG RFQ 상세 (RSC) + 견적 작성 폼.
+// PG RFQ 상세 (RSC) + 견적 작성 폼.
 //
-// 가드 (advisor pin 2): canAccess(rfqId, userId) — 도메인 동료 차단.
-// 클레임한 본인만 진입 가능. false면 notFound() (404).
+// 가드: canAccess(rfqId, pgWsId) — 초대된 워크스페이스 멤버 모두 통과.
+// 미클레임 멤버는 자연 통과(알림 딥링크 정상 동작). false면 notFound() (404).
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@/auth';
@@ -22,11 +22,13 @@ export default async function InboxDetailPage({ params }: Props) {
   const { rfqId } = await params;
 
   const session = await auth();
-  if (!session?.user?.id) redirect(`/login?next=/inbox/${rfqId}`);
+  if (!session?.user?.id || !session.user.workspaceId) {
+    redirect(`/login?next=/inbox/${rfqId}`);
+  }
 
   const invRepo = await getInvitationRepo();
-  // canAccess: 클레임한 본인만 진입(도메인 동료 차단). false면 404.
-  const ok = await invRepo.canAccess(rfqId, session.user.id);
+  // canAccess: 초대된 PG 워크스페이스 멤버 모두 통과. false면 404.
+  const ok = await invRepo.canAccess(rfqId, session.user.workspaceId);
   if (!ok) notFound();
 
   // PG 홈 칸반 '검토중' 컬럼 활성화 — accepted → opened 1회 전이. 이미 opened 이상이면 no-op.

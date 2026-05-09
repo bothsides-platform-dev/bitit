@@ -5,13 +5,11 @@ import { getPgKanbanData } from '@/lib/server/pg-kanban-loader';
 import { KanbanBoard } from './KanbanBoard';
 
 export async function PgHome({
-  userId,
   workspaceId,
 }: {
-  userId: string;
   workspaceId: string;
 }) {
-  const cards = await getPgKanbanData(userId, workspaceId);
+  const cards = await getPgKanbanData(workspaceId);
 
   if (cards.length === 0) {
     return (
