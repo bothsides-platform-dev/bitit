@@ -9,8 +9,6 @@ import { eq } from 'drizzle-orm';
 
 import {
   outboxEntries,
-  rfqInvitations,
-  rfqs,
   users,
   workspaces,
 } from '@/lib/db/schema';
@@ -18,12 +16,6 @@ import { signupEmailAction } from '../../signupEmailAction';
 import { verifyEmailAction } from '../../verifyEmailAction';
 import { signupCompleteAction } from '../../signupCompleteAction';
 import { setupActionEnv, teardownActionEnv } from '../_setup';
-import {
-  seedBizProfile,
-  seedBuyerWorkspace,
-  seedUser,
-} from '@/lib/server/repositories/drizzle/__tests__/_seed';
-import { addMinutes, generateToken, hashToken } from '@/lib/server/token';
 import type { PgliteDB } from '@/lib/db/client-pglite';
 
 let db: PgliteDB;
@@ -86,38 +78,13 @@ describe('signup flow integration (no UI)', () => {
     expect(ws.bizProfileId).not.toBeNull();
   });
 
-  it('P2 → P4 → P5 with inviteToken auto-joins/creates a PG ws and redirects to /inbox/{rfqId}', async () => {
-    // Seed a buyer-side RFQ + invitation row that the new PG user will claim.
-    const buyer = await seedUser(db, { email: 'buyer@biz.com' });
-    const biz = await seedBizProfile(db);
-    const buyerWs = await seedBuyerWorkspace(db, { bizProfileId: biz.id });
-    const rfqId = 'Q-2605-9901';
-    await db.insert(rfqs).values({
-      id: rfqId,
-      buyerWsId: buyerWs.id,
-      bizProfileId: biz.id,
-      title: 'Test RFQ',
-      memo: '',
-      allowedPgEmails: ['sales@toss.im'],
-      deadline: new Date(Date.now() + 86_400_000),
-      status: 'sent',
-      createdBy: buyer.id,
-    });
-    const inviteRaw = generateToken();
-    await db.insert(rfqInvitations).values({
-      id: crypto.randomUUID(),
-      rfqId,
-      pgEmail: 'sales@toss.im',
-      tokenHash: hashToken(inviteRaw),
-      sentAt: new Date(),
-      expiresAt: new Date(addMinutes(new Date(), 7 * 24 * 60)),
-      status: 'pending',
-    });
-
-    // P2 — sign up with the invite token attached to meta
+  it('P2 → P4 → P5 (pg) creates a PG workspace and redirects to /inbox', async () => {
+    // P2 — PG user requests verify mail (inviteToken in meta is preserved but
+    // workspace creation no longer uses it — claim happens via claimInviteTokenAction
+    // after login).
     const e = await signupEmailAction({
       email: 'sales@toss.im',
-      inviteToken: inviteRaw,
+      inviteToken: 'INVITE-RAW-STUB',
     });
     expect(e.ok).toBe(true);
 
@@ -132,34 +99,34 @@ describe('signup flow integration (no UI)', () => {
     const v = await verifyEmailAction(verifyToken);
     expect(v.ok).toBe(true);
     if (!v.ok) return;
-    expect(v.inviteToken).toBe(inviteRaw);
+    expect(v.inviteToken).toBe('INVITE-RAW-STUB');
 
-    // P5/P6 — finalise with inviteToken; buyer/PG branch logic is skipped.
+    // P5/P6 — finalise as PG with explicit workspace name.
+    // The inviteToken from the draft is NOT passed here; claim is separate.
     const c = await signupCompleteAction({
       email: v.email,
       name: '토스영업',
       password: 'Password123!',
-      inviteToken: v.inviteToken,
+      wsKind: 'pg',
+      wsName: '토스페이먼츠',
     });
     expect(c.ok).toBe(true);
     if (!c.ok) return;
-    expect(c.redirectTo).toBe(`/inbox/${rfqId}`);
+    expect(c.redirectTo).toBe('/inbox');
 
-    // PG workspace was auto-created from the email domain.
+    // PG workspace created with the provided name.
     const [pgWs] = await db
       .select()
       .from(workspaces)
-      .where(eq(workspaces.domain, 'toss.im'));
+      .where(eq(workspaces.name, '토스페이먼츠'));
     expect(pgWs).toBeDefined();
     expect(pgWs.type).toBe('pg');
 
-    // Invitation has acceptedByUserId + pgWsId stamped.
-    const [inv] = await db
+    // User was created.
+    const [u] = await db
       .select()
-      .from(rfqInvitations)
-      .where(eq(rfqInvitations.tokenHash, hashToken(inviteRaw)));
-    expect(inv.status).toBe('accepted');
-    expect(inv.acceptedByUserId).not.toBeNull();
-    expect(inv.pgWsId).toBe(pgWs.id);
+      .from(users)
+      .where(eq(users.email, 'sales@toss.im'));
+    expect(u).toBeDefined();
   });
 });

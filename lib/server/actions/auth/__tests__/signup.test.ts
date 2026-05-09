@@ -237,12 +237,13 @@ describe('signupCompleteAction — pg branch', () => {
   });
   afterEach(teardownActionEnv);
 
-  it('creates a new PG workspace named after the email domain', async () => {
+  it('creates a new PG workspace with the provided name, returns /inbox', async () => {
     const r = await signupCompleteAction({
       email: 'sales@toss.im',
       name: '토스영업',
       password: 'Password123!',
       wsKind: 'pg',
+      wsName: '토스페이먼츠',
     });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -251,36 +252,48 @@ describe('signupCompleteAction — pg branch', () => {
     const [ws] = await db
       .select()
       .from(workspaces)
-      .where(eq(workspaces.domain, 'toss.im'));
+      .where(eq(workspaces.name, '토스페이먼츠'));
     expect(ws).toBeDefined();
     expect(ws.type).toBe('pg');
+
+    const [member] = await db
+      .select()
+      .from(workspaceMembers)
+      .where(eq(workspaceMembers.workspaceId, ws.id));
+    expect(member.role).toBe('admin');
   });
 
-  it('auto-joins an existing PG workspace by domain', async () => {
-    await signupCompleteAction({
+  it('rejects when wsKind is pg but wsName missing', async () => {
+    const r = await signupCompleteAction({
+      email: 'sales@toss.im',
+      name: '토스영업',
+      password: 'Password123!',
+      wsKind: 'pg',
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toBe('MISSING_WS_NAME');
+  });
+
+  it('each PG signup creates its own workspace (no auto-join by domain)', async () => {
+    const r1 = await signupCompleteAction({
       email: 'first@toss.im',
       name: '첫번째',
       password: 'Password123!',
       wsKind: 'pg',
+      wsName: '토스페이먼츠 1팀',
     });
-    const r = await signupCompleteAction({
+    const r2 = await signupCompleteAction({
       email: 'second@toss.im',
       name: '두번째',
       password: 'Password123!',
       wsKind: 'pg',
+      wsName: '토스페이먼츠 2팀',
     });
-    expect(r.ok).toBe(true);
+    expect(r1.ok).toBe(true);
+    expect(r2.ok).toBe(true);
 
-    const wss = await db
-      .select()
-      .from(workspaces)
-      .where(eq(workspaces.domain, 'toss.im'));
-    expect(wss).toHaveLength(1); // not duplicated
-
-    const members = await db
-      .select()
-      .from(workspaceMembers)
-      .where(eq(workspaceMembers.workspaceId, wss[0].id));
-    expect(members).toHaveLength(2);
+    const wss = await db.select().from(workspaces);
+    const pgWss = wss.filter((w) => w.type === 'pg');
+    expect(pgWss).toHaveLength(2);
   });
 });

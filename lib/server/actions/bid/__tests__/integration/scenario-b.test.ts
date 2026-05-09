@@ -169,16 +169,13 @@ async function pgSignup(email: string): Promise<{ id: string; email: string }> {
   expect(p4.ok).toBe(true);
   if (!p4.ok) throw new Error('verify failed');
 
-  // PG signup — wsKind='pg' auto-derives ws from email domain; if a PG ws for
-  // this domain doesn't exist yet, signupCompleteAction creates one + admin
-  // membership. (Scenario B can also exercise the new-ws branch in
-  // claimInviteTokenAction by skipping signup-time auto-creation, but using
-  // the existing path keeps this test focused on the bid flow.)
+  // PG signup — wsKind='pg' creates a new PG workspace with the given name.
   const p6 = await signupCompleteAction({
     email: p4.email,
     name: '박판매',
     password: 'Password123!',
     wsKind: 'pg',
+    wsName: `${email.split('@')[1]} 워크스페이스`,
   });
   expect(p6.ok).toBe(true);
 

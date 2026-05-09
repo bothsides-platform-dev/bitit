@@ -2,24 +2,15 @@
 
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
-import { and, eq } from 'drizzle-orm';
-
 import { hashPassword } from '@/lib/auth/password';
 import {
   bizProfiles,
-  rfqInvitations,
   users,
   workspaceMembers,
   workspaces,
 } from '@/lib/db/schema';
 import {
-  getInvitationRepo,
-  getWorkspaceRepo,
-} from '@/lib/server/repositories/factory';
-import { hashToken } from '@/lib/server/token';
-import {
   actionDb,
-  emailDomain,
   normalizeEmail,
   type AuthActionResult,
 } from './_shared';
@@ -41,7 +32,6 @@ const Input = z
     email: z.string().email(),
     name: z.string().min(1).max(100),
     password: z.string().min(10).max(200),
-    inviteToken: z.string().min(1).max(256).optional(),
     wsKind: z.enum(['buyer', 'pg']).optional(),
     wsName: z.string().min(1).max(200).optional(),
     bizProfile: BizProfileInput.optional(),
@@ -59,17 +49,18 @@ export type SignupCompleteResult = AuthActionResult<{
  * P6 — finalise signup.
  *
  * Branches:
- *   - inviteToken set → claim invite, auto-join (or create) PG workspace by
- *     email domain. Returns redirectTo=/inbox/{rfqId}.
  *   - wsKind='buyer' → insert biz_profiles + workspaces(type='buyer') +
- *     member(role='admin'). Returns redirectTo=/home.
- *   - wsKind='pg' → domain conflict check → join existing PG ws or create new.
- *     Returns redirectTo=/home.
+ *     member(role='admin'). Returns redirectTo=/rfq.
+ *   - wsKind='pg' → create new PG workspace with wsName +
+ *     member(role='admin'). Returns redirectTo=/inbox.
  *
  * Auth.js v5 + Next 16 makes server-side signIn flaky (cookies can't be set
  * from a server action without a route response). Per advisor block C the
  * action returns `{ password }` so the client immediately calls
  * signIn('credentials', { email, password, redirect: false }) and pushes.
+ *
+ * Note: invite token claiming is handled separately via claimInviteTokenAction
+ * after the user is authenticated.
  */
 export async function signupCompleteAction(
   input: SignupCompleteInput,
@@ -78,8 +69,6 @@ export async function signupCompleteAction(
   if (!parsed.success) return { ok: false, error: 'INVALID_INPUT' };
 
   const email = normalizeEmail(parsed.data.email);
-  const domain = emailDomain(email);
-  if (!domain) return { ok: false, error: 'INVALID_EMAIL_DOMAIN' };
 
   const passwordHash = await hashPassword(parsed.data.password);
   const userId = randomUUID();
@@ -104,65 +93,7 @@ export async function signupCompleteAction(
         return { ok: false, error: 'EMAIL_TAKEN' };
       }
 
-      // 2a. Invite branch — claim invite, auto-join PG ws by domain.
-      if (parsed.data.inviteToken) {
-        const invitations = await getInvitationRepo();
-        const claim = await invitations.claimToken(
-          parsed.data.inviteToken,
-          userId,
-          tx,
-        );
-        if (!claim.ok) {
-          return { ok: false, error: `INVITE_${claim.reason.toUpperCase()}` };
-        }
-
-        // Find or create PG workspace by email domain.
-        const [existing] = await tx
-          .select()
-          .from(workspaces)
-          .where(and(eq(workspaces.domain, domain), eq(workspaces.type, 'pg')))
-          .limit(1);
-
-        let pgWsId: string;
-        if (existing) {
-          pgWsId = existing.id;
-        } else {
-          pgWsId = randomUUID();
-          await tx.insert(workspaces).values({
-            id: pgWsId,
-            type: 'pg',
-            name: domain,
-            domain,
-          });
-        }
-
-        await tx
-          .insert(workspaceMembers)
-          .values({
-            workspaceId: pgWsId,
-            userId,
-            role: 'admin',
-          })
-          .onConflictDoNothing({
-            target: [workspaceMembers.workspaceId, workspaceMembers.userId],
-          });
-
-        // Stamp the invitation with pg_ws_id so downstream queries can scope
-        // the bid form by workspace, not just by user.
-        await tx
-          .update(rfqInvitations)
-          .set({ pgWsId })
-          .where(eq(rfqInvitations.tokenHash, hashToken(parsed.data.inviteToken)));
-
-        return {
-          ok: true,
-          redirectTo: `/inbox/${claim.invitation.rfqId}`,
-          email,
-          password: parsed.data.password,
-        };
-      }
-
-      // 2b. Buyer branch.
+      // 2a. Buyer branch.
       if (parsed.data.wsKind === 'buyer') {
         if (!parsed.data.wsName) {
           return { ok: false, error: 'MISSING_WS_NAME' };
@@ -187,7 +118,6 @@ export async function signupCompleteAction(
           id: wsId,
           type: 'buyer',
           name: parsed.data.wsName,
-          domain: null,
           bizProfileId,
         });
         await tx.insert(workspaceMembers).values({
@@ -204,44 +134,24 @@ export async function signupCompleteAction(
         };
       }
 
-      // 2c. PG branch (no invite). Auto-derive workspace from email domain.
+      // 2b. PG branch — create new PG workspace with the provided name.
       if (parsed.data.wsKind === 'pg') {
-        // Try auto-join first.
-        const wsRepo = await getWorkspaceRepo();
-        const joined = await wsRepo.autoJoinPg(
-          email,
-          {
-            id: userId,
-            name: parsed.data.name,
-            email,
-            avatarColor: 'ink',
-            role: 'admin',
-            status: 'active',
-            joinedAt: new Date().toISOString(),
-          },
-          tx,
-        );
-        if (joined) {
-          return {
-            ok: true,
-            redirectTo: '/inbox',
-            email,
-            password: parsed.data.password,
-          };
+        if (!parsed.data.wsName) {
+          return { ok: false, error: 'MISSING_WS_NAME' };
         }
-        // Otherwise create a new PG ws.
+
         const wsId = randomUUID();
         await tx.insert(workspaces).values({
           id: wsId,
           type: 'pg',
-          name: parsed.data.wsName ?? domain,
-          domain,
+          name: parsed.data.wsName,
         });
         await tx.insert(workspaceMembers).values({
           workspaceId: wsId,
           userId,
           role: 'admin',
         });
+
         return {
           ok: true,
           redirectTo: '/inbox',
