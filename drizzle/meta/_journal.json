@@ -29,6 +29,13 @@
       "when": 1778228907706,
       "tag": "0003_chubby_cerebro",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1746871200000,
+      "tag": "0004_workspace_model_redesign",
+      "breakpoints": true
     }
   ]
 }
