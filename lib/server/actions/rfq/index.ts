@@ -4,11 +4,11 @@ export type { LookupBizNoResult } from './lookupBizNoAction';
 export { createRfqAction } from './createRfqAction';
 export type { CreateRfqInput, CreateRfqResult } from './createRfqAction';
 
-export { addPgEmailsToRfqAction } from './addPgEmailsToRfqAction';
+export { addPgWorkspacesToRfqAction } from './addPgWorkspacesToRfqAction';
 export type {
-  AddPgEmailsInput,
-  AddPgEmailsResult,
-} from './addPgEmailsToRfqAction';
+  AddPgWorkspacesInput,
+  AddPgWorkspacesResult,
+} from './addPgWorkspacesToRfqAction';
 
 export { sendDraftInvitationsAction } from './sendDraftInvitationsAction';
 export type {

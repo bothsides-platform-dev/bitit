@@ -50,24 +50,24 @@ export function IconSidebar({ workspaceType }: Props) {
             >
               <div
                 className={cn(
-                  'w-14 h-8 flex items-center justify-center rounded-[var(--md-sys-shape-full)] transition-colors [&_svg]:size-6',
+                  'w-14 flex flex-col items-center pt-1.5 pb-2 rounded-xl transition-colors [&_svg]:size-6',
                   isActive
                     ? 'bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]'
                     : 'text-[var(--md-sys-color-inverse-on-surface)] hover:bg-[color-mix(in_srgb,var(--md-sys-color-inverse-on-surface)_8%,transparent)]',
                 )}
               >
-                {item.icon}
+                <div className="h-8 flex items-center justify-center">
+                  {item.icon}
+                </div>
+                <span
+                  className={cn(
+                    'text-[length:var(--md-typescale-label-small-size)] tracking-[var(--md-typescale-label-small-tracking)]',
+                    isActive ? '' : 'opacity-60',
+                  )}
+                >
+                  {item.label}
+                </span>
               </div>
-              <span
-                className={cn(
-                  'mt-1 text-[length:var(--md-typescale-label-small-size)] tracking-[var(--md-typescale-label-small-tracking)]',
-                  isActive
-                    ? 'text-[var(--md-sys-color-inverse-on-surface)]'
-                    : 'text-[var(--md-sys-color-inverse-on-surface)] opacity-60',
-                )}
-              >
-                {item.label}
-              </span>
             </Link>
           );
         })}

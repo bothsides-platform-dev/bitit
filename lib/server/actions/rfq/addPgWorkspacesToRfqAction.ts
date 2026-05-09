@@ -2,45 +2,46 @@
 
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 
 import { requireBuyerSession } from '@/lib/auth/session';
-import { rfqInvitations, rfqs } from '@/lib/db/schema';
+import { rfqInvitations, rfqs, workspaces } from '@/lib/db/schema';
 import { actionDb, type RfqActionResult } from './_shared';
 
 const Input = z
   .object({
     rfqId: z.string().regex(/^Q-\d{4}-\d{4}$/),
-    emails: z.array(z.string().email()).min(1).max(20),
+    workspaceIds: z.array(z.string().uuid()).min(1).max(20),
   })
   .strict();
 
-export type AddPgEmailsInput = z.input<typeof Input>;
-export type AddPgEmailsResult = RfqActionResult<{
+export type AddPgWorkspacesInput = z.input<typeof Input>;
+export type AddPgWorkspacesResult = RfqActionResult<{
   addedCount: number;
   skipped: string[];
 }>;
 
-const ALLOWED_PG_EMAILS_MAX = 50;
+const ALLOWED_PG_WORKSPACES_MAX = 50;
 
 /**
- * 이미 발송된 RFQ에 PG 이메일을 추가 — `'draft'` 상태로 invitation row만
+ * 이미 발송된 RFQ에 PG 워크스페이스를 추가 — `'draft'` 상태로 invitation row만
  * 누적해두고, 실제 메일 발송은 `sendDraftInvitationsAction`이 일괄 처리한다.
  *
  * 정책:
  *   - `status='sent' && deadline > now` RFQ만 (PG_RFQ_SPEC.md §7).
- *   - case-insensitive dedupe → 이미 등록된 이메일은 `skipped`로 응답.
- *   - 총 `allowedPgEmails`가 50개를 넘기면 `EMAILS_LIMIT_EXCEEDED`.
- *   - `(rfq_id, lower(pg_email))` 부분 unique index가 race를 DB 레벨에서 차단.
+ *   - UUID dedupe → 이미 등록된 워크스페이스는 `skipped`로 응답.
+ *   - 총 `allowedPgWorkspaceIds`가 50개를 넘기면 `WORKSPACES_LIMIT_EXCEEDED`.
+ *   - `(rfq_id, pg_ws_id)` 부분 unique index가 race를 DB 레벨에서 차단.
+ *   - 입력 workspaceIds는 모두 type='pg'인 워크스페이스여야 한다.
  *
  * 토큰 모델: draft 상태에서는 진짜 raw 토큰을 발급하지 않는다(이메일 본문 URL을
  * 만들 일이 없으므로). `tokenHash` 컬럼은 NOT NULL이므로 row id 기반 placeholder
  * (`draft-{uuid}`)를 넣어둔다. send 단계에서 `generateToken()`으로 진짜 raw를
  * 발급하고 hash를 갱신한다.
  */
-export async function addPgEmailsToRfqAction(
-  input: AddPgEmailsInput,
-): Promise<AddPgEmailsResult> {
+export async function addPgWorkspacesToRfqAction(
+  input: AddPgWorkspacesInput,
+): Promise<AddPgWorkspacesResult> {
   let session;
   try {
     session = await requireBuyerSession();
@@ -56,13 +57,13 @@ export async function addPgEmailsToRfqAction(
 
   const result = await db.transaction(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async (tx: any): Promise<AddPgEmailsResult> => {
+    async (tx: any): Promise<AddPgWorkspacesResult> => {
       const [row] = await tx
         .select({
           buyerWsId: rfqs.buyerWsId,
           status: rfqs.status,
           deadline: rfqs.deadline,
-          allowedPgEmails: rfqs.allowedPgEmails,
+          allowedPgWorkspaceIds: rfqs.allowedPgWorkspaceIds,
         })
         .from(rfqs)
         .where(eq(rfqs.id, parsed.data.rfqId))
@@ -74,48 +75,69 @@ export async function addPgEmailsToRfqAction(
         return { ok: false, error: 'RFQ_DEADLINE_PASSED' };
       }
 
-      // case-insensitive dedupe vs. 기존 allowlist
+      // Verify all provided workspaceIds exist and are type='pg'.
+      const confirmedPgRows: { id: string }[] = await tx
+        .select({ id: workspaces.id, type: workspaces.type })
+        .from(workspaces)
+        .where(
+          inArray(workspaces.id, parsed.data.workspaceIds),
+        )
+        .then((rows: { id: string; type: string }[]) =>
+          rows.filter((r) => r.type === 'pg'),
+        );
+      const confirmedPgSet = new Set(confirmedPgRows.map((r) => r.id.toLowerCase()));
+      const hasInvalid = parsed.data.workspaceIds.some(
+        (id) => !confirmedPgSet.has(id.toLowerCase()),
+      );
+      if (hasInvalid) {
+        return { ok: false, error: 'INVALID_WORKSPACE' };
+      }
+
+      // UUID dedupe vs. existing allowlist (lowercase for canonical comparison).
       const existing = new Set(
-        (row.allowedPgEmails ?? []).map((e: string) => e.trim().toLowerCase()),
+        (row.allowedPgWorkspaceIds ?? []).map((id: string) => id.toLowerCase()),
       );
       const seenInBatch = new Set<string>();
       const toAdd: string[] = [];
       const skipped: string[] = [];
-      for (const raw of parsed.data.emails) {
-        const norm = raw.trim().toLowerCase();
+      for (const raw of parsed.data.workspaceIds) {
+        const norm = raw.toLowerCase();
         if (existing.has(norm) || seenInBatch.has(norm)) {
           skipped.push(raw);
           continue;
         }
         seenInBatch.add(norm);
-        toAdd.push(raw.trim());
+        toAdd.push(norm); // store canonical lowercase UUID
       }
 
       if (toAdd.length === 0) {
         return { ok: true, addedCount: 0, skipped };
       }
 
-      const totalAfter = (row.allowedPgEmails ?? []).length + toAdd.length;
-      if (totalAfter > ALLOWED_PG_EMAILS_MAX) {
-        return { ok: false, error: 'EMAILS_LIMIT_EXCEEDED' };
+      const totalAfter = (row.allowedPgWorkspaceIds ?? []).length + toAdd.length;
+      if (totalAfter > ALLOWED_PG_WORKSPACES_MAX) {
+        return { ok: false, error: 'WORKSPACES_LIMIT_EXCEEDED' };
       }
 
-      // allowlist union update
-      const merged = [...(row.allowedPgEmails ?? []), ...toAdd];
+      // allowlist union update — canonical lowercase UUIDs.
+      const merged = [
+        ...(row.allowedPgWorkspaceIds ?? []).map((id: string) => id.toLowerCase()),
+        ...toAdd,
+      ];
       await tx
         .update(rfqs)
-        .set({ allowedPgEmails: merged })
+        .set({ allowedPgWorkspaceIds: merged })
         .where(eq(rfqs.id, parsed.data.rfqId));
 
       // draft invitation rows. tokenHash placeholder 'draft-{invId}'를 넣어 NOT
       // NULL/UNIQUE 제약을 충족 — sendDraftInvitationsAction이 진짜 hash로 갱신.
       const expiresAt = new Date(row.deadline);
-      for (const email of toAdd) {
+      for (const workspaceId of toAdd) {
         const invId = randomUUID();
         await tx.insert(rfqInvitations).values({
           id: invId,
           rfqId: parsed.data.rfqId,
-          pgEmail: email,
+          pgWsId: workspaceId,
           tokenHash: `draft-${invId}`,
           sentAt: new Date(),
           expiresAt,
