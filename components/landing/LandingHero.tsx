@@ -1,38 +1,59 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { motion } from 'motion/react';
+import { motion, useScroll, useTransform, useMotionValueEvent } from 'motion/react';
 import { Logo } from '@/components/primitives/Logo';
 import { Button } from '@/components/primitives/Button';
 import { SavingsCalculator } from '@/components/landing/SavingsCalculator';
 import { LiveBidSimulation } from '@/components/landing/LiveBidSimulation';
+import { LandingToast, type LandingToastItem } from '@/components/landing/LandingToast';
 
 const EASE_OUT = [0.16, 1, 0.3, 1] as const;
-const COUNTER_TARGET = 50_000_000;
-const COUNTER_DURATION_MS = 2400;
 
-function useAnimatedCounter(target: number, durationMs: number, active: boolean): number {
-  const [value, setValue] = useState(0);
+const TYPING_VALUES = [
+  '협상의 주도권을',
+  '연간 수천만 원의 절감을',
+  '정보 비대칭 없는 계약을',
+  'PG사 간 공정한 경쟁을',
+  '5분짜리 경쟁 입찰을',
+];
+
+const STEP_TOASTS: Record<1 | 2 | 3, Omit<LandingToastItem, 'id'>> = {
+  1: { title: '토스페이먼츠 응답', fee: '1.95%' },
+  2: { title: 'KG이니시스 응답', fee: '2.10%' },
+  3: { title: 'NHN KCP 응답 · 최저가 🎉', fee: '1.85%', isBest: true },
+};
+
+function useTypewriter(values: string[], typingMs = 60, deletingMs = 30, holdMs = 1800): string {
+  const [displayText, setDisplayText] = useState('');
+  const [index, setIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   useEffect(() => {
-    if (!active) return;
-    let rafId: number;
-    let startTime: number | null = null;
-    const tick = (ts: number) => {
-      if (!startTime) startTime = ts;
-      const progress = Math.min((ts - startTime) / durationMs, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setValue(Math.round(target * eased));
-      if (progress < 1) rafId = requestAnimationFrame(tick);
-    };
-    const delay = setTimeout(() => { rafId = requestAnimationFrame(tick); }, 500);
-    return () => { clearTimeout(delay); cancelAnimationFrame(rafId); };
-  }, [target, durationMs, active]);
-  return value;
-}
+    const current = values[index];
 
-function formatCounter(n: number): string {
-  return '₩' + n.toLocaleString('ko-KR');
+    if (!isDeleting && displayText === current) {
+      const hold = setTimeout(() => setIsDeleting(true), holdMs);
+      return () => clearTimeout(hold);
+    }
+
+    if (isDeleting && displayText === '') {
+      setIsDeleting(false);
+      setIndex((i) => (i + 1) % values.length);
+      return;
+    }
+
+    const speed = isDeleting ? deletingMs : typingMs;
+    const next = isDeleting
+      ? displayText.slice(0, -1)
+      : current.slice(0, displayText.length + 1);
+
+    const timer = setTimeout(() => setDisplayText(next), speed);
+    return () => clearTimeout(timer);
+  }, [displayText, index, isDeleting, values, typingMs, deletingMs, holdMs]);
+
+  return displayText;
 }
 
 const PAIN_ITEMS = [
@@ -69,12 +90,43 @@ const HOW_STEPS = [
 ];
 
 export function LandingHero() {
-  const [counterActive, setCounterActive] = useState(false);
-  const counter = useAnimatedCounter(COUNTER_TARGET, COUNTER_DURATION_MS, counterActive);
+  const displayText = useTypewriter(TYPING_VALUES);
 
-  useEffect(() => {
-    setCounterActive(true);
+  // Scroll-driven simulation
+  const simSectionRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: simSectionRef,
+    offset: ['start start', 'end end'],
+  });
+  const arrowOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
+
+  const [currentStep, setCurrentStep] = useState<0 | 1 | 2 | 3>(0);
+  const prevStepRef = useRef<0 | 1 | 2 | 3>(0);
+
+  // Toast state
+  const [toastItems, setToastItems] = useState<LandingToastItem[]>([]);
+  const dismissToast = useCallback((id: string) => {
+    setToastItems(prev => prev.filter(t => t.id !== id));
   }, []);
+
+  useMotionValueEvent(scrollYProgress, 'change', (v) => {
+    const next: 0 | 1 | 2 | 3 = v < 0.25 ? 0 : v < 0.5 ? 1 : v < 0.75 ? 2 : 3;
+    const prev = prevStepRef.current;
+    if (next === prev) return;
+
+    if (next > prev) {
+      // Forward scroll: fire toast for each newly crossed threshold
+      for (let s = prev + 1; s <= next; s++) {
+        const data = STEP_TOASTS[s as 1 | 2 | 3];
+        if (data) {
+          setToastItems(items => [...items, { ...data, id: crypto.randomUUID() }]);
+        }
+      }
+    }
+
+    prevStepRef.current = next;
+    setCurrentStep(next);
+  });
 
   return (
     <div className="min-h-screen bg-[var(--md-sys-color-surface)] flex flex-col">
@@ -94,15 +146,13 @@ export function LandingHero() {
 
         {/* ── 01 / 05  Hero ── */}
         <section className="relative overflow-hidden px-8 py-[var(--s-11)] min-h-[calc(100svh-60px)] flex items-center border-b border-[var(--md-sys-color-outline-variant)]">
-
           <div className="mx-auto w-full max-w-[1080px] flex flex-col gap-[var(--s-8)]">
 
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.36, ease: EASE_OUT }}
-            >
-            </motion.div>
+            />
 
             {/* Headline */}
             <div className="flex flex-col gap-0">
@@ -112,40 +162,25 @@ export function LandingHero() {
                 transition={{ duration: 0.44, delay: 0.08, ease: EASE_OUT }}
                 className="text-[clamp(30px,5.5vw,72px)] leading-[1.06] tracking-[-0.028em] font-medium text-[var(--md-sys-color-on-surface)]"
               >
-                0.5%의 차이가,
+                bidit을 통해
               </motion.h1>
               <motion.div
                 initial={{ opacity: 0, y: 28 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.44, delay: 0.18, ease: EASE_OUT }}
-                className="text-[clamp(30px,5.5vw,72px)] leading-[1.06] tracking-[-0.028em] font-medium text-[var(--md-sys-color-on-surface)] flex items-baseline flex-wrap gap-x-[0.2em]"
+                className="text-[clamp(30px,5.5vw,72px)] leading-[1.06] tracking-[-0.028em] font-medium flex items-baseline flex-wrap"
               >
-                <span>연</span>
-                <span className="font-mono tabular-nums text-[var(--md-sys-color-primary)]">
-                  {formatCounter(counter)}
-                </span>
-                <span>을 만듭니다.</span>
+                <span className="text-[var(--md-sys-color-primary)]">{displayText}</span>
+                <span className="blink-cursor text-[var(--md-sys-color-primary)]">|</span>
+                <span className="text-[var(--md-sys-color-on-surface)]">&nbsp;만듭니다.</span>
               </motion.div>
             </div>
-
-            {/* Sub-copy */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.36, delay: 0.46, ease: EASE_OUT }}
-              className="max-w-[500px] text-[var(--text-md)] leading-[1.72] tracking-[-0.006em] text-[var(--md-sys-color-on-surface-variant)]"
-            >
-              bidit은 PG사를 1:N 사적 입찰로 비교합니다.
-              카드수수료뿐 아니라 정산주기·보증금·셋업비 등
-              모든 비용을 한 번에 협상하세요.
-              PG사끼리는 서로를 알 수 없습니다.
-            </motion.p>
 
             {/* CTA */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.36, delay: 0.6, ease: EASE_OUT }}
+              transition={{ duration: 0.36, delay: 0.46, ease: EASE_OUT }}
               className="flex flex-col items-start gap-[var(--s-4)]"
             >
               <Link href="/signup/buyer">
@@ -200,8 +235,51 @@ export function LandingHero() {
           </div>
         </section>
 
-        {/* ── 03 / 05  Live Bid Simulation ── */}
-        <LiveBidSimulation />
+        {/* ── 03 / 05  Live Bid Simulation (scroll-driven, 300vh) ── */}
+        <div ref={simSectionRef} style={{ height: '300vh' }} className="relative">
+          <div
+            className="sticky top-[var(--shell-topbar)] border-t border-b border-[var(--md-sys-color-outline-variant)] overflow-hidden"
+            style={{ height: 'calc(100svh - var(--shell-topbar))' }}
+          >
+            <div className="h-full py-[var(--s-9)] px-8 flex flex-col justify-center overflow-hidden">
+              <div className="mx-auto w-full max-w-[1080px] flex flex-col gap-[var(--s-7)]">
+
+                {/* Section header */}
+                <div className="flex flex-col gap-[var(--s-4)]">
+                  <motion.h2
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.36, ease: EASE_OUT }}
+                    className="text-[clamp(22px,3vw,40px)] leading-[1.1] tracking-[-0.022em] font-medium text-[var(--md-sys-color-on-surface)]"
+                  >
+                    N개 PG사가<br />동시에 응답합니다.
+                  </motion.h2>
+
+                  {/* Bounce arrow — fades out as scroll begins */}
+                  <motion.div
+                    style={{ opacity: arrowOpacity }}
+                    className="flex flex-col items-start gap-[var(--s-2)]"
+                  >
+                    <motion.div
+                      animate={{ y: [0, 6, 0] }}
+                      transition={{ repeat: Infinity, duration: 1.4, ease: 'easeInOut' }}
+                      className="w-9 h-9 rounded-full border border-[var(--md-sys-color-primary)] flex items-center justify-center text-[var(--md-sys-color-primary)] text-base"
+                    >
+                      ↓
+                    </motion.div>
+                    <span className="font-mono text-[var(--text-2xs)] tracking-[0.08em] text-[var(--md-sys-color-outline)]">
+                      스크롤해서 확인하기
+                    </span>
+                  </motion.div>
+                </div>
+
+                <LiveBidSimulation currentStep={currentStep} />
+
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* ── 04 / 05  How It Works ── */}
         <section className="py-[var(--s-11)] px-8 border-b border-[var(--md-sys-color-outline-variant)]">
@@ -316,6 +394,10 @@ export function LandingHero() {
         </section>
 
       </main>
+
+      {/* Landing-scoped toast viewport */}
+      <LandingToast items={toastItems} onDismiss={dismissToast} />
+
     </div>
   );
 }
