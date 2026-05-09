@@ -57,6 +57,11 @@ export interface InvitationRepo {
     userId: string,
     tx?: Tx,
   ): Promise<{ invitation: RfqInvitation; rfq: RFQ }[]>;
+  /** PG 워크스페이스에 발송된 활성 초대 + RFQ pair — PG 홈 칸반용. */
+  findByPgWorkspace(
+    pgWsId: string,
+    tx?: Tx,
+  ): Promise<{ invitation: RfqInvitation; rfq: RFQ }[]>;
   /** 토큰 atomic claim — 만료/사용/무효 분기. 동일 raw 토큰 동시 진입 가드. */
   claimToken(rawToken: string, userId: string, tx?: Tx): Promise<TokenClaimResult>;
   /** 같은 도메인 동료도 차단 — acceptedByUserId 매칭만 통과. */

@@ -1,4 +1,4 @@
-import { and, eq, exists, gt, isNull, sql } from 'drizzle-orm';
+import { and, eq, exists, gt, inArray, isNull, sql } from 'drizzle-orm';
 import { rfqInvitations, rfqs, bizProfiles } from '@/lib/db/schema';
 import type { DB } from '@/lib/db/client';
 import type { RfqInvitation, InvitationStatus } from '@/lib/types/invitation';
@@ -182,6 +182,28 @@ export class DrizzleInvitationRepository implements InvitationRepo {
       rfq: RfqRow;
       biz: BizRow | null;
     }[];
+    return rows.map((r) => ({
+      invitation: rowToInvitation(r.inv),
+      rfq: rowToRfq(r.rfq, r.biz),
+    }));
+  }
+
+  async findByPgWorkspace(
+    pgWsId: string,
+    tx?: Tx,
+  ): Promise<{ invitation: RfqInvitation; rfq: RFQ }[]> {
+    const db = this.h(tx);
+    const rows = (await db
+      .select({ inv: rfqInvitations, rfq: rfqs, biz: bizProfiles })
+      .from(rfqInvitations)
+      .innerJoin(rfqs, eq(rfqInvitations.rfqId, rfqs.id))
+      .leftJoin(bizProfiles, eq(rfqs.bizProfileId, bizProfiles.id))
+      .where(
+        and(
+          eq(rfqInvitations.pgWsId, pgWsId),
+          inArray(rfqInvitations.status, ['pending', 'opened', 'accepted']),
+        ),
+      )) as { inv: InvRow; rfq: RfqRow; biz: BizRow | null }[];
     return rows.map((r) => ({
       invitation: rowToInvitation(r.inv),
       rfq: rowToRfq(r.rfq, r.biz),

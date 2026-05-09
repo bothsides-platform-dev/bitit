@@ -70,6 +70,26 @@ export class InMemoryInvitationRepository implements InvitationRepo {
     return out;
   }
 
+  async findByPgWorkspace(
+    pgWsId: string,
+    _tx?: Tx,
+  ): Promise<{ invitation: RfqInvitation; rfq: RFQ }[]> {
+    void _tx;
+    if (!this.rfqRepoRef) return [];
+    const rfqRepo = this.rfqRepoRef();
+    const active = [...this.store.values()].filter(
+      (i) =>
+        i.pgWsId === pgWsId &&
+        (i.status === 'sent' || i.status === 'opened' || i.status === 'accepted'),
+    );
+    const out: { invitation: RfqInvitation; rfq: RFQ }[] = [];
+    for (const inv of active) {
+      const rfq = await rfqRepo.findById(inv.rfqId);
+      if (rfq) out.push({ invitation: { ...inv }, rfq });
+    }
+    return out;
+  }
+
   async claimToken(
     rawToken: string,
     userId: string,

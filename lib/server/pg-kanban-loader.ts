@@ -19,7 +19,7 @@ export async function getPgKanbanData(
     getBidRepo(),
   ]);
   const [pairs, bids] = await Promise.all([
-    invRepo.findByPgUser(userId),
+    invRepo.findByPgWorkspace(workspaceId),
     bidRepo.findByPgWs(workspaceId),
   ]);
 

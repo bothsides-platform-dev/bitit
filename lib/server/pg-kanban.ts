@@ -65,7 +65,7 @@ export function classifyPgInvitation(args: {
   if (bid?.status === 'draft') return 'drafting';
 
   // bid 가 아직 없음 — invitation 상태로 판정.
-  // findByPgUser 는 acceptedByUserId 필터라서 status 는 'accepted' / 'opened' 가 일반적.
+  // findByPgWorkspace 는 sent/opened/accepted 를 반환. sent → received, opened → reviewing.
   if (invitation.status === 'opened') return 'reviewing';
   return 'received';
 }
