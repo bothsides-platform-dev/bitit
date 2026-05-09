@@ -10,6 +10,7 @@ import {
   getInvitationRepo,
   getRfqRepo,
 } from '@/lib/server/repositories/factory';
+import { markInvitationOpenedAction } from '@/lib/server/actions/invitation';
 import { RfqBriefPanel } from '@/components/inbox/RfqBriefPanel';
 import { BidForm } from '@/components/inbox/BidForm';
 
@@ -27,6 +28,9 @@ export default async function InboxDetailPage({ params }: Props) {
   // canAccess: 클레임한 본인만 진입(도메인 동료 차단). false면 404.
   const ok = await invRepo.canAccess(rfqId, session.user.id);
   if (!ok) notFound();
+
+  // PG 홈 칸반 '검토중' 컬럼 활성화 — accepted → opened 1회 전이. 이미 opened 이상이면 no-op.
+  await markInvitationOpenedAction({ rfqId });
 
   const rfqRepo = await getRfqRepo();
   const rfq = await rfqRepo.findById(rfqId);

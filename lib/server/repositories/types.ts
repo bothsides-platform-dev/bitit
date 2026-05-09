@@ -61,6 +61,11 @@ export interface InvitationRepo {
   claimToken(rawToken: string, userId: string, tx?: Tx): Promise<TokenClaimResult>;
   /** 같은 도메인 동료도 차단 — acceptedByUserId 매칭만 통과. */
   canAccess(rfqId: string, userId: string, tx?: Tx): Promise<boolean>;
+  /**
+   * `accepted` 상태의 초대를 `opened` 로 한 번만 전이. 이미 `opened` 이상이면 no-op.
+   * inbox 상세 RSC 진입 시 호출 — PG 칸반의 '검토중' 컬럼을 활성화하기 위한 시그널.
+   */
+  markOpened(invitationId: string, openedAt: Date, tx?: Tx): Promise<void>;
 }
 
 // ── Workspace ─────────────────────────────────────────────────────────

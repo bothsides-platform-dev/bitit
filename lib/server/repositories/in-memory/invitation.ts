@@ -93,6 +93,22 @@ export class InMemoryInvitationRepository implements InvitationRepo {
     return { ok: true, invitation: { ...updated } };
   }
 
+  async markOpened(
+    invitationId: string,
+    openedAt: Date,
+    _tx?: Tx,
+  ): Promise<void> {
+    void _tx;
+    const inv = this.store.get(invitationId);
+    if (!inv) return;
+    if (inv.status !== 'accepted') return;
+    this.store.set(invitationId, {
+      ...inv,
+      status: 'opened',
+      openedAt: openedAt.toISOString(),
+    });
+  }
+
   // Only the user who accepted the token has access — same-domain peers blocked.
   async canAccess(rfqId: string, userId: string, _tx?: Tx): Promise<boolean> {
     void _tx;

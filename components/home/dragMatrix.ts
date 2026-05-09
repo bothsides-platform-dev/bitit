@@ -1,0 +1,100 @@
+// 칸반 드래그 결과 → 도메인 액션 매핑.
+// 드롭 = 사용자 의도 → 매트릭스 조회 → DragAction. 매칭 없으면 'invalid' (스냅백).
+// 'submit-bid'/'save-draft' 와 같은 mutation 은 v0 에서 폼 입력이 필수라 직접 트리거
+// 가 불가능 — 대신 inbox 페이지로 navigate 시켜 사용자가 폼에서 제출하도록 한다.
+import type { BuyerKanbanStage } from '@/lib/server/buyer-kanban';
+import type { PgKanbanStage } from '@/lib/server/pg-kanban';
+
+export type DragAction =
+  | { kind: 'send-rfq'; rfqId: string; title: string }
+  | { kind: 'cancel-rfq'; rfqId: string; title: string }
+  | { kind: 'navigate-rfq-detail'; rfqId: string }
+  | { kind: 'navigate-inbox'; rfqId: string }
+  | { kind: 'withdraw-bid'; bidId: string; rfqId: string; title: string };
+
+type BuyerInput = {
+  role: 'buyer';
+  from: BuyerKanbanStage;
+  to: BuyerKanbanStage;
+  rfqId: string;
+  title: string;
+};
+
+type PgInput = {
+  role: 'pg';
+  from: PgKanbanStage;
+  to: PgKanbanStage;
+  rfqId: string;
+  title: string;
+  bidId?: string;
+};
+
+export function resolveDrag(input: BuyerInput | PgInput): DragAction | null {
+  if (input.role === 'buyer') {
+    return resolveBuyer(input);
+  }
+  return resolvePg(input);
+}
+
+function resolveBuyer(i: BuyerInput): DragAction | null {
+  if (i.from === i.to) return null;
+
+  // draft → sent
+  if (i.from === 'draft' && i.to === 'sent') {
+    return { kind: 'send-rfq', rfqId: i.rfqId, title: i.title };
+  }
+
+  // {collecting, comparing} → awarded — 낙찰은 PG 선택이 필요하므로 RFQ 상세(BidBoard)로
+  // 보낸다. award 페이지는 ?bidId= 필수라서 home 카드에서 직접 호출 불가.
+  if (
+    (i.from === 'collecting' || i.from === 'comparing') &&
+    i.to === 'awarded'
+  ) {
+    return { kind: 'navigate-rfq-detail', rfqId: i.rfqId };
+  }
+
+  // 활성 컬럼 → closed: 취소
+  // ('awarded' / 'closed' 자체는 finality — drop target 이 아니지만 from 이 될 수 없게
+  //  KanbanColumn 의 useDroppable disabled 로 차단)
+  if (
+    i.to === 'closed' &&
+    (i.from === 'draft' ||
+      i.from === 'sent' ||
+      i.from === 'collecting' ||
+      i.from === 'comparing')
+  ) {
+    return { kind: 'cancel-rfq', rfqId: i.rfqId, title: i.title };
+  }
+
+  return null;
+}
+
+function resolvePg(i: PgInput): DragAction | null {
+  if (i.from === i.to) return null;
+
+  // 작성 단계로 이동 — v0 는 form 이 inbox 페이지에 있어 navigate.
+  if (
+    (i.from === 'received' ||
+      i.from === 'reviewing') &&
+    i.to === 'drafting'
+  ) {
+    return { kind: 'navigate-inbox', rfqId: i.rfqId };
+  }
+
+  // drafting → submitted: 폼 채워서 제출해야 함 — navigate.
+  if (i.from === 'drafting' && i.to === 'submitted') {
+    return { kind: 'navigate-inbox', rfqId: i.rfqId };
+  }
+
+  // submitted → lost: 철회.
+  if (i.from === 'submitted' && i.to === 'lost' && i.bidId) {
+    return {
+      kind: 'withdraw-bid',
+      bidId: i.bidId,
+      rfqId: i.rfqId,
+      title: i.title,
+    };
+  }
+
+  return null;
+}

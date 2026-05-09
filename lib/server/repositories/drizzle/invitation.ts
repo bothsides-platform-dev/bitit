@@ -224,6 +224,23 @@ export class DrizzleInvitationRepository implements InvitationRepo {
     return { ok: false, reason: 'expired' };
   }
 
+  async markOpened(
+    invitationId: string,
+    openedAt: Date,
+    tx?: Tx,
+  ): Promise<void> {
+    const db = this.h(tx);
+    await db
+      .update(rfqInvitations)
+      .set({ status: 'opened', openedAt })
+      .where(
+        and(
+          eq(rfqInvitations.id, invitationId),
+          eq(rfqInvitations.status, 'accepted'),
+        ),
+      );
+  }
+
   async canAccess(rfqId: string, userId: string, tx?: Tx): Promise<boolean> {
     const db = this.h(tx);
     const [row] = await db
