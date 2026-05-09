@@ -38,8 +38,8 @@ export function ResendCountdown({
       className={cn(
         'font-mono text-[11px] tracking-[0.1em] uppercase transition-colors',
         seconds > 0
-          ? 'text-[var(--color-ink-soft)] cursor-default'
-          : 'text-[var(--color-ink)] hover:text-[var(--color-ink-muted)] cursor-pointer',
+          ? 'text-[var(--md-sys-color-on-surface-variant)] cursor-default'
+          : 'text-[var(--md-sys-color-on-surface)] hover:text-[var(--md-sys-color-on-surface-variant)] cursor-pointer',
         className,
       )}
     >

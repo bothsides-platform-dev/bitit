@@ -32,8 +32,8 @@ function Checkbox({
         className={cn(
           'mt-0.5 w-4 h-4 border rounded-md flex items-center justify-center transition-colors shrink-0',
           checked
-            ? 'border-[var(--color-ink)] bg-[var(--color-ink)]'
-            : 'border-[var(--color-hair-strong)] group-hover:border-[var(--color-ink)]',
+            ? 'border-[var(--md-sys-color-on-surface)] bg-[var(--md-sys-color-on-surface)]'
+            : 'border-[var(--md-sys-color-outline)] group-hover:border-[var(--md-sys-color-on-surface)]',
         )}
       >
         {checked && (
@@ -43,9 +43,9 @@ function Checkbox({
         )}
       </div>
       <input id={id} type="checkbox" className="sr-only" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-      <span className="text-[13px] text-[var(--color-ink-muted)] leading-snug">
+      <span className="text-[13px] text-[var(--md-sys-color-on-surface-variant)] leading-snug">
         {children}
-        {required && <span className="ml-1 text-[var(--color-terracotta)]">*</span>}
+        {required && <span className="ml-1 text-[var(--md-sys-color-error)]">*</span>}
       </span>
     </label>
   );
@@ -64,7 +64,7 @@ export function AgreementCheckboxes({ value, onChange }: AgreementCheckboxesProp
       <Checkbox id="all" checked={allChecked} onChange={toggleAll}>
         <span className="font-medium">전체 동의</span>
       </Checkbox>
-      <div className="ml-7 space-y-2.5 border-t border-[var(--color-hair)] pt-3">
+      <div className="ml-7 space-y-2.5 border-t border-[var(--md-sys-color-outline-variant)] pt-3">
         <Checkbox
           id="terms"
           checked={value.terms}

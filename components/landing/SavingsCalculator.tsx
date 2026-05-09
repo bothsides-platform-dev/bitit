@@ -57,14 +57,14 @@ export function SavingsCalculator() {
       : `bidit 평균 낙찰가 ${(biditRate * 100).toFixed(2)}% (법정)`;
 
   return (
-    <section className="border-t border-b border-[var(--color-hair-strong)] py-[var(--s-9)]">
+    <section className="border-t border-b border-[var(--md-sys-color-outline)] py-[var(--s-9)]">
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-[var(--s-9)] md:gap-[var(--s-10)] items-end">
         {/* Sliders */}
         <div className="flex flex-col gap-[var(--s-8)]">
           <div className="flex flex-col gap-[var(--s-3)]">
             <div className="flex items-baseline justify-between">
-              <span className="font-mono text-[var(--text-xs)] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">연간 거래액</span>
-              <span className="font-mono tabular-nums text-[var(--text-base)] text-[var(--color-ink)] tracking-[0.02em]">
+              <span className="font-mono text-[var(--text-xs)] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">연간 거래액</span>
+              <span className="font-mono tabular-nums text-[var(--text-base)] text-[var(--md-sys-color-on-surface)] tracking-[0.02em]">
                 {formatVolume(volume)}
               </span>
             </div>
@@ -76,7 +76,7 @@ export function SavingsCalculator() {
               onValueChange={setVolT}
               ariaLabel="연간 거래액"
             />
-            <div className="flex justify-between font-mono text-[var(--text-2xs)] tracking-[0.1em] text-[var(--color-ink-faint)] uppercase">
+            <div className="flex justify-between font-mono text-[var(--text-2xs)] tracking-[0.1em] text-[var(--md-sys-color-outline)] uppercase">
               <span>1 억</span>
               <span>1,000 억</span>
             </div>
@@ -84,8 +84,8 @@ export function SavingsCalculator() {
 
           <div className="flex flex-col gap-[var(--s-3)]">
             <div className="flex items-baseline justify-between">
-              <span className="font-mono text-[var(--text-xs)] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">현재 PG 수수료율</span>
-              <span className="font-mono tabular-nums text-[var(--text-base)] text-[var(--color-ink)] tracking-[0.02em]">
+              <span className="font-mono text-[var(--text-xs)] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">현재 PG 수수료율</span>
+              <span className="font-mono tabular-nums text-[var(--text-base)] text-[var(--md-sys-color-on-surface)] tracking-[0.02em]">
                 {formatRate(rateBp / 100)}
               </span>
             </div>
@@ -97,7 +97,7 @@ export function SavingsCalculator() {
               onValueChange={setRateBp}
               ariaLabel="현재 PG 수수료율"
             />
-            <div className="flex justify-between font-mono text-[var(--text-2xs)] tracking-[0.1em] text-[var(--color-ink-faint)] uppercase">
+            <div className="flex justify-between font-mono text-[var(--text-2xs)] tracking-[0.1em] text-[var(--md-sys-color-outline)] uppercase">
               <span>0.50 %</span>
               <span>4.00 %</span>
             </div>
@@ -111,18 +111,18 @@ export function SavingsCalculator() {
             value={formatKRW(savings)}
           />
           <div className="flex items-center gap-3 md:justify-end">
-            <span className="font-mono text-[var(--text-2xs)] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
+            <span className="font-mono text-[var(--text-2xs)] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
               가맹점 등급
             </span>
             <Chip label={GRADE_LABELS[grade]} color="surface" />
           </div>
-          <span className="font-mono text-[var(--text-2xs)] tracking-[0.08em] text-[var(--color-ink-soft)]">
+          <span className="font-mono text-[var(--text-2xs)] tracking-[0.08em] text-[var(--md-sys-color-on-surface-variant)]">
             {baselineNote}
           </span>
         </div>
       </div>
 
-      <div className="mt-[var(--s-9)] pt-[var(--s-7)] border-t border-[var(--color-hair)]">
+      <div className="mt-[var(--s-9)] pt-[var(--s-7)] border-t border-[var(--md-sys-color-outline-variant)]">
         <CostComparisonChart
           currentCost={currentCost}
           biditCost={biditCost}
@@ -131,7 +131,7 @@ export function SavingsCalculator() {
         />
       </div>
 
-      <p className="mt-[var(--s-7)] font-mono text-[var(--text-2xs)] tracking-[0.06em] text-[var(--color-ink-soft)] leading-relaxed">
+      <p className="mt-[var(--s-7)] font-mono text-[var(--text-2xs)] tracking-[0.06em] text-[var(--md-sys-color-on-surface-variant)] leading-relaxed">
         * 최대 절감 가능액 추정치입니다. 일반 등급(연 30억 초과)은{' '}
         {(GENERAL_ASSUMED_RATE * 100).toFixed(2)}% 가정(최저 가능 수준).
         영세·중소 등급의 카드 수수료는 법정 고정으로, 실 절감은 카드 외

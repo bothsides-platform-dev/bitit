@@ -19,10 +19,10 @@ export default function SignupPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+        <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">
           누구로 시작하시나요?
         </h2>
-        <p className="mt-2 text-[13px] text-[var(--color-ink-muted)]">
+        <p className="mt-2 text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
           역할에 맞는 가입 경로를 선택합니다.
         </p>
       </div>
@@ -32,7 +32,7 @@ export default function SignupPage() {
       <div className="text-center">
         <Link
           href="/login"
-          className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+          className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
         >
           이미 계정이 있으세요? 로그인 →
         </Link>

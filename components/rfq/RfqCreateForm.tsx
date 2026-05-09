@@ -14,10 +14,10 @@ import type { BizProfile } from '@/lib/types/biz-profile';
 function SectionHeader({ num, label }: { num: string; label: string }) {
   return (
     <div className="flex items-center gap-3 mb-6">
-      <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+      <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
         {num} — {label}
       </span>
-      <div className="flex-1 h-px bg-[var(--color-hair)]" />
+      <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
     </div>
   );
 }
@@ -96,18 +96,18 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
   return (
     <form className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-12 lg:h-full" onSubmit={handleSubmit}>
       {/* Left column: sections 01, 02, 03 — independent scroll on lg+ */}
-      <div className="space-y-12 lg:border-r lg:border-[var(--color-hair)] lg:pr-10 lg:overflow-y-auto lg:min-h-0">
+      <div className="space-y-12 lg:border-r lg:border-[var(--md-sys-color-outline-variant)] lg:pr-10 lg:overflow-y-auto lg:min-h-0">
         {/* 01 사업자 정보 — read-only (workspace 시점) 또는 미입력 안내 */}
         <section>
           <SectionHeader num="01" label="사업자 정보" />
           {bizProfile ? (
             <>
-              <div className="border border-[var(--color-hair)] divide-y divide-[var(--color-hair)]">
+              <div className="border border-[var(--md-sys-color-outline-variant)] divide-y divide-[var(--md-sys-color-outline-variant)]">
                 <div className="px-4 py-2 flex items-center justify-between">
-                  <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
+                  <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
                     WORKSPACE — 등록된 사업자
                   </span>
-                  <span className="font-mono text-[10px] tracking-[0.1em] text-[var(--color-moss)]">
+                  <span className="font-mono text-[10px] tracking-[0.1em] text-[var(--md-sys-color-tertiary)]">
                     ✓ 확인됨
                   </span>
                 </div>
@@ -136,28 +136,28 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
                   ],
                 ].map(([label, value]) => (
                   <div key={label} className="px-4 py-2.5 flex items-baseline justify-between">
-                    <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
+                    <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
                       {label}
                     </span>
-                    <span className="text-[13px] text-[var(--color-ink)] font-mono tabular-nums">
+                    <span className="text-[13px] text-[var(--md-sys-color-on-surface)] font-mono tabular-nums">
                       {value}
                     </span>
                   </div>
                 ))}
               </div>
-              <p className="mt-3 font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+              <p className="mt-3 font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
                 사업자 정보 갱신은 설정 → 프로필에서 가능합니다.
               </p>
             </>
           ) : (
-            <div className="border border-[var(--color-hair)] px-4 py-4 space-y-2">
-              <div className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
+            <div className="border border-[var(--md-sys-color-outline-variant)] px-4 py-4 space-y-2">
+              <div className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
                 [ 사업자번호 미입력 ]
               </div>
-              <p className="text-[13px] leading-relaxed text-[var(--color-ink)]">
+              <p className="text-[13px] leading-relaxed text-[var(--md-sys-color-on-surface)]">
                 사업자번호 없이 작성 중입니다.
               </p>
-              <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+              <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
                 법인 설립 후에는 설정 → 프로필에서 사업자번호를 등록할 수 있습니다.
               </p>
             </div>
@@ -175,7 +175,7 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
                 value={draft.title}
                 onChange={(e) => draft.setField('title', e.target.value)}
                 placeholder="2026 결제 인프라 견적"
-                className="block w-full bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-2 text-[14px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
+                className="block w-full bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors"
               />
             </div>
             <div className="space-y-1">
@@ -185,7 +185,7 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
                 onChange={(e) => draft.setField('memo', e.target.value)}
                 rows={4}
                 placeholder="카드결제·간편결제 통합 솔루션 검토 중입니다. 정산주기 D+1 이내 희망."
-                className="block w-full bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-2 text-[14px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-ink)] transition-colors resize-none"
+                className="block w-full bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors resize-none"
               />
             </div>
             <RfpAttachmentDropzone
@@ -222,12 +222,12 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
                     e.target.value ? `${e.target.value}T23:59:59Z` : '',
                   )
                 }
-                className="block bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-2 text-[14px] font-mono tabular-nums text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
+                className="block bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] font-mono tabular-nums text-[var(--md-sys-color-on-surface)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors"
               />
             </div>
 
             {!canSend && (
-              <ul className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)] space-y-1">
+              <ul className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)] space-y-1">
                 {!draft.title.trim() && <li>· 견적 제목 입력 필요</li>}
                 {draft.allowedPgEmails.length === 0 && (
                   <li>· PG 이메일 1개 이상 추가 필요</li>
@@ -239,7 +239,7 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
             {serverError && (
               <p
                 role="alert"
-                className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]"
+                className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]"
               >
                 {`발송 실패 — ${serverError}`}
               </p>
@@ -253,12 +253,12 @@ export function RfqCreateForm({ bizProfile, workspaceName }: Props) {
                   : '발송'}
             </Button>
 
-            <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-faint)]">
+            <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--md-sys-color-outline)]">
               <span>
-                <kbd className="text-[var(--color-ink-soft)]">⌘S</kbd> 임시 저장
+                <kbd className="text-[var(--md-sys-color-on-surface-variant)]">⌘S</kbd> 임시 저장
               </span>
               {savedAt && (
-                <span className="text-[var(--color-moss)]">✓ 저장됨 {savedAt}</span>
+                <span className="text-[var(--md-sys-color-tertiary)]">✓ 저장됨 {savedAt}</span>
               )}
             </div>
           </div>

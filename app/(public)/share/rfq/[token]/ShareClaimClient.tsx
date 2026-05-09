@@ -37,10 +37,10 @@ export function ShareClaimClient({ token }: { token: string }) {
   if (error) {
     return (
       <div className="py-12 max-w-[420px] mx-auto text-center space-y-3">
-        <p className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-terracotta)]">
+        <p className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--md-sys-color-error)]">
           공유 링크 진입 실패
         </p>
-        <p className="text-[13px] text-[var(--color-ink-muted)]">
+        <p className="text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
           {ERROR_LABELS[error] ?? error}
         </p>
       </div>
@@ -49,10 +49,10 @@ export function ShareClaimClient({ token }: { token: string }) {
 
   return (
     <div className="py-8 text-center">
-      <p className="font-mono text-[12px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+      <p className="font-mono text-[12px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
         LOADING…
       </p>
-      <p className="mt-2 text-[13px] text-[var(--color-ink-muted)]">
+      <p className="mt-2 text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
         RFQ 진입을 확인하는 중입니다.
       </p>
     </div>

@@ -77,14 +77,14 @@ export function LandingHero() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--color-paper)] flex flex-col">
+    <div className="min-h-screen bg-[var(--md-sys-color-surface)] flex flex-col">
 
       {/* ── Nav ── */}
-      <header className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-8 h-[var(--shell-topbar)] border-b border-[var(--color-hair)] bg-[var(--color-paper)]">
+      <header className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-8 h-[var(--shell-topbar)] border-b border-[var(--md-sys-color-outline-variant)] bg-[var(--md-sys-color-surface)]">
         <Logo />
         <Link
           href="/login"
-          className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors duration-[140ms]"
+          className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors duration-[140ms]"
         >
           Sign in →
         </Link>
@@ -93,12 +93,12 @@ export function LandingHero() {
       <main className="flex-1 pt-[var(--shell-topbar)]">
 
         {/* ── 01 / 05  Hero ── */}
-        <section className="relative overflow-hidden px-8 py-[var(--s-11)] min-h-[calc(100svh-60px)] flex items-center border-b border-[var(--color-hair)]">
+        <section className="relative overflow-hidden px-8 py-[var(--s-11)] min-h-[calc(100svh-60px)] flex items-center border-b border-[var(--md-sys-color-outline-variant)]">
 
           {/* Watermark */}
           <span
             aria-hidden
-            className="absolute right-6 bottom-8 font-mono font-black leading-none text-[var(--color-ink)] select-none pointer-events-none hidden md:block"
+            className="absolute right-6 bottom-8 font-mono font-black leading-none text-[var(--md-sys-color-on-surface)] select-none pointer-events-none hidden md:block"
             style={{
               fontSize: 'clamp(80px, 16vw, 220px)',
               opacity: 0.030,
@@ -123,7 +123,7 @@ export function LandingHero() {
                 initial={{ opacity: 0, y: 28 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.44, delay: 0.08, ease: EASE_OUT }}
-                className="text-[clamp(30px,5.5vw,72px)] leading-[1.06] tracking-[-0.028em] font-medium text-[var(--color-ink)]"
+                className="text-[clamp(30px,5.5vw,72px)] leading-[1.06] tracking-[-0.028em] font-medium text-[var(--md-sys-color-on-surface)]"
               >
                 0.5%의 차이가,
               </motion.h1>
@@ -131,10 +131,10 @@ export function LandingHero() {
                 initial={{ opacity: 0, y: 28 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.44, delay: 0.18, ease: EASE_OUT }}
-                className="text-[clamp(30px,5.5vw,72px)] leading-[1.06] tracking-[-0.028em] font-medium text-[var(--color-ink)] flex items-baseline flex-wrap gap-x-[0.2em]"
+                className="text-[clamp(30px,5.5vw,72px)] leading-[1.06] tracking-[-0.028em] font-medium text-[var(--md-sys-color-on-surface)] flex items-baseline flex-wrap gap-x-[0.2em]"
               >
                 <span>연</span>
-                <span className="font-mono tabular-nums text-[var(--color-accent)]">
+                <span className="font-mono tabular-nums text-[var(--md-sys-color-primary)]">
                   {formatCounter(counter)}
                 </span>
                 <span>을 만듭니다.</span>
@@ -146,7 +146,7 @@ export function LandingHero() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.36, delay: 0.46, ease: EASE_OUT }}
-              className="max-w-[500px] text-[var(--text-md)] leading-[1.72] tracking-[-0.006em] text-[var(--color-ink-muted)]"
+              className="max-w-[500px] text-[var(--text-md)] leading-[1.72] tracking-[-0.006em] text-[var(--md-sys-color-on-surface-variant)]"
             >
               bidit은 PG사를 1:N 사적 입찰로 비교합니다.
               카드수수료뿐 아니라 정산주기·보증금·셋업비 등
@@ -164,7 +164,7 @@ export function LandingHero() {
               <Link href="/signup/buyer">
                 <Button size="lg">RFQ 무료로 시작하기 →</Button>
               </Link>
-              <span className="font-mono text-[var(--text-2xs)] tracking-[0.06em] text-[var(--color-ink-faint)]">
+              <span className="font-mono text-[var(--text-2xs)] tracking-[0.06em] text-[var(--md-sys-color-outline)]">
                 신용카드 불필요 — 입찰 시작까지 5분
               </span>
             </motion.div>
@@ -173,7 +173,7 @@ export function LandingHero() {
         </section>
 
         {/* ── 02 / 05  Pain ── */}
-        <section className="py-[var(--s-11)] px-8 border-b border-[var(--color-hair)]">
+        <section className="py-[var(--s-11)] px-8 border-b border-[var(--md-sys-color-outline-variant)]">
           <div className="mx-auto w-full max-w-[1080px] flex flex-col gap-[var(--s-9)]">
 
             <div className="flex flex-col gap-[var(--s-5)]">
@@ -182,7 +182,7 @@ export function LandingHero() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.36, ease: EASE_OUT }}
-                className="text-[clamp(22px,3.2vw,42px)] leading-[1.1] tracking-[-0.022em] font-medium text-[var(--color-ink)]"
+                className="text-[clamp(22px,3.2vw,42px)] leading-[1.1] tracking-[-0.022em] font-medium text-[var(--md-sys-color-on-surface)]"
               >
                 PG 계약,<br />이렇게 하고 있지 않나요?
               </motion.h2>
@@ -196,14 +196,14 @@ export function LandingHero() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.36, delay: i * 0.12, ease: EASE_OUT }}
-                  className="relative border border-[var(--color-hair-strong)] rounded-md p-[var(--s-6)] overflow-hidden"
+                  className="relative border border-[var(--md-sys-color-outline)] rounded-md p-[var(--s-6)] overflow-hidden"
                 >
-                  <span className="absolute left-0 top-0 bottom-0 w-0.5 bg-[var(--color-ink)]" />
+                  <span className="absolute left-0 top-0 bottom-0 w-0.5 bg-[var(--md-sys-color-on-surface)]" />
                   <div className="flex flex-col gap-[var(--s-4)]">
-                    <span className="font-mono text-[var(--text-2xs)] tracking-[0.18em] uppercase text-[var(--color-ink-faint)]">
+                    <span className="font-mono text-[var(--text-2xs)] tracking-[0.18em] uppercase text-[var(--md-sys-color-outline)]">
                       [ {item.num} ]
                     </span>
-                    <p className="text-[var(--text-md)] leading-[1.68] tracking-[-0.006em] text-[var(--color-ink-muted)] whitespace-pre-line">
+                    <p className="text-[var(--text-md)] leading-[1.68] tracking-[-0.006em] text-[var(--md-sys-color-on-surface-variant)] whitespace-pre-line">
                       {item.text}
                     </p>
                   </div>
@@ -217,7 +217,7 @@ export function LandingHero() {
         <LiveBidSimulation />
 
         {/* ── 04 / 05  How It Works ── */}
-        <section className="py-[var(--s-11)] px-8 border-b border-[var(--color-hair)]">
+        <section className="py-[var(--s-11)] px-8 border-b border-[var(--md-sys-color-outline-variant)]">
           <div className="mx-auto w-full max-w-[1080px] flex flex-col gap-[var(--s-9)]">
 
             <div className="flex flex-col gap-[var(--s-5)]">
@@ -226,7 +226,7 @@ export function LandingHero() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.36, ease: EASE_OUT }}
-                className="text-[clamp(22px,3.2vw,42px)] leading-[1.1] tracking-[-0.022em] font-medium text-[var(--color-ink)]"
+                className="text-[clamp(22px,3.2vw,42px)] leading-[1.1] tracking-[-0.022em] font-medium text-[var(--md-sys-color-on-surface)]"
               >
                 세 단계면<br />충분합니다.
               </motion.h2>
@@ -235,7 +235,7 @@ export function LandingHero() {
             {/* Hairline connector — desktop only */}
             <div className="hidden md:block overflow-hidden">
               <motion.div
-                className="h-px bg-[var(--color-hair-strong)]"
+                className="h-px bg-[var(--md-sys-color-outline)]"
                 initial={{ scaleX: 0 }}
                 whileInView={{ scaleX: 1 }}
                 viewport={{ once: true }}
@@ -255,16 +255,16 @@ export function LandingHero() {
                   className="flex flex-col gap-[var(--s-5)]"
                 >
                   <span
-                    className="font-mono tabular-nums font-medium leading-none text-[var(--color-hair-strong)]"
+                    className="font-mono tabular-nums font-medium leading-none text-[var(--md-sys-color-outline)]"
                     style={{ fontSize: 'clamp(32px, 4vw, 52px)', letterSpacing: '-0.02em' }}
                   >
                     {step.num}
                   </span>
                   <div className="flex flex-col gap-[var(--s-3)]">
-                    <span className="font-mono text-[var(--text-xs)] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+                    <span className="font-mono text-[var(--text-xs)] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
                       {step.title}
                     </span>
-                    <p className="text-[var(--text-md)] leading-[1.68] tracking-[-0.006em] text-[var(--color-ink-muted)] whitespace-pre-line">
+                    <p className="text-[var(--text-md)] leading-[1.68] tracking-[-0.006em] text-[var(--md-sys-color-on-surface-variant)] whitespace-pre-line">
                       {step.desc}
                     </p>
                   </div>
@@ -275,7 +275,7 @@ export function LandingHero() {
         </section>
 
         {/* ── 05 / 05  Savings Calculator ── */}
-        <section className="py-[var(--s-11)] px-8 border-b border-[var(--color-hair)]">
+        <section className="py-[var(--s-11)] px-8 border-b border-[var(--md-sys-color-outline-variant)]">
           <div className="mx-auto w-full max-w-[1080px] flex flex-col gap-[var(--s-9)]">
             <div className="flex flex-col gap-[var(--s-5)]">
               <motion.h2
@@ -283,7 +283,7 @@ export function LandingHero() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.36, ease: EASE_OUT }}
-                className="text-[clamp(22px,3.2vw,42px)] leading-[1.1] tracking-[-0.022em] font-medium text-[var(--color-ink)]"
+                className="text-[clamp(22px,3.2vw,42px)] leading-[1.1] tracking-[-0.022em] font-medium text-[var(--md-sys-color-on-surface)]"
               >
                 직접 계산해 보세요.
               </motion.h2>
@@ -293,7 +293,7 @@ export function LandingHero() {
         </section>
 
         {/* ── Final CTA ── */}
-        <section className="py-[var(--s-11)] px-8 bg-[var(--color-ink)]">
+        <section className="py-[var(--s-11)] px-8 bg-[var(--md-sys-color-on-surface)]">
           <div className="mx-auto w-full max-w-[1080px] flex flex-col gap-[var(--s-8)]">
 
             <motion.div
@@ -303,10 +303,10 @@ export function LandingHero() {
               transition={{ duration: 0.36, ease: EASE_OUT }}
               className="flex flex-col gap-[var(--s-3)]"
             >
-              <span className="font-mono text-[var(--text-xs)] tracking-[0.18em] uppercase text-[var(--color-ink-muted)]">
+              <span className="font-mono text-[var(--text-xs)] tracking-[0.18em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
                 — 경쟁이 만드는 차이
               </span>
-              <h2 className="text-[clamp(26px,4.5vw,60px)] leading-[1.06] tracking-[-0.026em] font-medium text-[var(--color-paper)]">
+              <h2 className="text-[clamp(26px,4.5vw,60px)] leading-[1.06] tracking-[-0.026em] font-medium text-[var(--md-sys-color-surface)]">
                 지금 바로<br />비교를 시작하세요.
               </h2>
             </motion.div>
@@ -319,7 +319,7 @@ export function LandingHero() {
               className="flex flex-col items-start gap-[var(--s-5)]"
             >
               <Link href="/signup/buyer">
-                <button className="inline-flex items-center gap-2 h-12 px-6 rounded-md bg-[var(--color-paper)] text-[var(--color-ink)] font-mono text-[13px] tracking-[0.06em] uppercase transition-opacity duration-[140ms] hover:opacity-85 active:scale-[0.98]">
+                <button className="inline-flex items-center gap-2 h-12 px-6 rounded-md bg-[var(--md-sys-color-surface)] text-[var(--md-sys-color-on-surface)] font-mono text-[13px] tracking-[0.06em] uppercase transition-opacity duration-[140ms] hover:opacity-85 active:scale-[0.98]">
                   RFQ 무료로 시작하기 →
                 </button>
               </Link>

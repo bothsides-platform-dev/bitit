@@ -47,7 +47,7 @@ export function PgEmailAllowlist({ value, onChange }: Props) {
             onChange={(e) => { setInput(e.target.value); setError(''); }}
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAdd())}
             placeholder="sales@pg.com"
-            className="flex-1 bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-2 text-[14px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
+            className="flex-1 bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors"
           />
           <Button
             type="button"
@@ -60,26 +60,26 @@ export function PgEmailAllowlist({ value, onChange }: Props) {
           </Button>
         </div>
         {error && (
-          <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]">
+          <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]">
             {error}
           </p>
         )}
       </div>
 
       {value.length > 0 && (
-        <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
+        <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-t border-[var(--md-sys-color-outline-variant)]">
           {value.map((email, i) => (
             <div key={email} className="py-2.5 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="font-mono text-[10px] tabular-nums text-[var(--color-ink-soft)]">
+                <span className="font-mono text-[10px] tabular-nums text-[var(--md-sys-color-on-surface-variant)]">
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <span className="text-[13px] text-[var(--color-ink)]">{email}</span>
+                <span className="text-[13px] text-[var(--md-sys-color-on-surface)]">{email}</span>
               </div>
               <button
                 type="button"
                 onClick={() => handleRemove(email)}
-                className="font-mono text-[11px] text-[var(--color-ink-faint)] hover:text-[var(--color-terracotta)] transition-colors px-1"
+                className="font-mono text-[11px] text-[var(--md-sys-color-outline)] hover:text-[var(--md-sys-color-error)] transition-colors px-1"
               >
                 ×
               </button>
@@ -89,7 +89,7 @@ export function PgEmailAllowlist({ value, onChange }: Props) {
       )}
 
       {value.length === 0 && (
-        <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+        <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
           이메일을 추가하면 해당 담당자에게 초대 메일이 발송됩니다.
         </p>
       )}

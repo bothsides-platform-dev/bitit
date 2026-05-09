@@ -25,10 +25,10 @@ export function CostComparisonChart({
   return (
     <div className="flex flex-col gap-[var(--s-5)]">
       <div className="flex items-baseline justify-between">
-        <span className="font-mono text-[var(--text-2xs)] tracking-[0.18em] uppercase text-[var(--color-ink-soft)]">
+        <span className="font-mono text-[var(--text-2xs)] tracking-[0.18em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
           ANNUAL PG COST
         </span>
-        <span className="font-mono text-[var(--text-2xs)] tracking-[0.1em] text-[var(--color-ink-faint)]">
+        <span className="font-mono text-[var(--text-2xs)] tracking-[0.1em] text-[var(--md-sys-color-outline)]">
           단위 ₩ / 연
         </span>
       </div>
@@ -50,16 +50,16 @@ export function CostComparisonChart({
         />
       </div>
 
-      <div className="flex items-baseline justify-between border-t border-[var(--color-hair)] pt-[var(--s-4)]">
-        <span className="font-mono text-[var(--text-2xs)] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+      <div className="flex items-baseline justify-between border-t border-[var(--md-sys-color-outline-variant)] pt-[var(--s-4)]">
+        <span className="font-mono text-[var(--text-2xs)] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
           연간 절감
         </span>
         <div className="flex items-baseline gap-3">
-          <span className="font-mono tabular-nums text-[var(--text-2xl)] tracking-[-0.02em] text-[var(--color-moss)] font-light">
+          <span className="font-mono tabular-nums text-[var(--text-2xl)] tracking-[-0.02em] text-[var(--md-sys-color-tertiary)] font-light">
             {formatKRW(savings)}
           </span>
           {currentCost > 0 && (
-            <span className="font-mono tabular-nums text-[var(--text-xs)] tracking-[0.06em] text-[var(--color-ink-soft)]">
+            <span className="font-mono tabular-nums text-[var(--text-xs)] tracking-[0.06em] text-[var(--md-sys-color-on-surface-variant)]">
               ▾ {savingsPct.toFixed(1)}%
             </span>
           )}
@@ -80,12 +80,12 @@ type BarRowProps = {
 function BarRow({ label, rateNote, ratio, cost, variant }: BarRowProps) {
   const fillClass =
     variant === 'current'
-      ? 'bg-[var(--color-ink-faint)]'
-      : 'bg-[var(--color-ink)]';
+      ? 'bg-[var(--md-sys-color-outline)]'
+      : 'bg-[var(--md-sys-color-on-surface)]';
   const labelClass =
     variant === 'current'
-      ? 'text-[var(--color-ink-soft)]'
-      : 'text-[var(--color-ink)]';
+      ? 'text-[var(--md-sys-color-on-surface-variant)]'
+      : 'text-[var(--md-sys-color-on-surface)]';
 
   return (
     <div className="flex flex-col gap-[var(--s-2)]">
@@ -96,11 +96,11 @@ function BarRow({ label, rateNote, ratio, cost, variant }: BarRowProps) {
           {label}{' '}
           <span className="opacity-60">@ {rateNote}</span>
         </span>
-        <span className="font-mono tabular-nums text-[var(--text-base)] tracking-[0.02em] text-[var(--color-ink)]">
+        <span className="font-mono tabular-nums text-[var(--text-base)] tracking-[0.02em] text-[var(--md-sys-color-on-surface)]">
           {formatKRW(cost)}
         </span>
       </div>
-      <div className="relative h-[14px] border border-[var(--color-hair-strong)] bg-[var(--color-paper)]">
+      <div className="relative h-[14px] border border-[var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface)]">
         <motion.div
           className={`absolute inset-y-0 left-0 ${fillClass}`}
           initial={false}

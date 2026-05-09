@@ -75,10 +75,10 @@ export default function PgSignupEmailPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+        <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">
           PG사 계정을 만듭니다
         </h2>
-        <p className="mt-2 text-[13px] text-[var(--color-ink-muted)]">
+        <p className="mt-2 text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
           초대 이메일을 받으셨다면 메일의 링크를 클릭하면 이 단계가 자동으로 건너뛰어집니다.
         </p>
       </div>
@@ -87,7 +87,7 @@ export default function PgSignupEmailPage() {
         <div className="space-y-1">
           <label
             htmlFor="email"
-            className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]"
+            className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--md-sys-color-on-surface-variant)]"
           >
             이메일
           </label>
@@ -99,7 +99,7 @@ export default function PgSignupEmailPage() {
             onChange={(e) => setEmailInput(e.target.value)}
             autoComplete="email"
             placeholder="your@pgcompany.com"
-            className="block w-full bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-2 text-[14px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
+            className="block w-full bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors"
           />
         </div>
 
@@ -107,12 +107,12 @@ export default function PgSignupEmailPage() {
 
         {error === 'EMAIL_TAKEN' ? (
           <div role="alert" className="space-y-0.5">
-            <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]">
+            <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]">
               이미 가입된 이메일입니다.
             </p>
             <Link
               href={`/login?email=${encodeURIComponent(emailInput)}`}
-              className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-ink)] underline underline-offset-2 block"
+              className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-on-surface)] underline underline-offset-2 block"
             >
               → 로그인하기
             </Link>
@@ -120,7 +120,7 @@ export default function PgSignupEmailPage() {
         ) : error ? (
           <p
             role="alert"
-            className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]"
+            className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]"
           >
             이메일을 보내지 못했습니다. 잠시 후 다시 시도해주세요.
           </p>
@@ -134,13 +134,13 @@ export default function PgSignupEmailPage() {
       <div className="text-center space-y-2">
         <Link
           href="/signup"
-          className="block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+          className="block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
         >
           ← 역할 선택으로
         </Link>
         <Link
           href="/login"
-          className="block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+          className="block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
         >
           이미 계정이 있으세요? 로그인 →
         </Link>

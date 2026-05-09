@@ -24,10 +24,10 @@ export default async function RfqListPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-8 py-5 border-b border-[var(--color-hair)]">
+      <div className="flex items-center justify-between px-8 py-5 border-b border-[var(--md-sys-color-outline-variant)]">
         <div>
           <Label size="md" muted={false}>RFQ — 견적 요청</Label>
-          <h1 className="text-[20px] font-[700] tracking-[-0.02em] text-[var(--color-ink)] mt-1">
+          <h1 className="text-[20px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)] mt-1">
             견적 요청 목록
           </h1>
         </div>

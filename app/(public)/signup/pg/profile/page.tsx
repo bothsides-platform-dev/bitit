@@ -54,7 +54,7 @@ export default function PgProfilePage() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+        <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">
           프로필 설정
         </h2>
       </div>
@@ -62,7 +62,7 @@ export default function PgProfilePage() {
         <div className="space-y-1">
           <label
             htmlFor="name"
-            className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]"
+            className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--md-sys-color-on-surface-variant)]"
           >
             이름
           </label>
@@ -72,10 +72,10 @@ export default function PgProfilePage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             autoComplete="name"
-            className="block w-full bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-2 text-[14px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
+            className="block w-full bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors"
           />
           {errors.name && (
-            <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]">
+            <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]">
               {errors.name}
             </p>
           )}
@@ -98,7 +98,7 @@ export default function PgProfilePage() {
         <div className="space-y-1">
           <label
             htmlFor="phone"
-            className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]"
+            className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--md-sys-color-on-surface-variant)]"
           >
             휴대전화 <span className="opacity-50">(선택)</span>
           </label>
@@ -109,7 +109,7 @@ export default function PgProfilePage() {
             onChange={(e) => setPhone(e.target.value)}
             autoComplete="tel"
             placeholder="010-0000-0000"
-            className="block w-full bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-2 text-[14px] font-mono tabular-nums text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
+            className="block w-full bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] font-mono tabular-nums text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors"
           />
         </div>
         <Button type="submit" fullWidth size="lg">

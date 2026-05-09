@@ -62,10 +62,10 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
     <>
       <div>
         <Label size="md" muted={false} as="span" className="block mb-2">SETTINGS · MEMBERS</Label>
-        <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+        <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">
           멤버 관리
         </h1>
-        <p className="mt-2 text-[13px] text-[var(--color-ink-muted)]">
+        <p className="mt-2 text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
           {workspaceName} 워크스페이스의 멤버 {members.length}명
           {pendingInvites.length > 0 && ` · 초대 대기 ${pendingInvites.length}건`}
         </p>
@@ -75,27 +75,27 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
       <section>
         <div className="flex items-center gap-3 mb-4">
           <Label size="md" muted={false}>활성 멤버</Label>
-          <span className="font-mono tabular-nums text-[11px] text-[var(--color-ink-soft)]">
+          <span className="font-mono tabular-nums text-[11px] text-[var(--md-sys-color-on-surface-variant)]">
             {String(members.length).padStart(2, '0')}
           </span>
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
         </div>
-        <div className="divide-y divide-[var(--color-hair)] border-y border-[var(--color-hair)]">
+        <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-y border-[var(--md-sys-color-outline-variant)]">
           {members.map((m) => (
-            <div key={m.id} className="py-4 flex items-center gap-4 hover:bg-[var(--color-paper-warm)] -mx-4 px-4 transition-colors">
+            <div key={m.id} className="py-4 flex items-center gap-4 hover:bg-[var(--md-sys-color-surface-container-high)] -mx-4 px-4 transition-colors">
               <Avatar name={m.name} color="primary" size="md" />
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-[var(--color-ink)]">{m.name}</p>
-                <span className="font-mono text-[11px] text-[var(--color-ink-soft)] tabular-nums">{m.email}</span>
+                <p className="text-[13px] font-medium text-[var(--md-sys-color-on-surface)]">{m.name}</p>
+                <span className="font-mono text-[11px] text-[var(--md-sys-color-on-surface-variant)] tabular-nums">{m.email}</span>
               </div>
-              <span className="font-mono text-[10px] tabular-nums text-[var(--color-ink-faint)] hidden md:inline">
+              <span className="font-mono text-[10px] tabular-nums text-[var(--md-sys-color-outline)] hidden md:inline">
                 {m.lastSeenAt ? formatDate(m.lastSeenAt) : '—'}
               </span>
               <Chip label={m.role === 'admin' ? '관리자' : '구성원'} color={m.role === 'admin' ? 'primary' : 'surface'} />
               <button
                 type="button"
                 onClick={() => handleRoleToggle(m.id)}
-                className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] hover:text-[var(--color-ink)] transition-colors"
+                className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
               >
                 {m.role === 'admin' ? '→ 멤버' : '→ 관리자'}
               </button>
@@ -109,26 +109,26 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
         <section>
           <div className="flex items-center gap-3 mb-4">
             <Label size="md" muted={false}>초대 대기</Label>
-            <span className="font-mono tabular-nums text-[11px] text-[var(--color-amber)]">
+            <span className="font-mono tabular-nums text-[11px] text-[var(--md-sys-color-warning)]">
               {String(pendingInvites.length).padStart(2, '0')}
             </span>
-            <div className="flex-1 h-px bg-[var(--color-hair)]" />
+            <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
           </div>
-          <div className="divide-y divide-[var(--color-hair)] border-y border-[var(--color-hair)]">
+          <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-y border-[var(--md-sys-color-outline-variant)]">
             {pendingInvites.map((p, i) => (
               <div key={p.email} className="py-3 flex items-center gap-4">
-                <span className="font-mono text-[11px] tabular-nums text-[var(--color-ink-faint)] w-8">
+                <span className="font-mono text-[11px] tabular-nums text-[var(--md-sys-color-outline)] w-8">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <span className="font-mono text-[13px] tabular-nums text-[var(--color-ink)]">{p.email}</span>
+                  <span className="font-mono text-[13px] tabular-nums text-[var(--md-sys-color-on-surface)]">{p.email}</span>
                 </div>
                 <Chip label={p.role === 'admin' ? '관리자' : '구성원'} color={p.role === 'admin' ? 'primary' : 'surface'} />
                 <Chip label="대기중" color="warning" />
                 <button
                   type="button"
                   onClick={() => handleCancelInvite(p.email)}
-                  className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] hover:text-[var(--color-terracotta)] transition-colors"
+                  className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-error)] transition-colors"
                 >
                   취소
                 </button>
@@ -142,7 +142,7 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
       <section>
         <div className="flex items-center gap-3 mb-4">
           <Label size="md" muted={false}>멤버 초대</Label>
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
         </div>
         <form onSubmit={handleInvite} className="space-y-4">
           <div className="flex flex-col md:flex-row md:items-end gap-4">
@@ -153,7 +153,7 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 placeholder="member@company.com"
-                className="block w-full bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-2 text-[14px] font-mono tabular-nums text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
+                className="block w-full bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] font-mono tabular-nums text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors"
               />
             </div>
             <div className="space-y-1 md:w-32">
@@ -166,8 +166,8 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
                     onClick={() => setInviteRole(r)}
                     className={`flex-1 h-10 px-3 font-mono text-[11px] tracking-[0.1em] uppercase rounded-md transition-colors ${
                       inviteRole === r
-                        ? 'border border-[var(--color-ink)] text-[var(--color-ink)]'
-                        : 'border border-[var(--color-hair)] text-[var(--color-ink-soft)] hover:border-[var(--color-hair-strong)]'
+                        ? 'border border-[var(--md-sys-color-on-surface)] text-[var(--md-sys-color-on-surface)]'
+                        : 'border border-[var(--md-sys-color-outline-variant)] text-[var(--md-sys-color-on-surface-variant)] hover:border-[var(--md-sys-color-outline)]'
                     }`}
                   >
                     {r}
@@ -180,11 +180,11 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
             </Button>
           </div>
           {error && (
-            <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-terracotta)]">
+            <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-error)]">
               {error}
             </p>
           )}
-          <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+          <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
             초대 메일이 발송되며, 수락 후 멤버 목록에 추가됩니다.
           </p>
         </form>

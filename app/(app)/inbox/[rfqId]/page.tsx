@@ -44,11 +44,11 @@ export default async function InboxDetailPage({ params }: Props) {
     return (
       <div className="px-8 py-8">
         <RfqBriefPanel rfq={rfq} />
-        <div className="mt-10 border-t border-[var(--color-hair)] pt-8 space-y-4">
-          <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-moss)]">
+        <div className="mt-10 border-t border-[var(--md-sys-color-outline-variant)] pt-8 space-y-4">
+          <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--md-sys-color-tertiary)]">
             ✓ 견적 제출 완료
           </p>
-          <p className="text-[13px] text-[var(--color-ink-muted)]">
+          <p className="text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
             제출 시각:{' '}
             {myBid.submittedAt
               ? new Date(myBid.submittedAt).toLocaleString('ko-KR')
@@ -56,7 +56,7 @@ export default async function InboxDetailPage({ params }: Props) {
           </p>
           <Link
             href={`/inbox/${rfqId}/submitted`}
-            className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+            className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
           >
             제출 내역 보기 →
           </Link>
@@ -68,17 +68,17 @@ export default async function InboxDetailPage({ params }: Props) {
   return (
     <div className="px-8 py-8 grid grid-cols-[340px_1fr] gap-12">
       {/* Left: RFQ brief */}
-      <div className="border-r border-[var(--color-hair)] pr-10">
+      <div className="border-r border-[var(--md-sys-color-outline-variant)] pr-10">
         <RfqBriefPanel rfq={rfq} />
       </div>
 
       {/* Right: Bid form */}
       <div>
         <div className="mb-8">
-          <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+          <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
             정형 견적 입력
           </span>
-          <h2 className="text-[22px] font-[700] tracking-[-0.02em] text-[var(--color-ink)] mt-1">
+          <h2 className="text-[22px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)] mt-1">
             견적 작성
           </h2>
         </div>

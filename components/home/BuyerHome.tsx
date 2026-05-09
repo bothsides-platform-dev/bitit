@@ -17,7 +17,7 @@ export async function BuyerHome({ workspaceId }: { workspaceId: string }) {
   return (
     <PageEnter className="px-8 py-10">
       {/* KPI Strip */}
-      <div className="flex items-start gap-16 mb-12 pb-12 border-b border-[var(--color-hair)]">
+      <div className="flex items-start gap-16 mb-12 pb-12 border-b border-[var(--md-sys-color-outline-variant)]">
         <KpiCell label="전체 견적" value={String(rfqs.length)} />
         <KpiCell label="진행 중" value={String(sentRfqs.length)} />
         <KpiCell label="수주 완료" value={String(awardedRfqs.length)} />
@@ -27,7 +27,7 @@ export async function BuyerHome({ workspaceId }: { workspaceId: string }) {
       <section>
         <div className="flex items-center gap-3 mb-4">
           <Label size="md" muted={false}>진행 중인 견적</Label>
-          <span className="font-mono tabular-nums text-[11px] text-[var(--color-ink-soft)]">
+          <span className="font-mono tabular-nums text-[11px] text-[var(--md-sys-color-on-surface-variant)]">
             {sentRfqs.length}건
           </span>
         </div>
@@ -43,18 +43,18 @@ export async function BuyerHome({ workspaceId }: { workspaceId: string }) {
             }
           />
         ) : (
-          <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
+          <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-t border-[var(--md-sys-color-outline-variant)]">
             {sentRfqs.map((rfq) => (
               <Link
                 key={rfq.id}
                 href={`/rfq/${rfq.id}`}
-                className="relative py-4 flex items-center justify-between group hover:bg-[var(--color-paper-warm)] -mx-4 px-4 cursor-pointer transition-colors before:absolute before:left-0 before:top-0 before:bottom-0 before:w-2 before:bg-[var(--color-ink)] before:opacity-0 hover:before:opacity-100 before:transition-opacity"
+                className="relative py-4 flex items-center justify-between group hover:bg-[var(--md-sys-color-surface-container-high)] -mx-4 px-4 cursor-pointer transition-colors before:absolute before:left-0 before:top-0 before:bottom-0 before:w-2 before:bg-[var(--md-sys-color-on-surface)] before:opacity-0 hover:before:opacity-100 before:transition-opacity"
               >
                 <div>
-                  <p className="text-[13px] font-medium text-[var(--color-ink)]">
+                  <p className="text-[13px] font-medium text-[var(--md-sys-color-on-surface)]">
                     {rfq.title}
                   </p>
-                  <span className="font-mono text-[11px] text-[var(--color-ink-soft)] tabular-nums">
+                  <span className="font-mono text-[11px] text-[var(--md-sys-color-on-surface-variant)] tabular-nums">
                     {rfq.id} · {formatDate(rfq.sentAt ?? rfq.createdAt)}
                   </span>
                 </div>

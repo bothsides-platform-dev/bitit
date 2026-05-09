@@ -7,10 +7,10 @@ import { cn } from '@/lib/utils';
 
 const strengthColor = [
   '',
-  'bg-[var(--color-terracotta)]',
-  'bg-[var(--color-amber)]',
-  'bg-[var(--color-lavender)]',
-  'bg-[var(--color-moss)]',
+  'bg-[var(--md-sys-color-error)]',
+  'bg-[var(--md-sys-color-warning)]',
+  'bg-[var(--md-sys-color-on-surface-variant)]',
+  'bg-[var(--md-sys-color-tertiary)]',
 ] as const;
 
 type PasswordFieldProps = {
@@ -39,7 +39,7 @@ export function PasswordField({
 
   return (
     <div className="space-y-2">
-      <label className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
+      <label className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
         {label}
       </label>
       <div className="relative">
@@ -51,16 +51,16 @@ export function PasswordField({
           autoComplete={autoComplete}
           placeholder={placeholder}
           className={cn(
-            'block w-full bg-transparent border-0 border-b py-2 pr-10 text-[14px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none transition-colors',
+            'block w-full bg-transparent border-0 border-b py-2 pr-10 text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none transition-colors',
             error
-              ? 'border-[var(--color-terracotta)] focus:border-[var(--color-terracotta)]'
-              : 'border-[var(--color-hair-strong)] focus:border-[var(--color-ink)]',
+              ? 'border-[var(--md-sys-color-error)] focus:border-[var(--md-sys-color-error)]'
+              : 'border-[var(--md-sys-color-outline)] focus:border-[var(--md-sys-color-on-surface)]',
           )}
         />
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute right-0 top-2 text-[var(--color-ink-soft)] hover:text-[var(--color-ink)] transition-colors"
+          className="absolute right-0 top-2 text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
           aria-label={visible ? '비밀번호 숨기기' : '비밀번호 보기'}
         >
           {visible ? <EyeOff size={16} strokeWidth={1.4} /> : <Eye size={16} strokeWidth={1.4} />}
@@ -75,19 +75,19 @@ export function PasswordField({
                 key={bar}
                 className={cn(
                   'h-0.5 flex-1 transition-colors duration-[140ms]',
-                  bar <= strength ? strengthColor[strength] : 'bg-[var(--color-hair-strong)]',
+                  bar <= strength ? strengthColor[strength] : 'bg-[var(--md-sys-color-outline)]',
                 )}
               />
             ))}
           </div>
-          <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-ink-soft)]">
+          <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
             MIN 10 · A-Z · 0-9 · !@#
           </p>
         </div>
       )}
 
       {error && (
-        <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]">
+        <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]">
           {error}
         </p>
       )}

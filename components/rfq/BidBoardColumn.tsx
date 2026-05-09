@@ -54,29 +54,29 @@ export function BidBoardColumn({
       className={cn(
         'flex flex-col min-h-[200px] rounded-md transition-colors',
         isOver
-          ? 'bg-[var(--color-paper-warm)] outline outline-1 outline-dashed outline-[var(--color-hair-strong)]'
+          ? 'bg-[var(--md-sys-color-surface-container-high)] outline outline-1 outline-dashed outline-[var(--md-sys-color-outline)]'
           : 'bg-transparent',
       )}
     >
       {/* Column header */}
-      <div className="flex items-center justify-between gap-2 px-1 pb-3 mb-3 border-b border-[var(--color-hair)]">
+      <div className="flex items-center justify-between gap-2 px-1 pb-3 mb-3 border-b border-[var(--md-sys-color-outline-variant)]">
         <div className="flex items-center gap-2">
           <Chip label={BUYER_STAGE_LABEL[stage]} color={stageChipColor[stage]} />
-          <span className="font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)]">
+          <span className="font-mono text-[11px] tabular-nums text-[var(--md-sys-color-on-surface-variant)]">
             {String(bids.length).padStart(2, '0')}
           </span>
         </div>
         {showAwardCta && (
           <Link
             href={`/rfq/${rfqId}/award?bidId=${bids[0].id}`}
-            className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink)] hover:underline"
+            className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface)] hover:underline"
           >
             수주 처리 →
           </Link>
         )}
         {awardDisabled && (
           <span
-            className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)] cursor-help"
+            className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)] cursor-help"
             title="결정 카드 중 1개를 선택해 카드 메뉴에서 수주 처리하세요"
           >
             수주 처리 →
@@ -107,7 +107,7 @@ export function BidBoardColumn({
             />
           ))}
           {bids.length === 0 && (
-            <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)] py-6 text-center">
+            <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)] py-6 text-center">
               —
             </p>
           )}

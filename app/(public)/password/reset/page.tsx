@@ -20,7 +20,7 @@ function ResetContent() {
 
   if (!token) {
     return (
-      <p className="text-[13px] text-[var(--color-terracotta)] text-center">
+      <p className="text-[13px] text-[var(--md-sys-color-error)] text-center">
         잘못된 링크입니다.
       </p>
     );
@@ -60,9 +60,9 @@ function ResetContent() {
   if (done) {
     return (
       <div className="space-y-8 text-center">
-        <div className="flex justify-center text-[var(--color-moss)]"><CheckSvg size={64} /></div>
-        <p className="text-[14px] text-[var(--color-ink)]">비밀번호가 변경되었습니다.</p>
-        <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">LOADING…</p>
+        <div className="flex justify-center text-[var(--md-sys-color-tertiary)]"><CheckSvg size={64} /></div>
+        <p className="text-[14px] text-[var(--md-sys-color-on-surface)]">비밀번호가 변경되었습니다.</p>
+        <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">LOADING…</p>
       </div>
     );
   }
@@ -70,7 +70,7 @@ function ResetContent() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">새 비밀번호</h2>
+        <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">새 비밀번호</h2>
       </div>
       <form className="space-y-6" onSubmit={handleSubmit}>
         <PasswordField label="새 비밀번호" value={password} onChange={setPassword} showStrength />

@@ -75,7 +75,7 @@ export function BuyerWorkspaceForm({ onSubmit, submitting, error }: Props) {
           value={wsName}
           onChange={(e) => setWsName(e.target.value)}
           placeholder="(주)샘플테크"
-          className="block w-full bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-2 text-[14px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-ink)] transition-colors"
+          className="block w-full bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors"
         />
       </div>
 
@@ -90,11 +90,11 @@ export function BuyerWorkspaceForm({ onSubmit, submitting, error }: Props) {
               setGrade(null);
             }
           }}
-          className="mt-1 h-3 w-3 accent-[var(--color-ink)]"
+          className="mt-1 h-3 w-3 accent-[var(--md-sys-color-on-surface)]"
         />
-        <span className="text-[13px] leading-snug text-[var(--color-ink)]">
+        <span className="text-[13px] leading-snug text-[var(--md-sys-color-on-surface)]">
           사업자번호·등급 나중에 입력하기
-          <span className="block mt-0.5 font-mono text-[10px] tracking-[0.08em] uppercase text-[var(--color-ink-muted)]">
+          <span className="block mt-0.5 font-mono text-[10px] tracking-[0.08em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
             법인 미설립 사전 견적 또는 보완 예정 케이스. 설정에서 추후 추가 가능.
           </span>
         </span>
@@ -125,7 +125,7 @@ export function BuyerWorkspaceForm({ onSubmit, submitting, error }: Props) {
       {error && (
         <p
           role="alert"
-          className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]"
+          className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]"
         >
           {error}
         </p>

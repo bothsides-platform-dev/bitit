@@ -26,12 +26,12 @@ export default async function AwardPage({ params, searchParams }: Props) {
   if (!rfq || rfq.buyerWsId !== session.user.workspaceId) {
     return (
       <div className="px-8 py-8">
-        <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+        <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
           RFQ를 찾을 수 없습니다.
         </p>
         <Link
           href={`/rfq/${id}`}
-          className="mt-4 inline-block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+          className="mt-4 inline-block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
         >
           ← RFQ 상세로
         </Link>
@@ -47,12 +47,12 @@ export default async function AwardPage({ params, searchParams }: Props) {
   if (!selected) {
     return (
       <div className="px-8 py-8">
-        <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+        <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
           선택된 견적을 찾을 수 없습니다.
         </p>
         <Link
           href={`/rfq/${id}`}
-          className="mt-4 inline-block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+          className="mt-4 inline-block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
         >
           ← RFQ 상세로
         </Link>

@@ -25,7 +25,7 @@ export default async function RfqNewPage() {
   return (
     <div className="px-8 py-8 lg:h-full lg:flex lg:flex-col lg:overflow-hidden">
       <div className="mb-10 lg:flex-none">
-        <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+        <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">
           신규 견적 요청
         </h1>
       </div>

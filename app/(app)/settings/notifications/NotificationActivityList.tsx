@@ -30,7 +30,7 @@ export function NotificationActivityList({ items }: { items: Notification[] }) {
   if (items.length === 0) {
     return (
       <div className="py-16 text-center">
-        <p className="text-[13px] text-[var(--color-ink-muted)]">
+        <p className="text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
           아직 받은 알림이 없습니다.
         </p>
       </div>
@@ -38,7 +38,7 @@ export function NotificationActivityList({ items }: { items: Notification[] }) {
   }
 
   return (
-    <div className="divide-y divide-[var(--color-hair)] border-y border-[var(--color-hair)]">
+    <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-y border-[var(--md-sys-color-outline-variant)]">
       {items.map((n, i) => (
         <NotificationRow key={n.id} notif={n} indexFromEnd={items.length - i} />
       ))}
@@ -73,27 +73,27 @@ function NotificationRow({
 
   const body = (
     <>
-      <span className="font-mono text-[10px] tabular-nums text-[var(--color-ink-faint)] w-8 mt-0.5 shrink-0">
+      <span className="font-mono text-[10px] tabular-nums text-[var(--md-sys-color-outline)] w-8 mt-0.5 shrink-0">
         {String(indexFromEnd).padStart(3, '0')}
       </span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
+          <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
             {notif.type}
           </span>
         </div>
-        <p className={`text-[13px] font-medium ${isUnread ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-muted)]'}`}>
+        <p className={`text-[13px] font-medium ${isUnread ? 'text-[var(--md-sys-color-on-surface)]' : 'text-[var(--md-sys-color-on-surface-variant)]'}`}>
           {notif.title}
         </p>
-        <p className="text-[12px] text-[var(--color-ink-muted)] mt-0.5">
+        <p className="text-[12px] text-[var(--md-sys-color-on-surface-variant)] mt-0.5">
           {notif.body}
         </p>
         <div className="mt-2 flex items-center gap-3">
-          <span className="font-mono text-[10px] tabular-nums text-[var(--color-ink-faint)]">
+          <span className="font-mono text-[10px] tabular-nums text-[var(--md-sys-color-outline)]">
             {fmtDateTime(notif.createdAt)}
           </span>
           {notif.linkUrl && (
-            <span className="font-mono text-[10px] text-[var(--color-ink-faint)]">
+            <span className="font-mono text-[10px] text-[var(--md-sys-color-outline)]">
               → {notif.linkUrl}
             </span>
           )}
@@ -109,7 +109,7 @@ function NotificationRow({
               e.stopPropagation();
               markReadInPlace();
             }}
-            className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] hover:text-[var(--color-ink)] transition-colors disabled:opacity-50"
+            className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors disabled:opacity-50"
           >
             {pending ? '처리 중…' : '읽음 처리'}
           </button>
@@ -123,7 +123,7 @@ function NotificationRow({
       <button
         type="button"
         onClick={navigate}
-        className="w-full text-left py-4 px-2 -mx-2 flex items-start gap-4 hover:bg-[var(--color-paper-warm)] transition-colors"
+        className="w-full text-left py-4 px-2 -mx-2 flex items-start gap-4 hover:bg-[var(--md-sys-color-surface-container-high)] transition-colors"
       >
         {body}
       </button>

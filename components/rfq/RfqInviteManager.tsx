@@ -115,24 +115,24 @@ export function RfqInviteManager({
       <div>
         <div className="flex items-center gap-3 mb-3">
           <Label size="md" muted={false}>초대 PG</Label>
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
         </div>
         {invitations.length === 0 ? (
-          <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+          <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
             초대된 PG가 없습니다.
           </p>
         ) : (
-          <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
+          <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-t border-[var(--md-sys-color-outline-variant)]">
             {invitations.map((inv, i) => (
               <div
                 key={`${inv.email}-${i}`}
                 className="py-2 flex items-center justify-between gap-3"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="font-mono text-[10px] tabular-nums text-[var(--color-ink-faint)]">
+                  <span className="font-mono text-[10px] tabular-nums text-[var(--md-sys-color-outline)]">
                     {String(i + 1).padStart(2, '0')}
                   </span>
-                  <span className="text-[13px] text-[var(--color-ink)] truncate">
+                  <span className="text-[13px] text-[var(--md-sys-color-on-surface)] truncate">
                     {inv.email}
                   </span>
                 </div>
@@ -161,7 +161,7 @@ export function RfqInviteManager({
                   e.key === 'Enter' && (e.preventDefault(), handleAdd())
                 }
                 placeholder="sales@pg.com"
-                className="flex-1 bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-2 text-[14px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-ink)] transition-colors disabled:opacity-50"
+                className="flex-1 bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors disabled:opacity-50"
               />
               <Button
                 type="button"
@@ -174,11 +174,11 @@ export function RfqInviteManager({
               </Button>
             </div>
             {inputError && (
-              <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]">
+              <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]">
                 {inputError}
               </p>
             )}
-            <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+            <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
               추가된 PG는 [ 대기중 ] 상태로 누적되며, 아래 &ldquo;초대 발송&rdquo;을
               눌러야 메일이 나갑니다.
             </p>
@@ -206,14 +206,14 @@ export function RfqInviteManager({
           <div className="space-y-2">
             <div className="flex items-center gap-3 mb-1">
               <Label size="md" muted={false}>공유 링크</Label>
-              <div className="flex-1 h-px bg-[var(--color-hair)]" />
+              <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
             </div>
-            <div className="flex items-center gap-3 border border-[var(--color-hair)] rounded-md px-3 py-2">
+            <div className="flex items-center gap-3 border border-[var(--md-sys-color-outline-variant)] rounded-md px-3 py-2">
               <input
                 readOnly
                 value={shareUrl}
                 onFocus={(e) => e.currentTarget.select()}
-                className="flex-1 bg-transparent text-[12px] font-mono tabular-nums text-[var(--color-ink-muted)] focus:outline-none truncate"
+                className="flex-1 bg-transparent text-[12px] font-mono tabular-nums text-[var(--md-sys-color-on-surface-variant)] focus:outline-none truncate"
               />
               <Button
                 type="button"
@@ -224,7 +224,7 @@ export function RfqInviteManager({
                 복사
               </Button>
             </div>
-            <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+            <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
               초대된 PG 도메인의 이메일로 가입한 누구나 이 링크로 진입 가능합니다.
               마감일에 자동 만료됩니다.
             </p>

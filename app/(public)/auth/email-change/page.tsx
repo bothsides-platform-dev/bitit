@@ -32,16 +32,16 @@ function EmailChangeContent() {
   }, [token]);
 
   if (!token) {
-    return <p className="text-[13px] text-[var(--color-terracotta)] text-center">잘못된 링크입니다.</p>;
+    return <p className="text-[13px] text-[var(--md-sys-color-error)] text-center">잘못된 링크입니다.</p>;
   }
   if (state === 'loading') {
-    return <p className="font-mono text-[12px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)] text-center">LOADING…</p>;
+    return <p className="font-mono text-[12px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)] text-center">LOADING…</p>;
   }
   if (state === 'failed') {
     return (
       <div className="space-y-4 text-center">
-        <p className="text-[13px] text-[var(--color-terracotta)]">링크가 만료되었거나 이미 사용되었습니다.</p>
-        <Link href="/login" className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ink)]">
+        <p className="text-[13px] text-[var(--md-sys-color-error)]">링크가 만료되었거나 이미 사용되었습니다.</p>
+        <Link href="/login" className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--md-sys-color-on-surface)]">
           로그인 →
         </Link>
       </div>
@@ -49,9 +49,9 @@ function EmailChangeContent() {
   }
   return (
     <div className="space-y-6 text-center">
-      <div className="flex justify-center text-[var(--color-moss)]"><CheckSvg size={56} /></div>
-      <p className="text-[14px] text-[var(--color-ink)]">이메일이 변경되었습니다.</p>
-      <Link href="/login" className="block font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ink)]">로그인 →</Link>
+      <div className="flex justify-center text-[var(--md-sys-color-tertiary)]"><CheckSvg size={56} /></div>
+      <p className="text-[14px] text-[var(--md-sys-color-on-surface)]">이메일이 변경되었습니다.</p>
+      <Link href="/login" className="block font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--md-sys-color-on-surface)]">로그인 →</Link>
     </div>
   );
 }

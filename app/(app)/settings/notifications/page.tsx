@@ -28,10 +28,10 @@ export default async function NotificationsSettingsPage() {
     <PageEnter className="px-4 py-6 md:px-8 md:py-8 space-y-8">
       <div>
         <Label size="md" muted={false} as="span" className="block mb-2">SETTINGS · NOTIFICATIONS</Label>
-        <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+        <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">
           알림 활동
         </h1>
-        <p className="mt-2 text-[13px] text-[var(--color-ink-muted)]">
+        <p className="mt-2 text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
           받은 알림 기록입니다. 항목을 클릭하면 해당 공고로 이동합니다.
         </p>
       </div>
@@ -39,18 +39,18 @@ export default async function NotificationsSettingsPage() {
       <section>
         <div className="flex items-center gap-3 mb-4">
           <Label size="md" muted={false}>받은 알림</Label>
-          <span className="font-mono tabular-nums text-[11px] text-[var(--color-ink-soft)]">
+          <span className="font-mono tabular-nums text-[11px] text-[var(--md-sys-color-on-surface-variant)]">
             {String(notifications.length).padStart(3, '0')}건
             {unreadCount > 0 && (
               <>
-                <span className="mx-2 text-[var(--color-ink-faint)]">·</span>
-                <span className="text-[var(--color-terracotta)]">
+                <span className="mx-2 text-[var(--md-sys-color-outline)]">·</span>
+                <span className="text-[var(--md-sys-color-error)]">
                   미읽음 {String(unreadCount).padStart(3, '0')}
                 </span>
               </>
             )}
           </span>
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
           {unreadCount > 0 && <MarkAllReadButton />}
         </div>
 

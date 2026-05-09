@@ -39,22 +39,22 @@ export function RoleChooser({ onSelect }: Props) {
           type="button"
           onClick={() => onSelect(opt.role)}
           className={cn(
-            'group relative text-left px-5 py-5 border border-[var(--color-hair)]',
-            'hover:border-[var(--color-ink)] transition-colors rounded-md',
-            'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ink)]',
+            'group relative text-left px-5 py-5 border border-[var(--md-sys-color-outline-variant)]',
+            'hover:border-[var(--md-sys-color-on-surface)] transition-colors rounded-md',
+            'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--md-sys-color-on-surface)]',
           )}
         >
           <div className="flex items-baseline justify-between gap-2 mb-2">
-            <span className="text-[15px] font-[600] text-[var(--color-ink)]">
+            <span className="text-[15px] font-[600] text-[var(--md-sys-color-on-surface)]">
               {opt.title}
             </span>
-            <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-faint)]">
+            <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--md-sys-color-outline)]">
               <span className="opacity-50">[ </span>
               {opt.badge}
               <span className="opacity-50"> ]</span>
             </span>
           </div>
-          <p className="text-[12px] text-[var(--color-ink-muted)] leading-snug">
+          <p className="text-[12px] text-[var(--md-sys-color-on-surface-variant)] leading-snug">
             {opt.description}
           </p>
         </button>

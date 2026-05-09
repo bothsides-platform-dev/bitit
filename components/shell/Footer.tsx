@@ -3,8 +3,8 @@ export function Footer() {
 
   return (
     <footer
-      className="w-full border-t border-[var(--color-hair)]"
-      style={{ backgroundColor: 'var(--color-paper)' }}
+      className="w-full border-t border-[var(--md-sys-color-outline-variant)]"
+      style={{ backgroundColor: 'var(--md-sys-color-surface)' }}
     >
       <div className="max-w-[1200px] mx-auto px-8 py-10">
         {/* Top row: brand + nav */}
@@ -13,13 +13,13 @@ export function Footer() {
           <div className="flex flex-col gap-3">
             <span
               className="text-[11px] tracking-[0.18em] uppercase"
-              style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-ink-soft)' }}
+              style={{ fontFamily: 'var(--font-mono)', color: 'var(--md-sys-color-on-surface-variant)' }}
             >
               BIDIT CORP.
             </span>
             <p
               className="text-[13px] leading-relaxed max-w-[260px]"
-              style={{ fontFamily: 'var(--font-sans)', color: 'var(--color-ink-muted)' }}
+              style={{ fontFamily: 'var(--font-sans)', color: 'var(--md-sys-color-on-surface-variant)' }}
             >
               PG사 영업담당자와 구매사를 연결하는
               <br />
@@ -32,7 +32,7 @@ export function Footer() {
             <div className="flex flex-col gap-2">
               <span
                 className="text-[10px] tracking-[0.2em] uppercase mb-1"
-                style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-ink-faint)' }}
+                style={{ fontFamily: 'var(--font-mono)', color: 'var(--md-sys-color-outline)' }}
               >
                 서비스
               </span>
@@ -47,7 +47,7 @@ export function Footer() {
                   className="text-[13px] transition-opacity duration-150 hover:opacity-100"
                   style={{
                     fontFamily: 'var(--font-sans)',
-                    color: 'var(--color-ink-muted)',
+                    color: 'var(--md-sys-color-on-surface-variant)',
                     opacity: 0.8,
                   }}
                 >
@@ -58,7 +58,7 @@ export function Footer() {
             <div className="flex flex-col gap-2">
               <span
                 className="text-[10px] tracking-[0.2em] uppercase mb-1"
-                style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-ink-faint)' }}
+                style={{ fontFamily: 'var(--font-mono)', color: 'var(--md-sys-color-outline)' }}
               >
                 법적 고지
               </span>
@@ -73,7 +73,7 @@ export function Footer() {
                   className="text-[13px] transition-opacity duration-150 hover:opacity-100"
                   style={{
                     fontFamily: 'var(--font-sans)',
-                    color: 'var(--color-ink-muted)',
+                    color: 'var(--md-sys-color-on-surface-variant)',
                     opacity: 0.8,
                   }}
                 >
@@ -84,7 +84,7 @@ export function Footer() {
             <div className="flex flex-col gap-2">
               <span
                 className="text-[10px] tracking-[0.2em] uppercase mb-1"
-                style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-ink-faint)' }}
+                style={{ fontFamily: 'var(--font-mono)', color: 'var(--md-sys-color-outline)' }}
               >
                 고객지원
               </span>
@@ -98,7 +98,7 @@ export function Footer() {
                   className="text-[13px] transition-opacity duration-150 hover:opacity-100"
                   style={{
                     fontFamily: 'var(--font-sans)',
-                    color: 'var(--color-ink-muted)',
+                    color: 'var(--md-sys-color-on-surface-variant)',
                     opacity: 0.8,
                   }}
                 >
@@ -110,7 +110,7 @@ export function Footer() {
         </div>
 
         {/* Divider */}
-        <div className="mt-10 mb-6 border-t border-[var(--color-hair)]" />
+        <div className="mt-10 mb-6 border-t border-[var(--md-sys-color-outline-variant)]" />
 
         {/* Bottom row: business info + copyright */}
         <div className="flex flex-col gap-4">
@@ -118,13 +118,13 @@ export function Footer() {
           <div className="flex items-center justify-between">
             <span
               className="text-[11px]"
-              style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-ink-faint)' }}
+              style={{ fontFamily: 'var(--font-mono)', color: 'var(--md-sys-color-outline)' }}
             >
               © {year} BIDIT CORP. ALL RIGHTS RESERVED.
             </span>
             <span
               className="text-[10px] tracking-[0.15em]"
-              style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-ink-faint)', opacity: 0.6 }}
+              style={{ fontFamily: 'var(--font-mono)', color: 'var(--md-sys-color-outline)', opacity: 0.6 }}
             >
               ISSUE №&thinsp;001 · v0
             </span>

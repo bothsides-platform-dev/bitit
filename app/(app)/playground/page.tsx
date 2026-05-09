@@ -30,7 +30,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     <section className="space-y-4">
       <div className="flex items-center gap-3">
         <Label size="md" muted={false}>{title}</Label>
-        <div className="flex-1 h-px bg-[var(--color-hair)]" />
+        <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
       </div>
       {children}
     </section>
@@ -44,10 +44,10 @@ export default function PlaygroundPage() {
   return (
     <div className="px-8 py-10 max-w-[960px] space-y-14">
       <div>
-        <h1 className="text-[36px] font-[800] tracking-[-0.034em] text-[var(--color-ink)]">
+        <h1 className="text-[36px] font-[800] tracking-[-0.034em] text-[var(--md-sys-color-on-surface)]">
           컴포넌트 쇼케이스
         </h1>
-        <p className="text-[13px] text-[var(--color-ink-muted)] mt-2">M1 — 공통 컴포넌트 12종</p>
+        <p className="text-[13px] text-[var(--md-sys-color-on-surface-variant)] mt-2">M1 — 공통 컴포넌트 12종</p>
       </div>
 
       {/* 1. Chip (was Tag) */}
@@ -128,7 +128,7 @@ export default function PlaygroundPage() {
           active={activeTab}
           onChange={setActiveTab}
         />
-        <p className="text-[12px] text-[var(--color-ink-soft)] px-1">활성 탭: {activeTab}</p>
+        <p className="text-[12px] text-[var(--md-sys-color-on-surface-variant)] px-1">활성 탭: {activeTab}</p>
       </Section>
 
       {/* 8. Label */}
@@ -157,7 +157,7 @@ export default function PlaygroundPage() {
 
       {/* 10. EmptyState */}
       <Section title="10 · EMPTY STATE">
-        <div className="border border-[var(--color-hair)] rounded-md">
+        <div className="border border-[var(--md-sys-color-outline-variant)] rounded-md">
           <EmptyState
             icon={<FileTextIcon size={28} />}
             title="데이터가 없습니다."
@@ -170,7 +170,7 @@ export default function PlaygroundPage() {
       {/* 11. DataTable */}
       <Section title="11 · DATA TABLE — 헤어라인 테이블">
         <DataTable columns={COLS} data={ROWS} onRowClick={(r) => alert(r.id)} />
-        <p className="text-[11px] text-[var(--color-ink-soft)] font-mono mt-2">
+        <p className="text-[11px] text-[var(--md-sys-color-on-surface-variant)] font-mono mt-2">
           ← 행 클릭 시 마커 + warm 배경
         </p>
       </Section>
@@ -181,7 +181,7 @@ export default function PlaygroundPage() {
           <Chip label="admin 이상 — 보임" color="tertiary" />
           <Chip label="member 전용 영역 — admin은 숨김" color="surface" />
         </div>
-        <p className="text-[12px] text-[var(--color-ink-soft)]">
+        <p className="text-[12px] text-[var(--md-sys-color-on-surface-variant)]">
           {'<PermissionGate role="member" requiredRole="admin">'}로 감싸면 member에게 hidden
         </p>
       </Section>

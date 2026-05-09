@@ -47,12 +47,12 @@ export default async function InboxSubmittedPage({ params }: Props) {
   if (!bid) {
     return (
       <div className="px-8 py-8">
-        <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+        <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
           제출된 견적이 없습니다.
         </p>
         <Link
           href={`/inbox/${rfqId}`}
-          className="mt-4 block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+          className="mt-4 block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
         >
           ← 견적 작성으로
         </Link>
@@ -66,17 +66,17 @@ export default async function InboxSubmittedPage({ params }: Props) {
     <div className="px-8 py-8 space-y-10">
       {/* Status */}
       <div>
-        <p className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-moss)] mb-3">
+        <p className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--md-sys-color-tertiary)] mb-3">
           ✓ 제출 완료
         </p>
-        <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+        <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">
           견적이 제출되었습니다
         </h1>
-        <p className="mt-2 text-[13px] text-[var(--color-ink-muted)]">
+        <p className="mt-2 text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
           구매사가 마감일까지 비교·검토 후 결과를 알립니다.
         </p>
         {bid.submittedAt && (
-          <p className="mt-1 font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)]">
+          <p className="mt-1 font-mono text-[11px] tabular-nums text-[var(--md-sys-color-on-surface-variant)]">
             제출 {new Date(bid.submittedAt).toLocaleString('ko-KR')}
           </p>
         )}
@@ -85,10 +85,10 @@ export default async function InboxSubmittedPage({ params }: Props) {
       {/* RFQ summary */}
       <div>
         <div className="flex items-center gap-3 mb-3">
-          <span className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">견적 요청</span>
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+          <span className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--md-sys-color-on-surface-variant)]">견적 요청</span>
+          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
         </div>
-        <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
+        <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-t border-[var(--md-sys-color-outline-variant)]">
           {[
             ['RFQ', rfq.id],
             ['제목', rfq.title],
@@ -96,8 +96,8 @@ export default async function InboxSubmittedPage({ params }: Props) {
             ['마감', formatDate(rfq.deadline)],
           ].map(([label, value]) => (
             <div key={label} className="py-2.5 flex items-baseline justify-between">
-              <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">{label}</span>
-              <span className="text-[13px] text-[var(--color-ink)]">{value}</span>
+              <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">{label}</span>
+              <span className="text-[13px] text-[var(--md-sys-color-on-surface)]">{value}</span>
             </div>
           ))}
         </div>
@@ -106,10 +106,10 @@ export default async function InboxSubmittedPage({ params }: Props) {
       {/* Bid summary */}
       <div>
         <div className="flex items-center gap-3 mb-3">
-          <span className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">제출 견적</span>
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+          <span className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--md-sys-color-on-surface-variant)]">제출 견적</span>
+          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
         </div>
-        <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
+        <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-t border-[var(--md-sys-color-outline-variant)]">
           {[
             ['정산 주기', SETTLE_LABEL[bid.settleCycle] ?? bid.settleCycle],
             ['보증금', formatKRW(bid.deposit)],
@@ -119,8 +119,8 @@ export default async function InboxSubmittedPage({ params }: Props) {
             ['간편결제', formatPct(bid.easyPayFeePct)],
           ].map(([label, value]) => (
             <div key={label} className="py-2.5 flex items-baseline justify-between">
-              <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">{label}</span>
-              <span className="font-mono text-[13px] tabular-nums text-[var(--color-ink)]">{value}</span>
+              <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">{label}</span>
+              <span className="font-mono text-[13px] tabular-nums text-[var(--md-sys-color-on-surface)]">{value}</span>
             </div>
           ))}
         </div>
@@ -129,7 +129,7 @@ export default async function InboxSubmittedPage({ params }: Props) {
       <div className="space-y-3">
         <Link
           href="/inbox"
-          className="block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+          className="block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
         >
           ← 수신함으로
         </Link>

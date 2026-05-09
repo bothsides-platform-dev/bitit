@@ -24,14 +24,14 @@ const EASE_OUT = [0.16, 1, 0.3, 1] as const;
 function StatusBadge({ status }: { status: BidStatus }) {
   if (status === 'waiting') {
     return (
-      <span className="font-mono text-[var(--text-xs)] tracking-[0.08em] text-[var(--color-ink-faint)]">
+      <span className="font-mono text-[var(--text-xs)] tracking-[0.08em] text-[var(--md-sys-color-outline)]">
         [ 대기 ]
       </span>
     );
   }
   if (status === 'typing') {
     return (
-      <span className="font-mono text-[var(--text-xs)] tracking-[0.08em] text-[var(--color-amber)] inline-flex items-baseline">
+      <span className="font-mono text-[var(--text-xs)] tracking-[0.08em] text-[var(--md-sys-color-warning)] inline-flex items-baseline">
         [ 응답중
         <span className="dot-1">.</span>
         <span className="dot-2">.</span>
@@ -41,7 +41,7 @@ function StatusBadge({ status }: { status: BidStatus }) {
     );
   }
   return (
-    <span className="font-mono text-[var(--text-xs)] tracking-[0.08em] text-[var(--color-moss)]">
+    <span className="font-mono text-[var(--text-xs)] tracking-[0.08em] text-[var(--md-sys-color-tertiary)]">
       [ 제출완료 ]
     </span>
   );
@@ -85,7 +85,7 @@ export function LiveBidSimulation() {
   const allDone = statuses.every(s => s === 'done');
 
   return (
-    <section ref={containerRef} className="py-[var(--s-11)] px-8 border-t border-b border-[var(--color-hair)]">
+    <section ref={containerRef} className="py-[var(--s-11)] px-8 border-t border-b border-[var(--md-sys-color-outline-variant)]">
       <style>{`
         @keyframes dot-fade {
           0%, 100% { opacity: 0.15; }
@@ -105,7 +105,7 @@ export function LiveBidSimulation() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.36, ease: EASE_OUT }}
-            className="text-[clamp(22px,3vw,40px)] leading-[1.1] tracking-[-0.022em] font-medium text-[var(--color-ink)]"
+            className="text-[clamp(22px,3vw,40px)] leading-[1.1] tracking-[-0.022em] font-medium text-[var(--md-sys-color-on-surface)]"
           >
             3개 PG사가<br />동시에 응답합니다.
           </motion.h2>
@@ -117,37 +117,37 @@ export function LiveBidSimulation() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.36, ease: EASE_OUT }}
-          className="border border-[var(--color-hair-strong)] rounded-md p-[var(--s-5)]"
+          className="border border-[var(--md-sys-color-outline)] rounded-md p-[var(--s-5)]"
         >
           <div className="flex flex-wrap items-baseline gap-x-[var(--s-7)] gap-y-[var(--s-2)]">
-            <span className="font-mono text-[var(--text-2xs)] tracking-[0.18em] uppercase text-[var(--color-ink-soft)]">
+            <span className="font-mono text-[var(--text-2xs)] tracking-[0.18em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
               RFQ № 042
             </span>
-            <span className="font-mono text-[var(--text-xs)] tracking-[0.06em] text-[var(--color-ink-muted)]">
+            <span className="font-mono text-[var(--text-xs)] tracking-[0.06em] text-[var(--md-sys-color-on-surface-variant)]">
               연 거래액{' '}
-              <span className="tabular-nums text-[var(--color-ink)]">100억</span>
+              <span className="tabular-nums text-[var(--md-sys-color-on-surface)]">100억</span>
             </span>
-            <span className="font-mono text-[var(--text-xs)] tracking-[0.06em] text-[var(--color-ink-muted)]">
-              업종 <span className="text-[var(--color-ink)]">이커머스</span>
+            <span className="font-mono text-[var(--text-xs)] tracking-[0.06em] text-[var(--md-sys-color-on-surface-variant)]">
+              업종 <span className="text-[var(--md-sys-color-on-surface)]">이커머스</span>
             </span>
-            <span className="font-mono text-[var(--text-xs)] tracking-[0.06em] text-[var(--color-ink-muted)]">
-              등급 <span className="text-[var(--color-ink)]">일반</span>
+            <span className="font-mono text-[var(--text-xs)] tracking-[0.06em] text-[var(--md-sys-color-on-surface-variant)]">
+              등급 <span className="text-[var(--md-sys-color-on-surface)]">일반</span>
             </span>
-            <span className="font-mono text-[var(--text-xs)] tracking-[0.06em] text-[var(--color-ink-muted)]">
+            <span className="font-mono text-[var(--text-xs)] tracking-[0.06em] text-[var(--md-sys-color-on-surface-variant)]">
               초대 PG사{' '}
-              <span className="tabular-nums text-[var(--color-ink)]">3개사</span>
+              <span className="tabular-nums text-[var(--md-sys-color-on-surface)]">3개사</span>
             </span>
           </div>
         </motion.div>
 
         {/* Bid table */}
         <div className="overflow-x-auto -mx-8 px-8 md:mx-0 md:px-0">
-          <div className="min-w-[560px] border border-[var(--color-hair-strong)] rounded-md overflow-hidden">
+          <div className="min-w-[560px] border border-[var(--md-sys-color-outline)] rounded-md overflow-hidden">
 
             {/* Column header */}
-            <div className="grid grid-cols-[2fr_1.4fr_1fr_1fr_1fr] border-b border-[var(--color-hair-strong)] px-[var(--s-5)] py-[var(--s-3)] bg-[var(--color-paper-warm)]">
+            <div className="grid grid-cols-[2fr_1.4fr_1fr_1fr_1fr] border-b border-[var(--md-sys-color-outline)] px-[var(--s-5)] py-[var(--s-3)] bg-[var(--md-sys-color-surface-container-high)]">
               {['PG사', '상태', '카드수수료', '정산주기', '보증금'].map(h => (
-                <span key={h} className="font-mono text-[var(--text-2xs)] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+                <span key={h} className="font-mono text-[var(--text-2xs)] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
                   {h}
                 </span>
               ))}
@@ -165,25 +165,25 @@ export function LiveBidSimulation() {
                   className={[
                     'relative grid grid-cols-[2fr_1.4fr_1fr_1fr_1fr]',
                     'px-[var(--s-5)] py-[var(--s-5)]',
-                    'border-b border-[var(--color-hair)] last:border-b-0',
-                    isBest ? 'bg-[var(--color-paper-warm)]' : '',
+                    'border-b border-[var(--md-sys-color-outline-variant)] last:border-b-0',
+                    isBest ? 'bg-[var(--md-sys-color-surface-container-high)]' : '',
                   ].filter(Boolean).join(' ')}
                   style={{
                     transition: 'background-color 420ms ease',
                   }}
                 >
                   {isBest && (
-                    <span className="absolute left-0 top-0 bottom-0 w-0.5 bg-[var(--color-moss)]" />
+                    <span className="absolute left-0 top-0 bottom-0 w-0.5 bg-[var(--md-sys-color-tertiary)]" />
                   )}
 
                   {/* PG name */}
                   <span className={[
                     'font-mono text-[var(--text-base)] tracking-[-0.01em]',
-                    isBest ? 'text-[var(--color-moss)]' : 'text-[var(--color-ink)]',
+                    isBest ? 'text-[var(--md-sys-color-tertiary)]' : 'text-[var(--md-sys-color-on-surface)]',
                   ].join(' ')}>
                     {pg.name}
                     {isBest && (
-                      <span className="ml-2 text-[var(--text-2xs)] tracking-[0.12em] uppercase text-[var(--color-moss)]">
+                      <span className="ml-2 text-[var(--text-2xs)] tracking-[0.12em] uppercase text-[var(--md-sys-color-tertiary)]">
                         최저가
                       </span>
                     )}
@@ -200,7 +200,7 @@ export function LiveBidSimulation() {
                   ] as const).map(({ key, value }) => (
                     <span
                       key={key}
-                      className="font-mono tabular-nums text-[var(--text-base)] text-[var(--color-ink)] tracking-[-0.01em]"
+                      className="font-mono tabular-nums text-[var(--text-base)] text-[var(--md-sys-color-on-surface)] tracking-[-0.01em]"
                     >
                       {revealed ? (
                         <motion.span
@@ -211,7 +211,7 @@ export function LiveBidSimulation() {
                           {value}
                         </motion.span>
                       ) : (
-                        <span className="text-[var(--color-hair-strong)]">—</span>
+                        <span className="text-[var(--md-sys-color-outline)]">—</span>
                       )}
                     </span>
                   ))}
@@ -225,13 +225,13 @@ export function LiveBidSimulation() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.4, delay: 0.5, ease: EASE_OUT }}
-                className="px-[var(--s-5)] py-[var(--s-4)] border-t border-[var(--color-hair-strong)] bg-[var(--color-paper-warm)]"
+                className="px-[var(--s-5)] py-[var(--s-4)] border-t border-[var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)]"
               >
-                <span className="font-mono text-[var(--text-xs)] tracking-[0.06em] text-[var(--color-ink-soft)] leading-relaxed">
+                <span className="font-mono text-[var(--text-xs)] tracking-[0.06em] text-[var(--md-sys-color-on-surface-variant)] leading-relaxed">
                   총 3개사 응답 완료 — 최저 카드수수료{' '}
-                  <span className="text-[var(--color-moss)] tabular-nums">1.85%</span>
+                  <span className="text-[var(--md-sys-color-tertiary)] tabular-nums">1.85%</span>
                   {' '}(최고 대비 연간{' '}
-                  <span className="text-[var(--color-moss)] tabular-nums">2,500만원</span>{' '}
+                  <span className="text-[var(--md-sys-color-tertiary)] tabular-nums">2,500만원</span>{' '}
                   절감 가능)
                 </span>
               </motion.div>
@@ -248,7 +248,7 @@ export function LiveBidSimulation() {
           >
             <button
               onClick={runSequence}
-              className="font-mono text-[var(--text-2xs)] tracking-[0.14em] uppercase text-[var(--color-ink-faint)] hover:text-[var(--color-ink-muted)] transition-colors duration-[140ms]"
+              className="font-mono text-[var(--text-2xs)] tracking-[0.14em] uppercase text-[var(--md-sys-color-outline)] hover:text-[var(--md-sys-color-on-surface-variant)] transition-colors duration-[140ms]"
             >
               ↺ 다시 보기
             </button>

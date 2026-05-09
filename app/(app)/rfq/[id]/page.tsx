@@ -49,7 +49,7 @@ export default async function RfqDetailPage({ params }: Props) {
   if (!rfq || rfq.buyerWsId !== session.user.workspaceId) {
     return (
       <div className="px-8 py-8">
-        <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+        <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
           RFQ를 찾을 수 없습니다.
         </p>
       </div>
@@ -102,11 +102,11 @@ export default async function RfqDetailPage({ params }: Props) {
     <PageEnter className="px-8 py-8 space-y-10">
       {/* Header */}
       <div>
-        <span className="font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)]">
+        <span className="font-mono text-[11px] tabular-nums text-[var(--md-sys-color-on-surface-variant)]">
           {rfq.id}
         </span>
         <div className="flex items-start justify-between mt-1 gap-4">
-          <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+          <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">
             {rfq.title}
           </h1>
           <div className="flex items-center gap-3 shrink-0">
@@ -120,9 +120,9 @@ export default async function RfqDetailPage({ params }: Props) {
         </div>
         <div className="flex items-center gap-4 mt-2">
           <Label size="md" muted={false}>마감 {formatDate(rfq.deadline)}</Label>
-          <span className="text-[var(--color-hair-strong)]">·</span>
+          <span className="text-[var(--md-sys-color-outline)]">·</span>
           <Label size="md" muted={false}>PG {rfq.allowedPgEmails.length}개사</Label>
-          <span className="text-[var(--color-hair-strong)]">·</span>
+          <span className="text-[var(--md-sys-color-outline)]">·</span>
           <Label size="md" muted={false}>받은 견적 {rfqBids.length}건</Label>
         </div>
       </div>
@@ -130,10 +130,10 @@ export default async function RfqDetailPage({ params }: Props) {
       {/* Comparison table */}
       <section>
         <div className="flex items-center gap-3 mb-4">
-          <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+          <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
             견적 비교
           </span>
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
         </div>
         <BidComparisonView
           rfqId={id}
@@ -148,14 +148,14 @@ export default async function RfqDetailPage({ params }: Props) {
       </section>
 
       {/* Meta sidebar */}
-      <div className="grid grid-cols-2 gap-10 border-t border-[var(--color-hair)] pt-8">
+      <div className="grid grid-cols-2 gap-10 border-t border-[var(--md-sys-color-outline-variant)] pt-8">
         {/* Biz info */}
         <section>
           <div className="flex items-center gap-3 mb-3">
             <Label size="md" muted={false}>사업자 정보</Label>
-            <div className="flex-1 h-px bg-[var(--color-hair)]" />
+            <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
           </div>
-          <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
+          <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-t border-[var(--md-sys-color-outline-variant)]">
             {[
               ['상호명', companyName],
               ['사업자번호', bizProfile?.bizNo ?? '미입력'],
@@ -175,10 +175,10 @@ export default async function RfqDetailPage({ params }: Props) {
                 key={label}
                 className="py-2 flex items-baseline justify-between"
               >
-                <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
+                <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
                   {label}
                 </span>
-                <span className="text-[13px] text-[var(--color-ink)]">{value}</span>
+                <span className="text-[13px] text-[var(--md-sys-color-on-surface)]">{value}</span>
               </div>
             ))}
           </div>
@@ -196,9 +196,9 @@ export default async function RfqDetailPage({ params }: Props) {
             <div>
               <div className="flex items-center gap-3 mb-3">
                 <Label size="md" muted={false}>메모</Label>
-                <div className="flex-1 h-px bg-[var(--color-hair)]" />
+                <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
               </div>
-              <p className="text-[13px] text-[var(--color-ink-muted)] leading-relaxed whitespace-pre-wrap">
+              <p className="text-[13px] text-[var(--md-sys-color-on-surface-variant)] leading-relaxed whitespace-pre-wrap">
                 {rfq.memo}
               </p>
             </div>

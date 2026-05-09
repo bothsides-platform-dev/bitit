@@ -16,9 +16,9 @@ const stageLabel: Record<'won' | 'lost' | 'pending', string> = {
 };
 
 const stageColor: Record<'won' | 'lost' | 'pending', string> = {
-  won: 'text-[var(--color-moss)]',
-  lost: 'text-[var(--color-ink-soft)]',
-  pending: 'text-[var(--color-ink-muted)]',
+  won: 'text-[var(--md-sys-color-tertiary)]',
+  lost: 'text-[var(--md-sys-color-on-surface-variant)]',
+  pending: 'text-[var(--md-sys-color-on-surface-variant)]',
 };
 
 export async function PgHome({
@@ -39,7 +39,7 @@ export async function PgHome({
   return (
     <PageEnter className="px-8 py-10">
       {/* KPI Strip */}
-      <div className="flex items-start gap-16 mb-12 pb-12 border-b border-[var(--color-hair)]">
+      <div className="flex items-start gap-16 mb-12 pb-12 border-b border-[var(--md-sys-color-outline-variant)]">
         <KpiCell label="전체 수신" value={String(kpi.total)} />
         <KpiCell label="응답 대기" value={String(kpi.pending)} />
         <KpiCell label="제출 완료" value={String(kpi.submitted)} />
@@ -52,7 +52,7 @@ export async function PgHome({
         <section>
           <div className="flex items-center gap-2 mb-3">
             <Label size="md" muted={false}>응답 대기</Label>
-            <span className="font-mono tabular-nums text-[11px] text-[var(--color-ink-soft)]">
+            <span className="font-mono tabular-nums text-[11px] text-[var(--md-sys-color-on-surface-variant)]">
               {kpi.pending}건
             </span>
           </div>
@@ -63,7 +63,7 @@ export async function PgHome({
               description="구매사가 초대한 RFQ가 /inbox에 표시됩니다."
             />
           ) : (
-            <div className="border-t border-[var(--color-hair)]">
+            <div className="border-t border-[var(--md-sys-color-outline-variant)]">
               {pendingPairs.map((p) => {
                 const dday = formatDeadline(p.rfq.deadline);
                 const urgent =
@@ -76,21 +76,21 @@ export async function PgHome({
                   <Link
                     key={p.invitation.id}
                     href={`/inbox/${p.rfq.id}`}
-                    className="relative flex items-center justify-between py-3 border-b border-[var(--color-hair)] hover:bg-[var(--color-paper-warm)] -mx-4 px-4 transition-colors before:absolute before:left-0 before:top-0 before:bottom-0 before:w-2 before:bg-[var(--color-ink)] before:opacity-0 hover:before:opacity-100 before:transition-opacity"
+                    className="relative flex items-center justify-between py-3 border-b border-[var(--md-sys-color-outline-variant)] hover:bg-[var(--md-sys-color-surface-container-high)] -mx-4 px-4 transition-colors before:absolute before:left-0 before:top-0 before:bottom-0 before:w-2 before:bg-[var(--md-sys-color-on-surface)] before:opacity-0 hover:before:opacity-100 before:transition-opacity"
                   >
                     <div>
-                      <p className="text-[13px] font-medium text-[var(--color-ink)]">
+                      <p className="text-[13px] font-medium text-[var(--md-sys-color-on-surface)]">
                         {p.rfq.title}
                       </p>
-                      <span className="font-mono text-[11px] text-[var(--color-ink-soft)] tabular-nums">
+                      <span className="font-mono text-[11px] text-[var(--md-sys-color-on-surface-variant)] tabular-nums">
                         {p.rfq.id} · {grade}
                       </span>
                     </div>
                     <span
                       className={`font-mono text-[11px] tabular-nums font-medium ${
                         urgent
-                          ? 'text-[var(--color-terracotta)]'
-                          : 'text-[var(--color-ink-muted)]'
+                          ? 'text-[var(--md-sys-color-error)]'
+                          : 'text-[var(--md-sys-color-on-surface-variant)]'
                       }`}
                     >
                       {dday}
@@ -106,7 +106,7 @@ export async function PgHome({
         <section>
           <div className="flex items-center gap-2 mb-3">
             <Label size="md" muted={false}>최근 제출</Label>
-            <span className="font-mono tabular-nums text-[11px] text-[var(--color-ink-soft)]">
+            <span className="font-mono tabular-nums text-[11px] text-[var(--md-sys-color-on-surface-variant)]">
               최근 3건
             </span>
           </div>
@@ -116,18 +116,18 @@ export async function PgHome({
               title="제출한 견적이 없습니다."
             />
           ) : (
-            <div className="border-t border-[var(--color-hair)]">
+            <div className="border-t border-[var(--md-sys-color-outline-variant)]">
               {recentBids.map(({ bid, rfqTitle, stage }) => (
                 <Link
                   key={bid.id}
                   href={`/inbox/${bid.rfqId}`}
-                  className="relative flex items-center justify-between py-3 border-b border-[var(--color-hair)] hover:bg-[var(--color-paper-warm)] -mx-4 px-4 transition-colors before:absolute before:left-0 before:top-0 before:bottom-0 before:w-2 before:bg-[var(--color-ink)] before:opacity-0 hover:before:opacity-100 before:transition-opacity"
+                  className="relative flex items-center justify-between py-3 border-b border-[var(--md-sys-color-outline-variant)] hover:bg-[var(--md-sys-color-surface-container-high)] -mx-4 px-4 transition-colors before:absolute before:left-0 before:top-0 before:bottom-0 before:w-2 before:bg-[var(--md-sys-color-on-surface)] before:opacity-0 hover:before:opacity-100 before:transition-opacity"
                 >
                   <div>
-                    <p className="text-[13px] font-medium text-[var(--color-ink)]">
+                    <p className="text-[13px] font-medium text-[var(--md-sys-color-on-surface)]">
                       {rfqTitle}
                     </p>
-                    <span className="font-mono text-[11px] text-[var(--color-ink-soft)] tabular-nums">
+                    <span className="font-mono text-[11px] text-[var(--md-sys-color-on-surface-variant)] tabular-nums">
                       {bid.rfqId} · {formatDate(bid.submittedAt!)}
                     </span>
                   </div>

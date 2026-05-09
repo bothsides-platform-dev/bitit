@@ -75,10 +75,10 @@ export default function PgWorkspacePage() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+        <h2 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">
           워크스페이스에 합류합니다
         </h2>
-        <p className="mt-2 text-[13px] text-[var(--color-ink-muted)]">
+        <p className="mt-2 text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
           이메일 도메인으로 PG 워크스페이스가 자동 연결됩니다.
         </p>
       </div>

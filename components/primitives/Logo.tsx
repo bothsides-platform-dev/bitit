@@ -16,7 +16,7 @@ export function Logo({ variant = 'default', className }: LogoProps) {
         aria-label="bidit 홈"
         className={cn(
           'group flex items-center justify-center',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-paper)]',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--md-sys-color-surface)]',
           'rounded-md',
           className,
         )}
@@ -30,11 +30,11 @@ export function Logo({ variant = 'default', className }: LogoProps) {
           xmlns="http://www.w3.org/2000/svg"
           className="opacity-[0.82] group-hover:opacity-100 transition-opacity duration-[140ms]"
         >
-          <rect width="32" height="32" rx="6" fill="var(--color-paper)" />
-          <rect x="5.5" y="5" width="4.5" height="22" rx="2.25" fill="var(--color-ink)" />
-          <circle cx="21" cy="16" r="9" fill="var(--color-ink)" />
+          <rect width="32" height="32" rx="6" fill="var(--md-sys-color-surface)" />
+          <rect x="5.5" y="5" width="4.5" height="22" rx="2.25" fill="var(--md-sys-color-on-surface)" />
+          <circle cx="21" cy="16" r="9" fill="var(--md-sys-color-on-surface)" />
           {/* paper gap separates bar from circle */}
-          <rect x="10" y="0" width="3" height="32" fill="var(--color-paper)" />
+          <rect x="10" y="0" width="3" height="32" fill="var(--md-sys-color-surface)" />
         </svg>
       </Link>
     )
@@ -47,7 +47,7 @@ export function Logo({ variant = 'default', className }: LogoProps) {
       className={cn(
         'group inline-flex items-center gap-3',
         'opacity-100 hover:opacity-70 transition-opacity duration-[140ms]',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-ink)]',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--md-sys-color-on-surface)]',
         'rounded-md',
         className,
       )}
@@ -60,10 +60,10 @@ export function Logo({ variant = 'default', className }: LogoProps) {
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <rect x="5.5" y="5" width="4.5" height="22" rx="2.25" fill="var(--color-ink)" />
-        <circle cx="21" cy="16" r="9" fill="var(--color-ink)" />
+        <rect x="5.5" y="5" width="4.5" height="22" rx="2.25" fill="var(--md-sys-color-on-surface)" />
+        <circle cx="21" cy="16" r="9" fill="var(--md-sys-color-on-surface)" />
       </svg>
-      <span className="font-sans font-extrabold text-[22px] leading-none tracking-[-0.04em] text-[var(--color-ink)]">
+      <span className="font-sans font-extrabold text-[22px] leading-none tracking-[-0.04em] text-[var(--md-sys-color-on-surface)]">
         bidit
       </span>
     </Link>

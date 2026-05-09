@@ -78,13 +78,13 @@ export function AwardConfirm(props: Props) {
     return (
       <div className="px-8 py-8 space-y-10">
         <div>
-          <p className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-moss)] mb-3">
+          <p className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--md-sys-color-tertiary)] mb-3">
             ✓ 수주 확정
           </p>
-          <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+          <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">
             {pgName(selected.pgWsId)} 와의 계약이 확정되었습니다
           </h1>
-          <p className="mt-2 text-[13px] text-[var(--color-ink-muted)]">
+          <p className="mt-2 text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
             선정된 PG와 미선정 PG 모두에게 결과 알림이 발송됩니다.
           </p>
         </div>
@@ -92,31 +92,31 @@ export function AwardConfirm(props: Props) {
         <section>
           <div className="flex items-center gap-3 mb-3">
             <Label size="md" muted={false}>발송 알림</Label>
-            <div className="flex-1 h-px bg-[var(--color-hair)]" />
+            <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
           </div>
-          <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
+          <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-t border-[var(--md-sys-color-outline-variant)]">
             <div className="py-3 flex items-center gap-4">
               <Chip label="선정" color="tertiary" />
-              <span className="text-[13px] text-[var(--color-ink)]">
+              <span className="text-[13px] text-[var(--md-sys-color-on-surface)]">
                 {pgName(selected.pgWsId)}
               </span>
-              <span className="ml-auto font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)]">
+              <span className="ml-auto font-mono text-[11px] tabular-nums text-[var(--md-sys-color-on-surface-variant)]">
                 계약 진행 안내
               </span>
             </div>
             {others.map((b) => (
               <div key={b.id} className="py-3 flex items-center gap-4">
                 <Chip label="미선정" color="surface" />
-                <span className="text-[13px] text-[var(--color-ink)]">
+                <span className="text-[13px] text-[var(--md-sys-color-on-surface)]">
                   {pgName(b.pgWsId)}
                 </span>
-                <span className="ml-auto font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)]">
+                <span className="ml-auto font-mono text-[11px] tabular-nums text-[var(--md-sys-color-on-surface-variant)]">
                   결과 안내
                 </span>
               </div>
             ))}
             {others.length === 0 && (
-              <div className="py-3 font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+              <div className="py-3 font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
                 — 다른 응답 견적 없음 —
               </div>
             )}
@@ -136,13 +136,13 @@ export function AwardConfirm(props: Props) {
     <div className="px-8 py-8 space-y-10">
       {/* Header */}
       <div>
-        <span className="font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)]">
+        <span className="font-mono text-[11px] tabular-nums text-[var(--md-sys-color-on-surface-variant)]">
           {rfqId} · 수주 처리
         </span>
-        <h1 className="mt-1 text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+        <h1 className="mt-1 text-[26px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">
           {pgName(selected.pgWsId)} 견적을 선택하시겠습니까?
         </h1>
-        <p className="mt-2 text-[13px] text-[var(--color-ink-muted)]">
+        <p className="mt-2 text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
           확정 시 선정 PG와 미선정 PG 모두에게 결과가 통지되며, RFQ가 마감
           처리됩니다.
         </p>
@@ -152,9 +152,9 @@ export function AwardConfirm(props: Props) {
       <section>
         <div className="flex items-center gap-3 mb-3">
           <Label size="md" muted={false}>선택 견적</Label>
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
         </div>
-        <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
+        <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-t border-[var(--md-sys-color-outline-variant)]">
           {[
             ['PG사', pgName(selected.pgWsId)],
             [
@@ -171,21 +171,21 @@ export function AwardConfirm(props: Props) {
             ['간편결제', formatPct(selected.easyPayFeePct)],
           ].map(([label, value]) => (
             <div key={label} className="py-2.5 flex items-baseline justify-between">
-              <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
+              <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
                 {label}
               </span>
-              <span className="font-mono text-[13px] tabular-nums text-[var(--color-ink)]">
+              <span className="font-mono text-[13px] tabular-nums text-[var(--md-sys-color-on-surface)]">
                 {value}
               </span>
             </div>
           ))}
         </div>
         {selected.memo && (
-          <div className="mt-4 p-4 bg-[var(--color-paper-warm)] border-l-2 border-[var(--color-hair-strong)]">
-            <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)] mb-2">
+          <div className="mt-4 p-4 bg-[var(--md-sys-color-surface-container-high)] border-l-2 border-[var(--md-sys-color-outline)]">
+            <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)] mb-2">
               PG 메모
             </p>
-            <p className="text-[13px] text-[var(--color-ink-muted)] leading-relaxed whitespace-pre-wrap">
+            <p className="text-[13px] text-[var(--md-sys-color-on-surface-variant)] leading-relaxed whitespace-pre-wrap">
               {selected.memo}
             </p>
           </div>
@@ -196,9 +196,9 @@ export function AwardConfirm(props: Props) {
       <section>
         <div className="flex items-center gap-3 mb-3">
           <Label size="md" muted={false}>계약 조건</Label>
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
         </div>
-        <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
+        <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-t border-[var(--md-sys-color-outline-variant)]">
           {[
             ['구매사', buyerWorkspaceName],
             ['사업자번호', bizProfile.bizNo ?? '미입력'],
@@ -208,10 +208,10 @@ export function AwardConfirm(props: Props) {
             ['응답 견적', `${others.length + 1}건`],
           ].map(([label, value]) => (
             <div key={label} className="py-2.5 flex items-baseline justify-between">
-              <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
+              <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
                 {label}
               </span>
-              <span className="text-[13px] text-[var(--color-ink)]">{value}</span>
+              <span className="text-[13px] text-[var(--md-sys-color-on-surface)]">{value}</span>
             </div>
           ))}
         </div>
@@ -220,19 +220,19 @@ export function AwardConfirm(props: Props) {
       {error && (
         <p
           role="alert"
-          className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]"
+          className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]"
         >
           처리 실패 — {error}
         </p>
       )}
 
       {/* Confirm action */}
-      <section className="border-t border-[var(--color-hair)] pt-6 space-y-4">
-        <div className="bg-[var(--color-paper-warm)] border border-[var(--color-hair)] p-4">
-          <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)] mb-2">
+      <section className="border-t border-[var(--md-sys-color-outline-variant)] pt-6 space-y-4">
+        <div className="bg-[var(--md-sys-color-surface-container-high)] border border-[var(--md-sys-color-outline-variant)] p-4">
+          <p className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)] mb-2">
             확정 후 처리
           </p>
-          <ul className="space-y-1.5 text-[12px] text-[var(--color-ink-muted)]">
+          <ul className="space-y-1.5 text-[12px] text-[var(--md-sys-color-on-surface-variant)]">
             <li>
               · RFQ 상태가 <span className="font-mono">awarded</span>로 전환됩니다
             </li>

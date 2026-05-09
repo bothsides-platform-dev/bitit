@@ -30,23 +30,23 @@ export default function PgVerifyPage() {
   return (
     <div className="space-y-8 text-center">
 
-      <div className="flex justify-center text-[var(--color-ink-faint)]">
+      <div className="flex justify-center text-[var(--md-sys-color-outline)]">
         <EnvelopeSvg size={80} />
       </div>
 
       <div className="space-y-3">
-        <h2 className="text-[20px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+        <h2 className="text-[20px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">
           인증 메일을 보냈습니다
         </h2>
         {displayEmail && (
-          <p className="text-[13px] text-[var(--color-ink-muted)]">
+          <p className="text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
             <span className="font-mono tabular-nums">{displayEmail}</span>
           </p>
         )}
-        <p className="text-[13px] text-[var(--color-ink-muted)]">
+        <p className="text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
           메일의 [인증하기] 버튼을 눌러주세요.
           <br />
-          <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
+          <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
             15분 내 만료됩니다.
           </span>
         </p>
@@ -57,7 +57,7 @@ export default function PgVerifyPage() {
         {resendError && (
           <p
             role="alert"
-            className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]"
+            className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]"
           >
             {resendError}
           </p>
@@ -65,14 +65,14 @@ export default function PgVerifyPage() {
         {!isInvite && (
           <Link
             href="/signup/pg"
-            className="block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+            className="block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
           >
             다른 이메일로 변경
           </Link>
         )}
       </div>
 
-      <div className="text-[12px] text-[var(--color-ink-soft)] space-y-1">
+      <div className="text-[12px] text-[var(--md-sys-color-on-surface-variant)] space-y-1">
         <p>스팸함을 확인해보세요.</p>
         <p>회사 메일의 경우 도메인 차단 여부를 확인해주세요.</p>
       </div>

@@ -98,18 +98,18 @@ export function BidDetailModal({
         </DialogDescription>
 
         {/* Left: PDF preview */}
-        <div className="bg-[var(--color-paper-warm)] border-r border-[var(--color-hair)] min-h-[400px] md:min-h-[640px] flex flex-col">
+        <div className="bg-[var(--md-sys-color-surface-container-high)] border-r border-[var(--md-sys-color-outline-variant)] min-h-[400px] md:min-h-[640px] flex flex-col">
           <PdfPreview pdf={bid.proposalPdf} />
         </div>
 
         {/* Right: meta + history */}
         <div className="flex flex-col max-h-[88vh] overflow-hidden">
-          <header className="flex items-start justify-between gap-3 p-5 border-b border-[var(--color-hair)] shrink-0">
+          <header className="flex items-start justify-between gap-3 p-5 border-b border-[var(--md-sys-color-outline-variant)] shrink-0">
             <div>
-              <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-faint)]">
+              <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--md-sys-color-outline)]">
                 {bid.id}
               </span>
-              <h2 className="text-[20px] font-[600] tracking-[-0.01em] text-[var(--color-ink)] mt-1">
+              <h2 className="text-[20px] font-[600] tracking-[-0.01em] text-[var(--md-sys-color-on-surface)] mt-1">
                 {pgName}
               </h2>
               <div className="mt-2">
@@ -127,7 +127,7 @@ export function BidDetailModal({
 
           <div className="overflow-y-auto flex-1">
             {/* KPI grid: 6 figures + optional issuer details */}
-            <section className="px-5 py-4 border-b border-[var(--color-hair)]">
+            <section className="px-5 py-4 border-b border-[var(--md-sys-color-outline-variant)]">
               <SectionLabel>정형 수치</SectionLabel>
               <dl className="grid grid-cols-2 gap-x-6 gap-y-3 mt-3">
                 <Kpi label="정산주기" value={SETTLE_LABEL[bid.settleCycle] ?? bid.settleCycle} />
@@ -149,7 +149,7 @@ export function BidDetailModal({
               </dl>
               {grade === 'general' && issuerEntries.length > 0 && (
                 <details className="mt-3 group">
-                  <summary className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] cursor-pointer hover:text-[var(--color-ink)] select-none">
+                  <summary className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] cursor-pointer hover:text-[var(--md-sys-color-on-surface)] select-none">
                     카드사별 수수료 9개사 ▾
                   </summary>
                   <dl className="grid grid-cols-3 gap-x-4 gap-y-2 mt-3">
@@ -190,10 +190,10 @@ function PdfPreview({ pdf }: { pdf: Attachment }) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
         <FileTextIcon size={28} />
-        <p className="mt-3 font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
+        <p className="mt-3 font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
           제안서 미첨부
         </p>
-        <p className="mt-1 text-[12px] text-[var(--color-ink-faint)]">
+        <p className="mt-1 text-[12px] text-[var(--md-sys-color-outline)]">
           PG가 견적 제출 시 PDF를 함께 업로드합니다.
         </p>
       </div>
@@ -201,16 +201,16 @@ function PdfPreview({ pdf }: { pdf: Attachment }) {
   }
   return (
     <>
-      <div className="px-4 py-2 border-b border-[var(--color-hair)] flex items-center gap-2 shrink-0">
+      <div className="px-4 py-2 border-b border-[var(--md-sys-color-outline-variant)] flex items-center gap-2 shrink-0">
         <FileTextIcon size={14} />
-        <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] truncate flex-1">
+        <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] truncate flex-1">
           {pdf.name}
         </span>
         <a
           href={pdf.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink)] hover:underline"
+          className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface)] hover:underline"
         >
           새 창 열기 →
         </a>
@@ -226,7 +226,7 @@ function PdfPreview({ pdf }: { pdf: Attachment }) {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+    <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
       {children}
     </span>
   );
@@ -243,14 +243,14 @@ function Kpi({
 }) {
   return (
     <div>
-      <dt className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
+      <dt className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
         {label}
       </dt>
       <dd
         className={
           muted
-            ? 'font-mono text-[13px] tabular-nums text-[var(--color-ink-muted)] mt-0.5'
-            : 'font-mono text-[13px] tabular-nums text-[var(--color-ink)] mt-0.5'
+            ? 'font-mono text-[13px] tabular-nums text-[var(--md-sys-color-on-surface-variant)] mt-0.5'
+            : 'font-mono text-[13px] tabular-nums text-[var(--md-sys-color-on-surface)] mt-0.5'
         }
       >
         {value}
@@ -331,16 +331,16 @@ function NoteForm({
   };
 
   return (
-    <div className="border border-[var(--color-hair)] rounded-md p-3 mt-3 bg-[var(--color-paper)]">
+    <div className="border border-[var(--md-sys-color-outline-variant)] rounded-md p-3 mt-3 bg-[var(--md-sys-color-surface)]">
       <textarea
         value={body}
         onChange={(e) => setBody(e.target.value.slice(0, MAX_BODY))}
         placeholder="협상 진행, 통화 기록, 결정 근거…"
         rows={3}
-        className="block w-full resize-y bg-transparent text-[13px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none min-h-[64px] max-h-[160px]"
+        className="block w-full resize-y bg-transparent text-[13px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none min-h-[64px] max-h-[160px]"
       />
       {files.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-[var(--color-hair)]">
+        <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-[var(--md-sys-color-outline-variant)]">
           {files.map((f) => (
             <FileChip
               key={f.id}
@@ -353,12 +353,12 @@ function NoteForm({
           ))}
         </div>
       )}
-      <div className="flex items-center justify-between mt-2 pt-2 border-t border-[var(--color-hair)]">
+      <div className="flex items-center justify-between mt-2 pt-2 border-t border-[var(--md-sys-color-outline-variant)]">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors cursor-pointer"
           >
             <PaperclipIcon size={12} /> + 첨부
           </button>
@@ -372,7 +372,7 @@ function NoteForm({
           />
         </div>
         <div className="flex items-center gap-3">
-          <span className="font-mono text-[10px] tabular-nums text-[var(--color-ink-faint)]">
+          <span className="font-mono text-[10px] tabular-nums text-[var(--md-sys-color-outline)]">
             {body.length} / {MAX_BODY}
           </span>
           <Button
@@ -403,7 +403,7 @@ function NoteTimeline({ bidId }: { bidId: string }) {
 
   if (notes.length === 0) {
     return (
-      <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)] mt-5 mb-2">
+      <p className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)] mt-5 mb-2">
         — 아직 기록된 메모가 없습니다 —
       </p>
     );
@@ -412,25 +412,25 @@ function NoteTimeline({ bidId }: { bidId: string }) {
   return (
     <ol className="mt-5 space-y-5">
       {display.map(({ note, serial }) => (
-        <li key={note.id} className="border-t border-[var(--color-hair)] pt-3">
+        <li key={note.id} className="border-t border-[var(--md-sys-color-outline-variant)] pt-3">
           <div className="flex items-baseline justify-between gap-3 mb-2">
-            <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+            <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
               № {String(serial).padStart(2, '0')} —{' '}
-              <span className="text-[var(--color-ink-muted)]">
+              <span className="text-[var(--md-sys-color-on-surface-variant)]">
                 {formatNoteTime(note.createdAt)} · {note.authorName}
               </span>
             </span>
             <button
               type="button"
               onClick={() => removeNote(bidId, note.id)}
-              className="font-mono text-[9px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)] hover:text-[var(--color-terracotta)] transition-colors cursor-pointer"
+              className="font-mono text-[9px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)] hover:text-[var(--md-sys-color-error)] transition-colors cursor-pointer"
               aria-label="삭제"
             >
               삭제
             </button>
           </div>
           {note.body && (
-            <p className="text-[13px] leading-relaxed text-[var(--color-ink)] whitespace-pre-wrap">
+            <p className="text-[13px] leading-relaxed text-[var(--md-sys-color-on-surface)] whitespace-pre-wrap">
               {note.body}
             </p>
           )}
@@ -453,7 +453,7 @@ function NoteAttachment({ attachment }: { attachment: Attachment }) {
 
   if (broken || !attachment.url) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-1 border border-dashed border-[var(--color-hair)] rounded-md font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-ink-faint)]">
+      <span className="inline-flex items-center gap-1 px-2 py-1 border border-dashed border-[var(--md-sys-color-outline-variant)] rounded-md font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--md-sys-color-outline)]">
         {attachment.name} · 미리보기 만료
       </span>
     );
@@ -465,7 +465,7 @@ function NoteAttachment({ attachment }: { attachment: Attachment }) {
         href={attachment.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="block w-16 h-16 border border-[var(--color-hair)] rounded-md overflow-hidden bg-[var(--color-paper-warm)]"
+        className="block w-16 h-16 border border-[var(--md-sys-color-outline-variant)] rounded-md overflow-hidden bg-[var(--md-sys-color-surface-container-high)]"
         title={attachment.name}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -484,7 +484,7 @@ function NoteAttachment({ attachment }: { attachment: Attachment }) {
       href={attachment.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 px-2 py-1 border border-[var(--color-hair)] rounded-md font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+      className="inline-flex items-center gap-1 px-2 py-1 border border-[var(--md-sys-color-outline-variant)] rounded-md font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
     >
       <FileTextIcon size={11} /> {attachment.name}
     </a>
@@ -506,24 +506,24 @@ function FileChip({
 }) {
   const isImage = mimeType?.startsWith('image/');
   return (
-    <span className="inline-flex items-center gap-2 px-2 py-1 bg-[var(--color-paper-warm)] border border-[var(--color-hair)] rounded-md">
+    <span className="inline-flex items-center gap-2 px-2 py-1 bg-[var(--md-sys-color-surface-container-high)] border border-[var(--md-sys-color-outline-variant)] rounded-md">
       {isImage ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={url} alt="" className="w-5 h-5 object-cover rounded-md" />
       ) : (
         <FileTextIcon size={11} />
       )}
-      <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-ink-muted)] truncate max-w-[160px]">
+      <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--md-sys-color-on-surface-variant)] truncate max-w-[160px]">
         {name}
       </span>
-      <span className="font-mono text-[9px] tabular-nums text-[var(--color-ink-faint)]">
+      <span className="font-mono text-[9px] tabular-nums text-[var(--md-sys-color-outline)]">
         {(size / 1024).toFixed(0)}KB
       </span>
       <button
         type="button"
         onClick={onRemove}
         aria-label={`${name} 제거`}
-        className="text-[var(--color-ink-faint)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
+        className="text-[var(--md-sys-color-outline)] hover:text-[var(--md-sys-color-on-surface)] transition-colors cursor-pointer"
       >
         <XIcon size={11} />
       </button>

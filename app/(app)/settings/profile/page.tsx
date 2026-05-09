@@ -36,7 +36,7 @@ export default async function ProfilePage({ searchParams }: Props) {
   if (!me || !ws) {
     return (
       <div className="px-4 py-8 md:px-8 md:py-12">
-        <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]">
+        <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]">
           프로필 정보를 불러오지 못했습니다.
         </p>
       </div>
@@ -79,15 +79,15 @@ export default async function ProfilePage({ searchParams }: Props) {
   const kvRowClass =
     'py-2 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4';
   const kvLabelClass =
-    'font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]';
+    'font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]';
   const kvValueClass =
-    'text-[13px] text-[var(--color-ink)] font-mono tabular-nums break-all sm:break-normal';
+    'text-[13px] text-[var(--md-sys-color-on-surface)] font-mono tabular-nums break-all sm:break-normal';
 
   return (
     <PageEnter className="px-4 py-6 md:px-8 md:py-8 space-y-8 md:space-y-10">
       <div>
         <Label size="md" muted={false} as="span" className="block mb-2">SETTINGS · PROFILE</Label>
-        <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+        <h1 className="text-[26px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">
           프로필 설정
         </h1>
       </div>
@@ -96,7 +96,7 @@ export default async function ProfilePage({ searchParams }: Props) {
       <section>
         <div className="flex items-center gap-3 mb-3">
           <Label size="md" muted={false}>사용자</Label>
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
         </div>
         <div className="flex items-center gap-4 mb-3">
           <Avatar
@@ -105,13 +105,13 @@ export default async function ProfilePage({ searchParams }: Props) {
             size="lg"
           />
           <div className="min-w-0">
-            <p className="text-[14px] font-medium text-[var(--color-ink)]">{me.name}</p>
-            <p className="font-mono text-[11px] tabular-nums text-[var(--color-ink-soft)] break-all">
+            <p className="text-[14px] font-medium text-[var(--md-sys-color-on-surface)]">{me.name}</p>
+            <p className="font-mono text-[11px] tabular-nums text-[var(--md-sys-color-on-surface-variant)] break-all">
               {me.email}
             </p>
           </div>
         </div>
-        <div className="divide-y divide-[var(--color-hair)] border-y border-[var(--color-hair)]">
+        <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-y border-[var(--md-sys-color-outline-variant)]">
           {[
             ['이메일', me.email],
             ['역할', me.role.toUpperCase()],
@@ -130,7 +130,7 @@ export default async function ProfilePage({ searchParams }: Props) {
         <div className="flex items-center gap-3 mb-3">
           <Label size="md" muted={false}>워크스페이스</Label>
           <Chip label={ws.type === 'buyer' ? '구매사' : 'PG'} color="surface" />
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
         </div>
 
         <div
@@ -141,7 +141,7 @@ export default async function ProfilePage({ searchParams }: Props) {
           }
         >
           {/* Left: meta KV (이름 폼 포함) */}
-          <div className="divide-y divide-[var(--color-hair)] border-t border-[var(--color-hair)]">
+          <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-t border-[var(--md-sys-color-outline-variant)]">
             <WorkspaceNameForm
               currentName={ws.name}
               canEdit={me.role === 'admin'}
@@ -156,13 +156,13 @@ export default async function ProfilePage({ searchParams }: Props) {
 
           {/* Right: 사업자번호/등급 폼 (buyer only) */}
           {ws.type === 'buyer' && (
-            <div className="mt-6 pt-6 border-t border-[var(--color-hair)] space-y-6 lg:mt-0 lg:pt-0 lg:border-t-0 lg:space-y-8">
+            <div className="mt-6 pt-6 border-t border-[var(--md-sys-color-outline-variant)] space-y-6 lg:mt-0 lg:pt-0 lg:border-t-0 lg:space-y-8">
               {biz_required === '1' && !biz && (
                 <>
                   <BizRequiredToast />
                   <p
                     role="alert"
-                    className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]"
+                    className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]"
                   >
                     견적 생성을 위해 사업자번호 등록이 필요합니다.
                   </p>

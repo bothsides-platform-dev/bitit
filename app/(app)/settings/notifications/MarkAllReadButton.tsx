@@ -18,7 +18,7 @@ export function MarkAllReadButton() {
           router.refresh();
         })
       }
-      className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] hover:text-[var(--color-ink)] transition-colors disabled:opacity-50"
+      className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors disabled:opacity-50"
     >
       {pending ? '처리 중…' : '모두 읽음'}
     </button>

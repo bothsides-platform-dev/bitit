@@ -33,7 +33,7 @@ const SETTLE_CYCLES: { value: SettlementCycle; label: string }[] = [
 ];
 
 const inputBase =
-  'block w-full bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-2 text-[14px] font-mono tabular-nums text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-ink)] transition-colors';
+  'block w-full bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] font-mono tabular-nums text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors';
 
 const ERROR_LABELS: Record<string, string> = {
   FORBIDDEN_PG: 'PG 사용자 권한이 필요합니다.',
@@ -69,7 +69,7 @@ function PctInput({
           placeholder={placeholder}
           className={cn(inputBase, 'flex-1')}
         />
-        <span className="font-mono text-[13px] text-[var(--color-ink-soft)] pb-2">%</span>
+        <span className="font-mono text-[13px] text-[var(--md-sys-color-on-surface-variant)] pb-2">%</span>
       </div>
     </div>
   );
@@ -99,7 +99,7 @@ function KrwInput({
           placeholder={placeholder}
           className={cn(inputBase, 'flex-1')}
         />
-        <span className="font-mono text-[13px] text-[var(--color-ink-soft)] pb-2">원</span>
+        <span className="font-mono text-[13px] text-[var(--md-sys-color-on-surface-variant)] pb-2">원</span>
       </div>
     </div>
   );
@@ -241,11 +241,11 @@ export function BidForm({ rfqId, grade }: Props) {
         <StatutoryCardFeeNotice grade={grade} />
       )}
       {grade === undefined && (
-        <div className="border border-[var(--color-hair)] px-4 py-3 space-y-1">
-          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
+        <div className="border border-[var(--md-sys-color-outline-variant)] px-4 py-3 space-y-1">
+          <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
             [ 등급 미입력 ] 일반 가정 견적
           </p>
-          <p className="text-[13px] text-[var(--color-ink-muted)]">
+          <p className="text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
             구매사가 가맹점 등급을 입력하지 않은 사전 견적 RFQ 입니다. 일반 등급 가정으로 9개 카드사별 수수료를 직접 입력해주세요.
           </p>
         </div>
@@ -254,10 +254,10 @@ export function BidForm({ rfqId, grade }: Props) {
       {/* 01 정산 조건 */}
       <section>
         <div className="flex items-center gap-3 mb-5">
-          <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+          <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
             01 — 정산 조건
           </span>
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
         </div>
         <div className="grid grid-cols-2 gap-x-6 gap-y-5">
           <div className="col-span-2 space-y-1">
@@ -277,10 +277,10 @@ export function BidForm({ rfqId, grade }: Props) {
       {/* 02 수수료 */}
       <section>
         <div className="flex items-center gap-3 mb-5">
-          <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+          <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
             02 — 수수료
           </span>
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
         </div>
         <div className="grid grid-cols-2 gap-x-6 gap-y-5">
           <PctInput label="계좌이체 수수료 *" value={bankPct} onChange={setBankPct} placeholder="1.50" />
@@ -305,10 +305,10 @@ export function BidForm({ rfqId, grade }: Props) {
       {/* 03 제안서 */}
       <section>
         <div className="flex items-center gap-3 mb-5">
-          <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+          <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
             03 — 제안서
           </span>
-          <div className="flex-1 h-px bg-[var(--color-hair)]" />
+          <div className="flex-1 h-px bg-[var(--md-sys-color-outline-variant)]" />
         </div>
         <div className="space-y-4">
           <div className="space-y-2">
@@ -328,30 +328,30 @@ export function BidForm({ rfqId, grade }: Props) {
               <button
                 type="button"
                 onClick={() => proposalInputRef.current?.click()}
-                className="block w-full border border-dashed border-[var(--color-hair-strong)] py-5 text-center hover:border-[var(--color-ink)] transition-colors"
+                className="block w-full border border-dashed border-[var(--md-sys-color-outline)] py-5 text-center hover:border-[var(--md-sys-color-on-surface)] transition-colors"
               >
-                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-[var(--color-ink-soft)]">
+                <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
                   PDF 업로드 (클릭)
                 </p>
-                <p className="font-mono text-[10px] tracking-[0.08em] uppercase text-[var(--color-ink-faint)] mt-1">
+                <p className="font-mono text-[10px] tracking-[0.08em] uppercase text-[var(--md-sys-color-outline)] mt-1">
                   20MB 이내
                 </p>
               </button>
             )}
             {proposal && 'status' in proposal && proposal.status === 'uploading' && (
-              <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-ink-faint)]">
+              <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-outline)]">
                 {proposal.name} — UPLOADING…
               </p>
             )}
             {proposal && 'status' in proposal && proposal.status === 'error' && (
               <div className="flex items-center justify-between gap-3">
-                <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--color-terracotta)]">
+                <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]">
                   {proposal.name} — {proposal.error}
                 </p>
                 <button
                   type="button"
                   onClick={() => setProposal(null)}
-                  className="font-mono text-[11px] text-[var(--color-ink-faint)] hover:text-[var(--color-terracotta)] px-1"
+                  className="font-mono text-[11px] text-[var(--md-sys-color-outline)] hover:text-[var(--md-sys-color-error)] px-1"
                 >
                   ×
                 </button>
@@ -360,11 +360,11 @@ export function BidForm({ rfqId, grade }: Props) {
             {proposalReady && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[13px] text-[var(--color-ink)] truncate">{proposal.name}</span>
+                  <span className="text-[13px] text-[var(--md-sys-color-on-surface)] truncate">{proposal.name}</span>
                   <button
                     type="button"
                     onClick={() => setProposal(null)}
-                    className="font-mono text-[11px] text-[var(--color-ink-faint)] hover:text-[var(--color-terracotta)] px-1 shrink-0"
+                    className="font-mono text-[11px] text-[var(--md-sys-color-outline)] hover:text-[var(--md-sys-color-error)] px-1 shrink-0"
                   >
                     ×
                   </button>
@@ -372,7 +372,7 @@ export function BidForm({ rfqId, grade }: Props) {
                 <iframe
                   src={`/api/files/${proposal.id}`}
                   title={proposal.name}
-                  className="w-full h-[320px] border border-[var(--color-hair)] bg-[var(--color-paper-warm)]"
+                  className="w-full h-[320px] border border-[var(--md-sys-color-outline-variant)] bg-[var(--md-sys-color-surface-container-high)]"
                 />
               </div>
             )}
@@ -384,21 +384,21 @@ export function BidForm({ rfqId, grade }: Props) {
               onChange={(e) => setMemo(e.target.value)}
               rows={3}
               placeholder="추가 안내 사항이 있으면 입력하세요."
-              className="block w-full bg-transparent border-0 border-b border-[var(--color-hair-strong)] py-2 text-[14px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-ink)] transition-colors resize-none"
+              className="block w-full bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors resize-none"
             />
           </div>
         </div>
       </section>
 
       {!canSubmit && !pending && (
-        <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+        <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
           · 계좌이체·간편결제 수수료 입력 필요
           {allowCardFees && ' · 카드사 9개 수수료 모두 입력 필요'}
         </p>
       )}
 
       {submitError && (
-        <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-terracotta)]">
+        <p className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-error)]">
           {ERROR_LABELS[submitError] ?? submitError}
         </p>
       )}

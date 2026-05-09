@@ -34,11 +34,11 @@ function SortTh({
 }) {
   return (
     <th
-      className="px-3 py-3 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] font-normal cursor-pointer hover:text-[var(--color-ink)] transition-colors select-none"
+      className="px-3 py-3 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] font-normal cursor-pointer hover:text-[var(--md-sys-color-on-surface)] transition-colors select-none"
       onClick={() => onSort(sortId)}
     >
       {label}
-      {active && <span className="ml-1 text-[var(--color-ink)]">{dir === 'asc' ? '↑' : '↓'}</span>}
+      {active && <span className="ml-1 text-[var(--md-sys-color-on-surface)]">{dir === 'asc' ? '↑' : '↓'}</span>}
     </th>
   );
 }
@@ -106,14 +106,14 @@ export function BidComparisonTable({ rfqId, bids, grade, rfqStatus, awardedBidId
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">
         <thead>
-          <tr className="border-b border-[var(--color-hair)]">
+          <tr className="border-b border-[var(--md-sys-color-outline-variant)]">
             <SortTh label="PG사" sortId="name" active={sortKey === 'name'} dir={sortDir} onSort={handleSort} />
             <SortTh label="정산주기" sortId="settle" active={sortKey === 'settle'} dir={sortDir} onSort={handleSort} />
             <SortTh label="보증금" sortId="deposit" active={sortKey === 'deposit'} dir={sortDir} onSort={handleSort} />
             <SortTh label="셋업비" sortId="setupFee" active={sortKey === 'setupFee'} dir={sortDir} onSort={handleSort} />
             <SortTh label="월최저" sortId="monthlyMin" active={sortKey === 'monthlyMin'} dir={sortDir} onSort={handleSort} />
             {cardFee !== null && (
-              <th className="px-3 py-3 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] font-normal">
+              <th className="px-3 py-3 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] font-normal">
                 카드
               </th>
             )}
@@ -128,12 +128,12 @@ export function BidComparisonTable({ rfqId, bids, grade, rfqStatus, awardedBidId
             return (
               <tr
                 key={bid.id}
-                className="group border-b border-[var(--color-hair)] hover:bg-[var(--color-paper-warm)] transition-colors"
+                className="group border-b border-[var(--md-sys-color-outline-variant)] hover:bg-[var(--md-sys-color-surface-container-high)] transition-colors"
               >
-                <td className="relative px-3 py-4 text-[13px] font-medium text-[var(--color-ink)] group-hover:before:absolute group-hover:before:left-0 group-hover:before:top-0 group-hover:before:bottom-0 group-hover:before:w-0.5 group-hover:before:bg-[var(--color-amber)]">
+                <td className="relative px-3 py-4 text-[13px] font-medium text-[var(--md-sys-color-on-surface)] group-hover:before:absolute group-hover:before:left-0 group-hover:before:top-0 group-hover:before:bottom-0 group-hover:before:w-0.5 group-hover:before:bg-[var(--md-sys-color-warning)]">
                   {pgName(bid.pgWsId)}
                   {bid.proposalPdf.name !== '제안서 미첨부' && (
-                    <span className="ml-2 font-mono text-[10px] text-[var(--color-ink-faint)]">PDF</span>
+                    <span className="ml-2 font-mono text-[10px] text-[var(--md-sys-color-outline)]">PDF</span>
                   )}
                 </td>
                 <Num label={SETTLE_LABEL[bid.settleCycle]} best={isMinSettle} />
@@ -141,7 +141,7 @@ export function BidComparisonTable({ rfqId, bids, grade, rfqStatus, awardedBidId
                 <Num label={formatKRW(bid.setupFee)} best={bid.setupFee === minSetup} />
                 <Num label={formatKRW(bid.monthlyMin)} best={bid.monthlyMin === minMonthly} />
                 {cardFee !== null && (
-                  <td className="px-3 py-4 font-mono text-[12px] tabular-nums text-[var(--color-ink-soft)]">
+                  <td className="px-3 py-4 font-mono text-[12px] tabular-nums text-[var(--md-sys-color-on-surface-variant)]">
                     {formatPct(cardFee)}
                   </td>
                 )}
@@ -167,7 +167,7 @@ export function BidComparisonTable({ rfqId, bids, grade, rfqStatus, awardedBidId
       </table>
 
       {cardFee !== null && grade && (
-        <p className="mt-3 font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)]">
+        <p className="mt-3 font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
           카드 {(cardFee * 100).toFixed(2)}% — {GRADE_LABELS[grade]} 법정 고정수수료 (PG 변경 불가)
         </p>
       )}
@@ -177,7 +177,7 @@ export function BidComparisonTable({ rfqId, bids, grade, rfqStatus, awardedBidId
 
 function Num({ label, best }: { label: string; best: boolean }) {
   return (
-    <td className={`px-3 py-4 font-mono text-[12px] tabular-nums ${best ? 'text-[var(--color-moss)] font-medium' : 'text-[var(--color-ink-muted)]'}`}>
+    <td className={`px-3 py-4 font-mono text-[12px] tabular-nums ${best ? 'text-[var(--md-sys-color-tertiary)] font-medium' : 'text-[var(--md-sys-color-on-surface-variant)]'}`}>
       {label}
       {best && <span className="ml-1 text-[9px] opacity-60">▼</span>}
     </td>

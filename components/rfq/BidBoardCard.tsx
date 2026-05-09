@@ -83,11 +83,11 @@ export function BidBoardCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group relative bg-[var(--color-paper)] border border-[var(--color-hair)] rounded-md',
+        'group relative bg-[var(--md-sys-color-surface)] border border-[var(--md-sys-color-outline-variant)] rounded-md',
         'transition-shadow hover:shadow-[0_2px_8px_-4px_rgba(20,18,15,0.08)]',
         'cursor-pointer',
         isAwarded &&
-          "before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[2px] before:bg-[var(--color-moss)] before:rounded-r",
+          "before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[2px] before:bg-[var(--md-sys-color-tertiary)] before:rounded-r",
         isDragging && 'shadow-lg',
       )}
     >
@@ -102,7 +102,7 @@ export function BidBoardCard({
       >
         {/* Top row: PG name */}
         <div className="flex items-start justify-between gap-2 mb-2">
-          <span className="text-[14px] font-medium text-[var(--color-ink)] truncate">
+          <span className="text-[14px] font-medium text-[var(--md-sys-color-on-surface)] truncate">
             {pgName}
           </span>
           {/* Spacer for menu button */}
@@ -116,7 +116,7 @@ export function BidBoardCard({
           ) : (
             <Chip label={BUYER_STAGE_LABEL[stage]} color={stageChipColor[stage]} />
           )}
-          <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-faint)] tabular-nums ml-auto">
+          <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)] tabular-nums ml-auto">
             № {String(serial).padStart(2, '0')}
           </span>
         </div>
@@ -131,17 +131,17 @@ export function BidBoardCard({
         </div>
 
         {/* Footer: PDF + note count */}
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-[var(--color-hair)]">
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-[var(--md-sys-color-outline-variant)]">
           {hasPdf ? (
-            <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-ink-soft)]">
+            <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--md-sys-color-on-surface-variant)]">
               <FileTextIcon size={12} /> PDF
             </span>
           ) : (
-            <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-ink-faint)]">
+            <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--md-sys-color-outline)]">
               제안서 없음
             </span>
           )}
-          <span className="font-mono text-[10px] uppercase tracking-[0.1em] tabular-nums text-[var(--color-ink-soft)]">
+          <span className="font-mono text-[10px] uppercase tracking-[0.1em] tabular-nums text-[var(--md-sys-color-on-surface-variant)]">
             메모 {noteCount}
           </span>
         </div>
@@ -168,7 +168,7 @@ export function BidBoardCard({
                 disabled={disabled}
                 onClick={() => onMoveStage(s)}
               >
-                <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] mr-2">
+                <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] mr-2">
                   →
                 </span>
                 {BUYER_STAGE_LABEL[s]}으로
@@ -196,10 +196,10 @@ export function BidBoardCard({
 function KpiLine({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
-      <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">
+      <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
         {label}
       </span>
-      <span className="font-mono text-[12px] tabular-nums text-[var(--color-ink)]">
+      <span className="font-mono text-[12px] tabular-nums text-[var(--md-sys-color-on-surface)]">
         {value}
       </span>
     </div>

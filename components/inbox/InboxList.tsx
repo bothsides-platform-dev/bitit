@@ -49,14 +49,14 @@ export function InboxList({ rows }: { rows: InboxRow[] }) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-8 py-5 border-b border-[var(--color-hair)]">
+      <div className="flex items-center justify-between px-8 py-5 border-b border-[var(--md-sys-color-outline-variant)]">
         <div>
           <Label size="md" muted={false}>수신함 — PG 견적 요청</Label>
-          <h1 className="text-[20px] font-[700] tracking-[-0.02em] text-[var(--color-ink)] mt-1">
+          <h1 className="text-[20px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)] mt-1">
             받은 견적 요청
           </h1>
         </div>
-        <span className="font-mono tabular-nums text-[11px] text-[var(--color-ink-soft)]">
+        <span className="font-mono tabular-nums text-[11px] text-[var(--md-sys-color-on-surface-variant)]">
           {rows.length}건
         </span>
       </div>
@@ -70,13 +70,13 @@ export function InboxList({ rows }: { rows: InboxRow[] }) {
       ) : (
         <div className="flex-1 overflow-y-auto">
           <table className="w-full border-collapse">
-            <thead className="sticky top-0 bg-[var(--color-paper)]">
-              <tr className="border-b border-[var(--color-hair)]">
-                <th className="px-8 py-3 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] font-normal">번호</th>
-                <th className="px-3 py-3 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] font-normal">제목</th>
-                <th className="px-3 py-3 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] font-normal">등급</th>
-                <th className="px-3 py-3 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] font-normal">마감</th>
-                <th className="px-3 py-3 text-right font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)] font-normal">상태</th>
+            <thead className="sticky top-0 bg-[var(--md-sys-color-surface)]">
+              <tr className="border-b border-[var(--md-sys-color-outline-variant)]">
+                <th className="px-8 py-3 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] font-normal">번호</th>
+                <th className="px-3 py-3 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] font-normal">제목</th>
+                <th className="px-3 py-3 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] font-normal">등급</th>
+                <th className="px-3 py-3 text-left font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] font-normal">마감</th>
+                <th className="px-3 py-3 text-right font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] font-normal">상태</th>
               </tr>
             </thead>
             <tbody>
@@ -93,16 +93,16 @@ export function InboxList({ rows }: { rows: InboxRow[] }) {
                     }}
                     onClick={() => router.push(`/inbox/${row.rfqId}`)}
                     data-active={active === i}
-                    className="group border-b border-[var(--color-hair)] hover:bg-[var(--color-paper-warm)] data-[active=true]:bg-[var(--color-paper-warm)] cursor-pointer transition-colors"
+                    className="group border-b border-[var(--md-sys-color-outline-variant)] hover:bg-[var(--md-sys-color-surface-container-high)] data-[active=true]:bg-[var(--md-sys-color-surface-container-high)] cursor-pointer transition-colors"
                   >
-                    <td className="relative px-8 py-4 font-mono text-[12px] tabular-nums text-[var(--color-ink-soft)] group-hover:before:absolute group-hover:before:left-0 group-hover:before:top-0 group-hover:before:bottom-0 group-hover:before:w-2 group-hover:before:bg-[var(--color-ink)] group-data-[active=true]:before:absolute group-data-[active=true]:before:left-0 group-data-[active=true]:before:top-0 group-data-[active=true]:before:bottom-0 group-data-[active=true]:before:w-2 group-data-[active=true]:before:bg-[var(--color-ink)]">
+                    <td className="relative px-8 py-4 font-mono text-[12px] tabular-nums text-[var(--md-sys-color-on-surface-variant)] group-hover:before:absolute group-hover:before:left-0 group-hover:before:top-0 group-hover:before:bottom-0 group-hover:before:w-2 group-hover:before:bg-[var(--md-sys-color-on-surface)] group-data-[active=true]:before:absolute group-data-[active=true]:before:left-0 group-data-[active=true]:before:top-0 group-data-[active=true]:before:bottom-0 group-data-[active=true]:before:w-2 group-data-[active=true]:before:bg-[var(--md-sys-color-on-surface)]">
                       {row.rfqId}
                     </td>
-                    <td className="px-3 py-4 text-[13px] text-[var(--color-ink)] font-medium">{row.rfqTitle}</td>
-                    <td className="px-3 py-4 font-mono text-[12px] text-[var(--color-ink-muted)]">
+                    <td className="px-3 py-4 text-[13px] text-[var(--md-sys-color-on-surface)] font-medium">{row.rfqTitle}</td>
+                    <td className="px-3 py-4 font-mono text-[12px] text-[var(--md-sys-color-on-surface-variant)]">
                       {row.grade}
                     </td>
-                    <td className={`px-3 py-4 font-mono text-[12px] tabular-nums ${isUrgent ? 'text-[var(--color-terracotta)]' : 'text-[var(--color-ink-muted)]'}`}>
+                    <td className={`px-3 py-4 font-mono text-[12px] tabular-nums ${isUrgent ? 'text-[var(--md-sys-color-error)]' : 'text-[var(--md-sys-color-on-surface-variant)]'}`}>
                       {daysLeft}
                     </td>
                     <td className="px-3 py-4 text-right">
@@ -116,13 +116,13 @@ export function InboxList({ rows }: { rows: InboxRow[] }) {
               })}
             </tbody>
           </table>
-          <div className="px-8 py-3 border-t border-[var(--color-hair)] flex items-center gap-4 font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-ink-faint)]">
+          <div className="px-8 py-3 border-t border-[var(--md-sys-color-outline-variant)] flex items-center gap-4 font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--md-sys-color-outline)]">
             <span>
-              <kbd className="text-[var(--color-ink-soft)]">J</kbd> /{' '}
-              <kbd className="text-[var(--color-ink-soft)]">K</kbd> 이동
+              <kbd className="text-[var(--md-sys-color-on-surface-variant)]">J</kbd> /{' '}
+              <kbd className="text-[var(--md-sys-color-on-surface-variant)]">K</kbd> 이동
             </span>
             <span>
-              <kbd className="text-[var(--color-ink-soft)]">Enter</kbd> 응답
+              <kbd className="text-[var(--md-sys-color-on-surface-variant)]">Enter</kbd> 응답
               작성
             </span>
           </div>

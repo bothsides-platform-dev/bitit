@@ -68,13 +68,13 @@ export function CommandPalette() {
           }}
         >
           <div
-            className="w-[620px] bg-[var(--color-paper)] border border-[var(--color-hair)] rounded-md overflow-hidden shadow-lg"
+            className="w-[620px] bg-[var(--md-sys-color-surface)] border border-[var(--md-sys-color-outline-variant)] rounded-md overflow-hidden shadow-lg"
             style={{ boxShadow: '0 2px 8px rgba(10,10,15,0.08), 0 24px 64px -8px rgba(10,10,15,0.18)' }}
           >
             <Command>
-              <div className="flex items-center border-b border-[var(--color-hair)] px-4">
+              <div className="flex items-center border-b border-[var(--md-sys-color-outline-variant)] px-4">
                 <Command.Input
-                  className="flex-1 h-12 bg-transparent font-sans text-[14px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-soft)] outline-none"
+                  className="flex-1 h-12 bg-transparent font-sans text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-on-surface-variant)] outline-none"
                   placeholder="명령어 검색..."
                   autoFocus
                 />
@@ -83,14 +83,14 @@ export function CommandPalette() {
                 </IconButton>
               </div>
               <Command.List className="max-h-80 overflow-y-auto py-2">
-                <Command.Empty className="py-8 text-center font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
+                <Command.Empty className="py-8 text-center font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
                   결과 없음
                 </Command.Empty>
                 {groups.map((group) => (
                   <Command.Group
                     key={group}
                     heading={
-                      <span className="px-4 py-1 block font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+                      <span className="px-4 py-1 block font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
                         {group}
                       </span>
                     }
@@ -103,11 +103,11 @@ export function CommandPalette() {
                           if (cmd.href) router.push(cmd.href);
                           closeCommandPalette();
                         }}
-                        className="flex items-center justify-between px-4 py-2.5 text-[13px] text-[var(--color-ink)] cursor-pointer aria-selected:bg-[var(--color-paper-warm)]"
+                        className="flex items-center justify-between px-4 py-2.5 text-[13px] text-[var(--md-sys-color-on-surface)] cursor-pointer aria-selected:bg-[var(--md-sys-color-surface-container-high)]"
                       >
                         <span>{cmd.label}</span>
                         {cmd.shortcut && (
-                          <kbd className="font-mono text-[10px] text-[var(--color-ink-soft)]">
+                          <kbd className="font-mono text-[10px] text-[var(--md-sys-color-on-surface-variant)]">
                             {cmd.shortcut}
                           </kbd>
                         )}
@@ -118,14 +118,14 @@ export function CommandPalette() {
                 {(bidsLoading || bidItems.length > 0) && (
                   <Command.Group
                     heading={
-                      <span className="px-4 py-1 block font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
+                      <span className="px-4 py-1 block font-mono text-[10px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
                         견적서
                       </span>
                     }
                   >
                     {bidsLoading ? (
                       <Command.Loading>
-                        <span className="px-4 py-3 block font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-ink-soft)]">
+                        <span className="px-4 py-3 block font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--md-sys-color-on-surface-variant)]">
                           LOADING…
                         </span>
                       </Command.Loading>
@@ -138,18 +138,18 @@ export function CommandPalette() {
                             router.push(item.href);
                             closeCommandPalette();
                           }}
-                          className="flex flex-col items-start gap-0.5 px-4 py-2.5 cursor-pointer aria-selected:bg-[var(--color-paper-warm)]"
+                          className="flex flex-col items-start gap-0.5 px-4 py-2.5 cursor-pointer aria-selected:bg-[var(--md-sys-color-surface-container-high)]"
                         >
-                          <span className="text-[13px] text-[var(--color-ink)]">
+                          <span className="text-[13px] text-[var(--md-sys-color-on-surface)]">
                             {item.rfqTitle}
                             {item.pgWsName && (
-                              <span className="ml-2 text-[var(--color-ink-soft)]">
+                              <span className="ml-2 text-[var(--md-sys-color-on-surface-variant)]">
                                 {item.pgWsName}
                               </span>
                             )}
                           </span>
                           {item.memo && (
-                            <span className="text-[11px] font-mono text-[var(--color-ink-soft)] truncate max-w-[540px]">
+                            <span className="text-[11px] font-mono text-[var(--md-sys-color-on-surface-variant)] truncate max-w-[540px]">
                               {item.memo}
                             </span>
                           )}

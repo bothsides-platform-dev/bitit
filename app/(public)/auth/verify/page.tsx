@@ -71,31 +71,31 @@ function VerifyContent() {
     const displayEmail = emailQuery || readSignupDraft().email || 'your@email.com';
     return (
       <div className="space-y-8 text-center">
-        <div className="flex justify-center text-[var(--color-ink-faint)]">
+        <div className="flex justify-center text-[var(--md-sys-color-outline)]">
           <EnvelopeSvg size={80} />
         </div>
         <div className="space-y-3">
-          <h2 className="text-[20px] font-[700] tracking-[-0.02em] text-[var(--color-ink)]">
+          <h2 className="text-[20px] font-[700] tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]">
             인증 메일을 보냈습니다
           </h2>
-          <p className="text-[13px] text-[var(--color-ink-muted)]">
+          <p className="text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
             <span className="font-mono tabular-nums">{displayEmail}</span>
           </p>
-          <p className="text-[13px] text-[var(--color-ink-muted)]">
+          <p className="text-[13px] text-[var(--md-sys-color-on-surface-variant)]">
             메일의 [인증하기] 버튼을 눌러주세요.<br />
-            <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-soft)]">15분 내 만료됩니다.</span>
+            <span className="font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)]">15분 내 만료됩니다.</span>
           </p>
         </div>
         <div className="space-y-3">
           <ResendCountdown onResend={() => {}} />
           <Link
             href="/signup"
-            className="block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
+            className="block font-mono text-[11px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
           >
             다른 이메일로 변경
           </Link>
         </div>
-        <div className="text-[12px] text-[var(--color-ink-soft)] space-y-1">
+        <div className="text-[12px] text-[var(--md-sys-color-on-surface-variant)] space-y-1">
           <p>스팸함을 확인해보세요.</p>
           <p>회사 메일의 경우 도메인 차단 여부를 확인해주세요.</p>
         </div>
@@ -105,31 +105,31 @@ function VerifyContent() {
 
   // Token verification view.
   if (state === 'loading') {
-    return <p className="font-mono text-[12px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)] text-center">LOADING…</p>;
+    return <p className="font-mono text-[12px] tracking-[0.16em] uppercase text-[var(--md-sys-color-on-surface-variant)] text-center">LOADING…</p>;
   }
   if (state === 'success') {
-    return <p className="font-mono text-[12px] tracking-[0.16em] uppercase text-[var(--color-moss)] text-center">인증 완료. 이동 중…</p>;
+    return <p className="font-mono text-[12px] tracking-[0.16em] uppercase text-[var(--md-sys-color-tertiary)] text-center">인증 완료. 이동 중…</p>;
   }
   if (state === 'expired') {
     return (
       <div className="space-y-4 text-center">
-        <p className="text-[13px] text-[var(--color-terracotta)]">링크가 만료되었습니다.</p>
-        <Link href="/signup" className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ink)] hover:text-[var(--color-ink-muted)]">재발송 →</Link>
+        <p className="text-[13px] text-[var(--md-sys-color-error)]">링크가 만료되었습니다.</p>
+        <Link href="/signup" className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--md-sys-color-on-surface)] hover:text-[var(--md-sys-color-on-surface-variant)]">재발송 →</Link>
       </div>
     );
   }
   if (state === 'used') {
     return (
       <div className="space-y-4 text-center">
-        <p className="text-[13px] text-[var(--color-ink-muted)]">이미 사용된 링크입니다.</p>
-        <Link href="/login" className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ink)]">로그인 →</Link>
+        <p className="text-[13px] text-[var(--md-sys-color-on-surface-variant)]">이미 사용된 링크입니다.</p>
+        <Link href="/login" className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--md-sys-color-on-surface)]">로그인 →</Link>
       </div>
     );
   }
   return (
     <div className="space-y-4 text-center">
-      <p className="text-[13px] text-[var(--color-terracotta)]">잘못된 링크입니다.</p>
-      <Link href="/login" className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--color-ink)]">로그인 →</Link>
+      <p className="text-[13px] text-[var(--md-sys-color-error)]">잘못된 링크입니다.</p>
+      <Link href="/login" className="font-mono text-[11px] uppercase tracking-[0.1em] text-[var(--md-sys-color-on-surface)]">로그인 →</Link>
     </div>
   );
 }
