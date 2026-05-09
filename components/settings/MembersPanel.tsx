@@ -12,7 +12,7 @@ import { Label } from '@/components/primitives/Label';
 import { Button } from '@/components/primitives/Button';
 import { Chip } from '@/components/primitives/Chip';
 import { formatDate } from '@/lib/format';
-import type { User, Role } from '@/lib/types/user';
+import type { User } from '@/lib/types/user';
 
 type Props = {
   workspaceName: string;
@@ -20,10 +20,9 @@ type Props = {
 };
 
 export function MembersPanel({ workspaceName, initialMembers }: Props) {
-  const [members, setMembers] = useState<User[]>(initialMembers);
-  const [pendingInvites, setPendingInvites] = useState<{ email: string; role: Role; invitedAt: string }[]>([]);
+  const [members] = useState<User[]>(initialMembers);
+  const [pendingInvites, setPendingInvites] = useState<{ email: string; invitedAt: string }[]>([]);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<Role>('member');
   const [error, setError] = useState<string | null>(null);
 
   const handleInvite = (e: React.FormEvent) => {
@@ -42,20 +41,13 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
 
     setPendingInvites((prev) => [
       ...prev,
-      { email, role: inviteRole, invitedAt: new Date().toISOString() },
+      { email, invitedAt: new Date().toISOString() },
     ]);
     setInviteEmail('');
-    setInviteRole('member');
   };
 
   const handleCancelInvite = (email: string) => {
     setPendingInvites((prev) => prev.filter((p) => p.email !== email));
-  };
-
-  const handleRoleToggle = (id: string) => {
-    setMembers((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, role: m.role === 'admin' ? 'member' : 'admin' } : m)),
-    );
   };
 
   return (
@@ -91,14 +83,6 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
               <span className="font-mono text-[10px] tabular-nums text-[var(--md-sys-color-outline)] hidden md:inline">
                 {m.lastSeenAt ? formatDate(m.lastSeenAt) : '—'}
               </span>
-              <Chip label={m.role === 'admin' ? '관리자' : '구성원'} color={m.role === 'admin' ? 'primary' : 'surface'} />
-              <button
-                type="button"
-                onClick={() => handleRoleToggle(m.id)}
-                className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)] transition-colors"
-              >
-                {m.role === 'admin' ? '→ 멤버' : '→ 관리자'}
-              </button>
             </div>
           ))}
         </div>
@@ -123,7 +107,6 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
                 <div className="flex-1 min-w-0">
                   <span className="font-mono text-[13px] tabular-nums text-[var(--md-sys-color-on-surface)]">{p.email}</span>
                 </div>
-                <Chip label={p.role === 'admin' ? '관리자' : '구성원'} color={p.role === 'admin' ? 'primary' : 'surface'} />
                 <Chip label="대기중" color="warning" />
                 <button
                   type="button"
@@ -155,25 +138,6 @@ export function MembersPanel({ workspaceName, initialMembers }: Props) {
                 placeholder="member@company.com"
                 className="block w-full bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] font-mono tabular-nums text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors"
               />
-            </div>
-            <div className="space-y-1 md:w-32">
-              <Label size="md" muted={false}>역할</Label>
-              <div className="flex gap-2">
-                {(['admin', 'member'] as Role[]).map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setInviteRole(r)}
-                    className={`flex-1 h-10 px-3 font-mono text-[11px] tracking-[0.1em] uppercase rounded-md transition-colors ${
-                      inviteRole === r
-                        ? 'border border-[var(--md-sys-color-on-surface)] text-[var(--md-sys-color-on-surface)]'
-                        : 'border border-[var(--md-sys-color-outline-variant)] text-[var(--md-sys-color-on-surface-variant)] hover:border-[var(--md-sys-color-outline)]'
-                    }`}
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
             </div>
             <Button type="submit" disabled={!inviteEmail.trim()} className="md:ml-4">
               초대 발송
