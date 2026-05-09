@@ -2,28 +2,82 @@
 
 import { cn } from '@/lib/utils';
 
+export type ChipVariant = 'assist' | 'filter' | 'input' | 'suggestion';
+export type ChipColor = 'primary' | 'tertiary' | 'warning' | 'error' | 'surface';
+
 type ChipProps = {
-  children: React.ReactNode;
-  active?: boolean;
+  variant?: ChipVariant;
+  color?: ChipColor;
+  selected?: boolean;
+  onDelete?: () => void;
+  icon?: React.ReactNode;
+  label: string;
   onClick?: () => void;
+  disabled?: boolean;
   className?: string;
 };
 
-export function Chip({ children, active = false, onClick, className }: ChipProps) {
+const tonalClasses: Record<ChipColor, string> = {
+  primary:  'bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] border-transparent',
+  tertiary: 'bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)] border-transparent',
+  warning:  'bg-[var(--md-sys-color-warning-container)] text-[var(--md-sys-color-on-warning-container)] border-transparent',
+  error:    'bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)] border-transparent',
+  surface:  'bg-[var(--md-sys-color-surface-container-low)] text-[var(--md-sys-color-on-surface-variant)] border-transparent',
+};
+
+const outlineClass = 'bg-transparent text-[var(--md-sys-color-on-surface-variant)] border-[var(--md-sys-color-outline)]';
+
+export function Chip({
+  variant = 'assist',
+  color = 'surface',
+  selected = false,
+  onDelete,
+  icon,
+  label,
+  onClick,
+  disabled = false,
+  className,
+}: ChipProps) {
+  const isFilter = variant === 'filter';
+  const useTonal = !isFilter || selected;
+
   return (
     <button
       type="button"
+      role="button"
+      aria-pressed={isFilter ? selected : undefined}
+      disabled={disabled}
       onClick={onClick}
       className={cn(
-        'inline-flex items-center gap-1.5 px-3 h-7 font-mono text-[11px] tracking-[0.1em] uppercase border transition-colors',
-        'rounded-md cursor-pointer select-none',
-        active
-          ? 'border-[var(--color-ink)] text-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-paper)]'
-          : 'border-[var(--color-hair-strong)] text-[var(--color-ink-muted)] hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]',
+        'inline-flex items-center gap-1.5 h-8 px-3',
+        'rounded-[var(--md-sys-shape-small)]',
+        'text-[length:var(--md-typescale-label-large-size)]',
+        'font-[number:var(--md-typescale-label-large-weight)]',
+        'tracking-[var(--md-typescale-label-large-tracking)]',
+        'border transition-all cursor-pointer select-none',
+        'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--md-sys-color-primary)]/50',
+        'disabled:opacity-[0.38] disabled:cursor-not-allowed disabled:pointer-events-none',
+        useTonal ? tonalClasses[color] : outlineClass,
         className,
       )}
     >
-      {children}
+      {icon && <span className="[&_svg]:size-[18px] shrink-0 -ml-1">{icon}</span>}
+      <span>{label}</span>
+      {variant === 'input' && onDelete && (
+        <span
+          role="button"
+          tabIndex={0}
+          aria-label={`${label} 제거`}
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onDelete(); } }}
+          className="[&_svg]:size-4 shrink-0 -mr-1 hover:opacity-70 cursor-pointer"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </span>
+      )}
     </button>
   );
 }
