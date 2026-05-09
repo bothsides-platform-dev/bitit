@@ -1,41 +1,36 @@
 import { cn } from '@/lib/utils';
 
+type KpiDelta = { direction: 'up' | 'down' | 'neutral'; text: string };
+
 type KpiCellProps = {
   label: string;
-  serial?: string;
   value: string;
-  delta?: { direction: 'up' | 'down' | 'flat'; text: string };
+  delta?: KpiDelta;
   className?: string;
 };
 
-const deltaIcon = { up: '↑', down: '↓', flat: '—' } as const;
+const deltaIcon = { up: '↑', down: '↓', neutral: '—' } as const;
+
 const deltaColor = {
-  up: 'text-[var(--color-moss)]',
-  down: 'text-[var(--color-terracotta)]',
-  flat: 'text-[var(--color-ink-soft)]',
+  up:      'text-[var(--md-sys-color-tertiary)]',
+  down:    'text-[var(--md-sys-color-error)]',
+  neutral: 'text-[var(--md-sys-color-on-surface-variant)]',
 } as const;
 
-export function KpiCell({ label, serial, value, delta, className }: KpiCellProps) {
+export function KpiCell({ label, value, delta, className }: KpiCellProps) {
   return (
     <div className={cn('flex flex-col gap-1', className)}>
-      <div className="flex items-center gap-2">
-        <span className="font-mono text-[11px] tracking-[0.16em] uppercase text-[var(--color-ink-soft)]">
-          {label}
-        </span>
-        {serial && (
-          <span className="font-mono text-[10px] tracking-[0.1em] text-[var(--color-ink-faint)]">
-            {serial}
-          </span>
-        )}
-      </div>
-      <span
-        className="font-mono tabular-nums text-[84px] leading-none font-light tracking-[-0.04em] text-[var(--color-ink)]"
-        style={{ fontWeight: 300, fontSize: '84px' }}
-      >
+      <span className="text-[length:var(--md-typescale-label-medium-size)] font-[number:var(--md-typescale-label-medium-weight)] text-[var(--md-sys-color-on-surface-variant)]">
+        {label}
+      </span>
+      <span className="md-numeric text-[length:var(--md-typescale-display-small-size)] font-[number:var(--md-typescale-display-small-weight)] text-[var(--md-sys-color-on-surface)] leading-[var(--md-typescale-display-small-line-height)]">
         {value}
       </span>
       {delta && (
-        <span className={cn('font-mono text-[11px] tracking-[0.1em]', deltaColor[delta.direction])}>
+        <span className={cn(
+          'md-numeric text-[length:var(--md-typescale-label-small-size)]',
+          deltaColor[delta.direction],
+        )}>
           {deltaIcon[delta.direction]} {delta.text}
         </span>
       )}
