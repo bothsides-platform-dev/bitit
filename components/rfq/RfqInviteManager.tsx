@@ -7,7 +7,7 @@ import { Label } from '@/components/primitives/Label';
 import { Chip } from '@/components/primitives/Chip';
 import type { ChipColor } from '@/components/primitives/Chip';
 import {
-  addPgEmailsToRfqAction,
+  addPgWorkspacesToRfqAction,
   sendDraftInvitationsAction,
 } from '@/lib/server/actions/rfq';
 import { toast } from '@/lib/toast';
@@ -71,19 +71,14 @@ export function RfqInviteManager({
       return;
     }
     setInputError('');
+    // TODO(Task7): 이 컴포넌트를 workspace 검색 기반 UI로 교체해야 함.
+    // addPgWorkspacesToRfqAction은 workspaceIds: string[] 를 입력받으며,
+    // 이메일 직접 입력 → PG 워크스페이스 선택 흐름으로 UI 변경 필요.
     startTransition(async () => {
-      const r = await addPgEmailsToRfqAction({ rfqId, emails: [email] });
-      if (!r.ok) {
-        toast(`PG 추가 실패 — ${r.error}`, { type: 'error' });
-        return;
-      }
-      if (r.addedCount === 0 && r.skipped.length > 0) {
-        toast('이미 추가된 이메일입니다.', { type: 'error' });
-        return;
-      }
-      setInput('');
-      toast('PG가 추가되었습니다. "초대 발송" 버튼으로 메일을 보내세요.');
-      router.refresh();
+      // Placeholder: workspace-based invite not yet wired in UI.
+      // Use addPgWorkspacesToRfqAction({ rfqId, workspaceIds: [...] }) here.
+      void addPgWorkspacesToRfqAction;
+      toast('PG 워크스페이스 초대 UI 준비 중입니다.', { type: 'error' });
     });
   };
 
