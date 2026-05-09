@@ -252,7 +252,7 @@ export function LandingHero() {
                     transition={{ duration: 0.36, ease: EASE_OUT }}
                     className="text-[clamp(22px,3vw,40px)] leading-[1.1] tracking-[-0.022em] font-medium text-[var(--md-sys-color-on-surface)]"
                   >
-                    한 번 요청으로, 모든 PG사 견적을 한눈에.
+                    한 번의 요청으로, 모든 PG사 견적을 한눈에.
                   </motion.h2>
 
 
