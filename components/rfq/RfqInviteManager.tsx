@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useTransition, useRef, useEffect } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import * as Popover from '@radix-ui/react-popover';
+import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from 'cmdk';
 import { Button } from '@/components/primitives/Button';
 import { Label } from '@/components/primitives/Label';
 import { Chip } from '@/components/primitives/Chip';
@@ -10,10 +12,10 @@ import {
   addPgWorkspacesToRfqAction,
   sendDraftInvitationsAction,
 } from '@/lib/server/actions/rfq';
+import { useLazyPgWorkspaces } from '@/hooks/useLazyPgWorkspaces';
+import type { PgWorkspace } from '@/hooks/useLazyPgWorkspaces';
 import { toast } from '@/lib/toast';
 import type { InvitationStatus } from '@/lib/types/invitation';
-
-type WsSearchResult = { id: string; displayName: string };
 
 type InvitationView = {
   wsId: string;
@@ -53,67 +55,19 @@ export function RfqInviteManager({
   canEdit,
 }: Props) {
   const router = useRouter();
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<WsSearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const { pgList, loading: pgLoading, error: pgError, load: loadPg } = useLazyPgWorkspaces();
+  const [pgOpen, setPgOpen] = useState(false);
   const [inputError, setInputError] = useState('');
   const [pending, startTransition] = useTransition();
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const draftCount = invitations.filter((i) => i.status === 'draft').length;
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const q = e.target.value;
-    setQuery(q);
+  const handleSelect = (ws: PgWorkspace) => {
     setInputError('');
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-
-    if (!q.trim()) {
-      setResults([]);
-      setShowDropdown(false);
-      return;
-    }
-
-    searchTimerRef.current = setTimeout(async () => {
-      setIsSearching(true);
-      try {
-        const res = await fetch(
-          `/api/workspaces/search?q=${encodeURIComponent(q)}&type=pg`,
-        );
-        if (res.ok) {
-          const data = (await res.json()) as { workspaces: WsSearchResult[] };
-          setResults(data.workspaces);
-          setShowDropdown(data.workspaces.length > 0);
-        }
-      } finally {
-        setIsSearching(false);
-      }
-    }, 250);
-  };
-
-  const handleSelect = (ws: WsSearchResult) => {
-    setShowDropdown(false);
-    setQuery('');
-    setResults([]);
-    setInputError('');
-
     if (invitations.some((i) => i.wsId === ws.id)) {
       setInputError('이미 추가된 워크스페이스입니다.');
       return;
     }
-
     startTransition(async () => {
       const r = await addPgWorkspacesToRfqAction({ rfqId, workspaceIds: [ws.id] });
       if (!r.ok) {
@@ -185,39 +139,59 @@ export function RfqInviteManager({
           {/* PG 검색 추가 */}
           <div className="space-y-2">
             <Label size="md" muted={false}>PG 워크스페이스 추가</Label>
-            <div ref={dropdownRef} className="relative">
-              <div className="flex items-end gap-3">
-                <input
-                  type="text"
-                  value={query}
+            <Popover.Root
+              open={pgOpen}
+              onOpenChange={(v) => {
+                setPgOpen(v);
+                if (v) loadPg();
+              }}
+            >
+              <Popover.Trigger asChild>
+                <button
+                  type="button"
                   disabled={pending}
-                  onChange={handleQueryChange}
-                  onFocus={() => results.length > 0 && setShowDropdown(true)}
-                  placeholder="워크스페이스 이름 검색…"
-                  className="flex-1 bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors disabled:opacity-50"
-                />
-                {isSearching && (
-                  <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)] pb-2">
-                    LOADING…
-                  </span>
-                )}
-              </div>
-
-              {showDropdown && results.length > 0 && (
-                <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-[var(--md-sys-color-surface-container)] border border-[var(--md-sys-color-outline-variant)] rounded-md shadow-sm overflow-hidden">
-                  {results.map((ws) => (
-                    <button
-                      key={ws.id}
-                      type="button"
-                      onClick={() => handleSelect(ws)}
-                      className="w-full text-left px-3 py-2 text-[13px] text-[var(--md-sys-color-on-surface)] hover:bg-[var(--md-sys-color-surface-container-high)] transition-colors"
-                    >
-                      {ws.displayName}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+                  className="w-full bg-transparent border-0 border-b border-[var(--md-sys-color-outline)] py-2 text-left text-[14px] text-[var(--md-sys-color-outline)] hover:border-[var(--md-sys-color-on-surface)] focus:outline-none focus:border-[var(--md-sys-color-on-surface)] transition-colors disabled:opacity-50"
+                >
+                  PG사 검색…
+                </button>
+              </Popover.Trigger>
+              <Popover.Portal>
+                <Popover.Content
+                  align="start"
+                  sideOffset={4}
+                  className="z-50 w-[var(--radix-popover-trigger-width)] bg-[var(--md-sys-color-surface-container)] border border-[var(--md-sys-color-outline-variant)] rounded-md shadow-sm overflow-hidden"
+                >
+                  <Command>
+                    <CommandInput
+                      placeholder="PG사 이름 검색"
+                      className="w-full bg-transparent px-3 py-2 text-[14px] text-[var(--md-sys-color-on-surface)] placeholder:text-[var(--md-sys-color-outline)] focus:outline-none border-b border-[var(--md-sys-color-outline-variant)]"
+                    />
+                    <CommandList className="max-h-[200px] overflow-y-auto">
+                      <CommandEmpty className="py-2 px-3 font-mono text-[10px] tracking-[0.1em] uppercase text-[var(--md-sys-color-outline)]">
+                        {pgLoading ? 'LOADING…' : pgError ?? '결과 없음'}
+                      </CommandEmpty>
+                      {pgList.map((pg) => {
+                        const alreadyAdded = invitations.some((i) => i.wsId === pg.id);
+                        return (
+                          <CommandItem
+                            key={pg.id}
+                            value={pg.displayName}
+                            disabled={alreadyAdded}
+                            onSelect={() => {
+                              handleSelect(pg);
+                              setPgOpen(false);
+                            }}
+                            className="px-3 py-2 text-[13px] text-[var(--md-sys-color-on-surface)] data-[selected=true]:bg-[var(--md-sys-color-surface-container-high)] aria-disabled:opacity-40 cursor-pointer"
+                          >
+                            {pg.displayName}
+                          </CommandItem>
+                        );
+                      })}
+                    </CommandList>
+                  </Command>
+                </Popover.Content>
+              </Popover.Portal>
+            </Popover.Root>
             {inputError && (
               <p className="font-mono text-[10px] tracking-[0.12em] uppercase text-[var(--md-sys-color-error)]">
                 {inputError}
