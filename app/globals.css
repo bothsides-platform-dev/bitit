@@ -92,3 +92,11 @@
     font-feature-settings: "tnum";
   }
 }
+
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.blink-cursor {
+  animation: blink-cursor 0.7s step-end infinite;
+}

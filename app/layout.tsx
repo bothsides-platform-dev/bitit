@@ -10,13 +10,6 @@ const pretendard = localFont({
   weight: "45 920",
 });
 
-const jetbrains = localFont({
-  src: "../public/fonts/JetBrainsMonoVariable.ttf",
-  variable: "--font-mono",
-  display: "swap",
-  weight: "100 800",
-});
-
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: { default: siteConfig.title, template: "%s — bidit" },
@@ -67,7 +60,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`${pretendard.variable} ${jetbrains.variable} h-full antialiased`}
+      className={`${pretendard.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

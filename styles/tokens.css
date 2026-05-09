@@ -67,7 +67,7 @@
 
   /* ── Typography ─────────────────────────────────── */
   --font-sans: 'Pretendard Variable', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+  --font-mono: 'Pretendard Variable', system-ui, -apple-system, sans-serif;
 
   /* Display Large  57px. Korean tracking: -0.02em (Latin spec: -0.25px) */
   --md-typescale-display-large-size:        3.5625rem;

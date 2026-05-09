@@ -142,29 +142,7 @@ export function LiveBidSimulation({ currentStep = 3 }: Props) {
           )}
         </AnimatePresence>
 
-        {/* Blur peek overlay — fades out once all rows are revealed */}
-        <AnimatePresence>
-          {!allDone && (
-            <motion.div
-              initial={{ opacity: 1 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4, ease: EASE_OUT }}
-              className="absolute bottom-0 left-0 right-0 h-24 flex items-end justify-center pb-4 pointer-events-none"
-              style={{ background: 'linear-gradient(to bottom, transparent, var(--md-sys-color-surface))' }}
-            >
-              <motion.div
-                animate={{ y: [0, 3, 0] }}
-                transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
-                className="pointer-events-auto flex items-center gap-2 bg-[var(--md-sys-color-surface)] border border-[var(--md-sys-color-outline-variant)] rounded-full px-4 py-2 shadow-[var(--md-sys-elevation-1)]"
-              >
-                <span className="font-mono text-[12px] tracking-[0.06em] text-[var(--md-sys-color-primary)]">
-                  ↓ 스크롤해서 나머지 확인
-                </span>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
 
       </div>
     </div>

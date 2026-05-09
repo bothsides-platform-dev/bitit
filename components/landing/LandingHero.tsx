@@ -98,8 +98,7 @@ export function LandingHero() {
     target: simSectionRef,
     offset: ['start start', 'end end'],
   });
-  const arrowOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
-
+  
   const [currentStep, setCurrentStep] = useState<0 | 1 | 2 | 3>(0);
   const prevStepRef = useRef<0 | 1 | 2 | 3>(0);
 
@@ -253,25 +252,10 @@ export function LandingHero() {
                     transition={{ duration: 0.36, ease: EASE_OUT }}
                     className="text-[clamp(22px,3vw,40px)] leading-[1.1] tracking-[-0.022em] font-medium text-[var(--md-sys-color-on-surface)]"
                   >
-                    N개 PG사가<br />동시에 응답합니다.
+                    한 번 요청으로, 모든 PG사 견적을 한눈에.
                   </motion.h2>
 
-                  {/* Bounce arrow — fades out as scroll begins */}
-                  <motion.div
-                    style={{ opacity: arrowOpacity }}
-                    className="flex flex-col items-start gap-[var(--s-2)]"
-                  >
-                    <motion.div
-                      animate={{ y: [0, 6, 0] }}
-                      transition={{ repeat: Infinity, duration: 1.4, ease: 'easeInOut' }}
-                      className="w-9 h-9 rounded-full border border-[var(--md-sys-color-primary)] flex items-center justify-center text-[var(--md-sys-color-primary)] text-base"
-                    >
-                      ↓
-                    </motion.div>
-                    <span className="font-mono text-[var(--text-2xs)] tracking-[0.08em] text-[var(--md-sys-color-outline)]">
-                      스크롤해서 확인하기
-                    </span>
-                  </motion.div>
+
                 </div>
 
                 <LiveBidSimulation currentStep={currentStep} />
