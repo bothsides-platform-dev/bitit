@@ -25,14 +25,14 @@ export const rfqs = pgTable(
       .references(() => bizProfiles.id),
     title: text('title').notNull(),
     memo: text('memo').notNull().default(''),
-    allowedPgEmails: text('allowed_pg_emails')
+    allowedPgWorkspaceIds: uuid('allowed_pg_workspace_ids')
       .array()
       .notNull()
-      .default(sql`'{}'::text[]`),
+      .default(sql`'{}'::uuid[]`),
     deadline: timestamp('deadline', { withTimezone: true }).notNull(),
     // RFQ-scoped permanent share URL token — buyer copies and distributes
-    // to PG companies via Slack/KakaoTalk. Authenticated PG users with email
-    // domain matching `allowed_pg_emails` can claim through `/share/rfq/[token]`.
+    // to PG workspaces via Slack/KakaoTalk. Authenticated PG workspace members
+    // can claim through `/share/rfq/[token]`.
     // Plaintext (not hashed) — RFQ owner needs to re-render the URL on revisit;
     // auto-expires at deadline; no rotate policy. The `gen_random_uuid()::text`
     // default exists so backfill on ALTER TABLE and test fixtures stay simple;

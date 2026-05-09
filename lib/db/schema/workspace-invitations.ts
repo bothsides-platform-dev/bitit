@@ -1,0 +1,27 @@
+import { pgTable, uuid, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { workspaceInvitationStatusEnum } from './_enums';
+import { workspaces } from './workspaces';
+import { users } from './users';
+
+export const workspaceInvitations = pgTable(
+  'workspace_invitations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    workspaceId: uuid('workspace_id')
+      .notNull()
+      .references(() => workspaces.id, { onDelete: 'cascade' }),
+    invitedEmail: text('invited_email').notNull(),
+    invitedByUserId: uuid('invited_by_user_id')
+      .notNull()
+      .references(() => users.id),
+    tokenHash: text('token_hash').notNull().unique(),
+    status: workspaceInvitationStatusEnum('status').notNull().default('pending'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    acceptedByUserId: uuid('accepted_by_user_id').references(() => users.id),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => [
+    uniqueIndex('workspace_invitations_ws_email_uniq').on(t.workspaceId, sql`lower(${t.invitedEmail})`),
+  ],
+);
