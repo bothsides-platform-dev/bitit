@@ -54,7 +54,7 @@ describe('decideRoute — Step 3 four cases', () => {
     expect(decideRoute('/', '', false)).toEqual({ kind: 'next' });
   });
 
-  it('auth + / redirects to /home (skip marketing landing)', () => {
-    expect(decideRoute('/', '', true)).toEqual({ kind: 'redirect', to: '/home' });
+  it('auth + / passes through (landing is accessible to all)', () => {
+    expect(decideRoute('/', '', true)).toEqual({ kind: 'next' });
   });
 });

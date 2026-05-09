@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation';
-import { auth } from '@/auth';
 import { LandingHero } from '@/components/landing/LandingHero';
 import { siteConfig } from '@/lib/site-config';
 
@@ -12,9 +10,7 @@ const organizationJsonLd = {
   description: siteConfig.description,
 };
 
-export default async function RootPage() {
-  const session = await auth();
-  if (session?.user) redirect('/home');
+export default function RootPage() {
   return (
     <>
       <script

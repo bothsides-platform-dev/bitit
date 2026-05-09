@@ -33,7 +33,7 @@ export function decideRoute(
   isAuthenticated: boolean,
 ): RouteDecision {
   if (pathname === '/') {
-    return isAuthenticated ? { kind: 'redirect', to: '/home' } : { kind: 'next' };
+    return { kind: 'next' };
   }
 
   const isPublic = PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
