@@ -42,7 +42,7 @@ const Input = z
     title: z.string().min(1).max(200),
     memo: z.string().max(2000).optional(),
     deadline: z.string().min(1), // ISO timestamp
-    allowedPgWorkspaceIds: z.array(z.string().uuid()).min(1).max(50),
+    allowedPgWorkspaceIds: z.array(z.string().uuid()).max(50),
     rfpAttachmentIds: z.array(z.string().uuid()).optional(),
     send: z.boolean().optional().default(false),
     // bizProfile 분기 — default 'inherit' 은 워크스페이스 bizProfile 을 스냅샷.

@@ -139,7 +139,6 @@ export function RfqCreateForm({ bizProfile, workspaceName = '', guest = false }:
 
   const canSend =
     draft.title.trim() !== '' &&
-    pgCount > 0 &&
     draft.deadline !== '';
 
   const handleSubmit = async (e: React.FormEvent) => {
