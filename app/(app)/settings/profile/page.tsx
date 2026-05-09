@@ -72,7 +72,6 @@ export default async function ProfilePage({ searchParams }: Props) {
             : []),
         ] as [string, string][])
       : []),
-    ...(ws.domain ? ([['도메인', `@${ws.domain}`]] as [string, string][]) : []),
     ['생성일', formatDate(ws.createdAt)],
   ];
 
@@ -114,7 +113,6 @@ export default async function ProfilePage({ searchParams }: Props) {
         <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-y border-[var(--md-sys-color-outline-variant)]">
           {[
             ['이메일', me.email],
-            ['역할', me.role.toUpperCase()],
             ['가입일', formatDate(memberMeta?.joinedAt ?? me.joinedAt)],
           ].map(([k, v]) => (
             <div key={k} className={kvRowClass}>
@@ -144,7 +142,7 @@ export default async function ProfilePage({ searchParams }: Props) {
           <div className="divide-y divide-[var(--md-sys-color-outline-variant)] border-t border-[var(--md-sys-color-outline-variant)]">
             <WorkspaceNameForm
               currentName={ws.name}
-              canEdit={me.role === 'admin'}
+              canEdit={memberMeta?.role === 'admin'}
             />
             {wsKvPairs.map(([k, v]) => (
               <div key={k} className={kvRowClass}>
