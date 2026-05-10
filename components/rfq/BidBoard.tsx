@@ -146,6 +146,7 @@ export function BidBoard({
   return (
     <>
       <DndContext
+        id="bid-board"
         sensors={disabled ? [] : sensors}
         collisionDetection={closestCorners}
         onDragEnd={handleDragEnd}

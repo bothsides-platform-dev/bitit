@@ -130,6 +130,7 @@ export function KanbanBoard(props: Props) {
     return (
       <>
         <DndContext
+          id="kanban-buyer"
           sensors={sensors}
           collisionDetection={closestCorners}
           onDragEnd={handleDragEnd}
@@ -193,6 +194,7 @@ export function KanbanBoard(props: Props) {
   return (
     <>
       <DndContext
+        id="kanban-pg"
         sensors={sensors}
         collisionDetection={closestCorners}
         onDragEnd={handleDragEnd}
