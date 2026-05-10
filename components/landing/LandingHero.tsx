@@ -240,7 +240,7 @@ export function LandingHero() {
             className="sticky top-[var(--shell-topbar)] border-t border-b border-[var(--md-sys-color-outline-variant)] overflow-hidden"
             style={{ height: 'calc(100svh - var(--shell-topbar))' }}
           >
-            <div className="h-full py-[var(--s-9)] px-8 flex flex-col justify-center overflow-hidden">
+            <div className="h-full py-[var(--s-9)] px-8 flex flex-col justify-center">
               <div className="mx-auto w-full max-w-[1080px] flex flex-col gap-[var(--s-7)]">
 
                 {/* Section header */}
