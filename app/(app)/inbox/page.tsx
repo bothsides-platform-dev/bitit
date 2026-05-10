@@ -25,6 +25,7 @@ export default async function InboxPage() {
   const rows = pairs.map(({ invitation, rfq }) => ({
     invitationId: invitation.id,
     invitationStatus: invitation.status,
+    isRecommended: invitation.source === 'recommendation',
     rfqId: rfq.id,
     rfqTitle: rfq.title,
     rfqDeadline: rfq.deadline,

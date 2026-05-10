@@ -1,6 +1,6 @@
 import { pgTable, uuid, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-import { invitationStatusEnum } from './_enums';
+import { invitationSourceEnum, invitationStatusEnum } from './_enums';
 import { rfqs } from './rfqs';
 import { workspaces } from './workspaces';
 import { users } from './users';
@@ -20,6 +20,7 @@ export const rfqInvitations = pgTable(
     sentAt: timestamp('sent_at', { withTimezone: true }).notNull().default(sql`now()`),
     openedAt: timestamp('opened_at', { withTimezone: true }),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    source: invitationSourceEnum('source').notNull().default('request'),
     status: invitationStatusEnum('status').notNull().default('pending'),
   },
   (t) => [

@@ -28,6 +28,7 @@ const invStatusColor: Record<string, ChipColor> = {
 export type InboxRow = {
   invitationId: string;
   invitationStatus: string;
+  isRecommended: boolean;
   rfqId: string;
   rfqTitle: string;
   rfqDeadline: string;
@@ -98,7 +99,20 @@ export function InboxList({ rows }: { rows: InboxRow[] }) {
                     <td className="relative px-8 py-4 font-mono text-[12px] tabular-nums text-[var(--md-sys-color-on-surface-variant)] group-hover:before:absolute group-hover:before:left-0 group-hover:before:top-0 group-hover:before:bottom-0 group-hover:before:w-2 group-hover:before:bg-[var(--md-sys-color-on-surface)] group-data-[active=true]:before:absolute group-data-[active=true]:before:left-0 group-data-[active=true]:before:top-0 group-data-[active=true]:before:bottom-0 group-data-[active=true]:before:w-2 group-data-[active=true]:before:bg-[var(--md-sys-color-on-surface)]">
                       {row.rfqId}
                     </td>
-                    <td className="px-3 py-4 text-[13px] text-[var(--md-sys-color-on-surface)] font-medium">{row.rfqTitle}</td>
+                    <td className="px-3 py-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13px] text-[var(--md-sys-color-on-surface)] font-medium">
+                          {row.rfqTitle}
+                        </span>
+                        {row.isRecommended && (
+                          <Chip
+                            label="추천"
+                            color="primary"
+                            className="h-6 px-2 text-[10px]"
+                          />
+                        )}
+                      </div>
+                    </td>
                     <td className="px-3 py-4 font-mono text-[12px] text-[var(--md-sys-color-on-surface-variant)]">
                       {row.grade}
                     </td>

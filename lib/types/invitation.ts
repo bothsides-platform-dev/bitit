@@ -6,6 +6,8 @@ export type InvitationStatus =
   | 'declined'
   | 'expired';
 
+export type InvitationSource = 'request' | 'recommendation';
+
 export type RfqInvitation = {
   id: string;
   rfqId: string;
@@ -16,4 +18,5 @@ export type RfqInvitation = {
   openedAt?: string;
   expiresAt: string;
   status: InvitationStatus;
+  source?: InvitationSource;
 };

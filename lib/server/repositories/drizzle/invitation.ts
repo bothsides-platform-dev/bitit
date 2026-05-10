@@ -83,6 +83,7 @@ function rowToInvitation(row: InvRow): RfqInvitation {
     openedAt: row.openedAt ? new Date(row.openedAt).toISOString() : undefined,
     expiresAt: new Date(row.expiresAt).toISOString(),
     status: dbStatusToUi(row.status),
+    source: row.source ?? 'request',
   };
 }
 
@@ -108,6 +109,7 @@ export class DrizzleInvitationRepository implements InvitationRepo {
         sentAt: new Date(inv.sentAt),
         openedAt: inv.openedAt ? new Date(inv.openedAt) : null,
         expiresAt: new Date(inv.expiresAt),
+        source: inv.source ?? 'request',
         status: uiStatusToDb(inv.status),
       })
       .onConflictDoUpdate({

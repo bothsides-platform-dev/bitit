@@ -36,6 +36,13 @@
       "when": 1746871200000,
       "tag": "0004_workspace_model_redesign",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1778378480971,
+      "tag": "0005_rfq_invitation_source",
+      "breakpoints": true
     }
   ]
 }
