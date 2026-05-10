@@ -25,8 +25,6 @@ const invStatusColor: Record<string, ChipColor> = {
   expired: 'surface',
 };
 
-const RECOMMENDATION_CHIP_CLASS = 'h-6 px-2 text-[10px]';
-
 export type InboxRow = {
   invitationId: string;
   invitationStatus: string;
@@ -110,7 +108,6 @@ export function InboxList({ rows }: { rows: InboxRow[] }) {
                           <Chip
                             label="추천"
                             color="primary"
-                            className={RECOMMENDATION_CHIP_CLASS}
                           />
                         )}
                       </div>
