@@ -29,6 +29,7 @@ function makeInv(status: RfqInvitation['status'] = 'accepted'): RfqInvitation {
     uniqueToken: '',
     sentAt: '2026-05-01T00:00:00Z',
     expiresAt: '2026-05-20T00:00:00Z',
+    source: 'request',
     status,
   };
 }

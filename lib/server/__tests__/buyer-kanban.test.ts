@@ -35,6 +35,7 @@ function makeInv(
     uniqueToken: '',
     sentAt: '2026-05-01T00:00:00Z',
     expiresAt: FUTURE,
+    source: 'request',
     status,
   };
 }

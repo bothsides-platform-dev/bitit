@@ -18,5 +18,5 @@ export type RfqInvitation = {
   openedAt?: string;
   expiresAt: string;
   status: InvitationStatus;
-  source?: InvitationSource;
+  source: InvitationSource;
 };

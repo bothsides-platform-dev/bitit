@@ -44,6 +44,7 @@ function makeInvitation(rfqId: string, pgWsId: string, overrides?: Partial<RfqIn
     uniqueToken: 'placeholder',
     sentAt: new Date().toISOString(),
     expiresAt: addMinutes(new Date(), 7 * 24 * 60),
+    source: 'request',
     status: 'sent',
     ...overrides,
   };

@@ -11,6 +11,7 @@ function makeInvitation(rawToken: string, overrides?: Partial<RfqInvitation>): R
     uniqueToken: rawToken,
     sentAt: new Date().toISOString(),
     expiresAt: addMinutes(new Date(), 7 * 24 * 60),
+    source: 'request',
     status: 'sent',
     ...overrides,
   };

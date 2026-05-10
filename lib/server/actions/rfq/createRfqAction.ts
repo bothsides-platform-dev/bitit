@@ -222,6 +222,7 @@ export async function createRfqAction(
               uniqueToken: '',
               sentAt: now.toISOString(),
               expiresAt,
+              source: 'request',
               status: 'sent',
             },
             rawToken,
