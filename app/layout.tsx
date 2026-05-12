@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { siteConfig } from "@/lib/site-config";
+import { getChannelMember } from "@/lib/channel-io/server";
+import { ChannelTalk } from "@/components/shell/ChannelTalk";
 import "./globals.css";
 
 const pretendard = localFont({
@@ -52,17 +54,22 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const member = await getChannelMember();
+  const pluginKey = process.env.NEXT_PUBLIC_CHANNEL_IO_PLUGIN_KEY;
   return (
     <html
       lang="ko"
       className={`${pretendard.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <ChannelTalk pluginKey={pluginKey} member={member} />
+      </body>
     </html>
   );
 }

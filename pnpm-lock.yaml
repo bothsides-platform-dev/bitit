@@ -8,6 +8,9 @@ dependencies:
   '@base-ui/react':
     specifier: ^1.4.1
     version: 1.4.1(@types/react@19.0.0)(react-dom@19.2.4)(react@19.2.4)
+  '@channel.io/channel-web-sdk-loader':
+    specifier: ^2.0.2
+    version: 2.0.2
   '@dnd-kit/core':
     specifier: ^6.3.1
     version: 6.3.1(react-dom@19.2.4)(react@19.2.4)
@@ -592,6 +595,10 @@ packages:
     dependencies:
       css-tree: 3.2.1
     dev: true
+
+  /@channel.io/channel-web-sdk-loader@2.0.2:
+    resolution: {integrity: sha512-43xRJX+BUjb5vRw5A/LDkgE9syJYTPERf7xo49Fz5MMpA9UtzPWHWyzN2QU1/tTT2uu5tpxapT2BgMx6FfP2qg==}
+    dev: false
 
   /@csstools/color-helpers@6.0.2:
     resolution: {integrity: sha512-LMGQLS9EuADloEFkcTBR3BwV/CGHV7zyDxVRtVDTwdI2Ca4it0CCVTT9wCkxSgokjE5Ho41hEPgb8OEUwoXr6Q==}
