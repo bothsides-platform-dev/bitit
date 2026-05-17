@@ -217,9 +217,8 @@ export function LandingHero() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.36, delay: i * 0.12, ease: EASE_OUT }}
-                  className="relative border border-[var(--md-sys-color-outline)] rounded-md p-[var(--s-6)] overflow-hidden"
+                  className="border border-[var(--md-sys-color-outline-variant)] rounded-md p-[var(--s-6)]"
                 >
-                  <span className="absolute left-0 top-0 bottom-0 w-0.5 bg-[var(--md-sys-color-on-surface)]" />
                   <div className="flex flex-col gap-[var(--s-4)]">
                     <span className="font-mono text-[var(--text-2xs)] tracking-[0.18em] uppercase text-[var(--md-sys-color-outline)]">
                       [ {item.num} ]
